@@ -1,0 +1,283 @@
+/* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS DE COR --- */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+:root {
+    --cor-fundo-app: #0c0c0c;
+    --cor-primaria: #eca8e73f;
+    --cor-borda: #8A2BE2;
+    --cor-texto-principal: #e0e0e0;
+    --cor-texto-secundario: #a0a0a0;
+    --cor-acento: #c609f5db;
+    --cor-acento-hover: #9932CC;
+    --cor-sucesso: #4CAF50;
+    --cor-erro: #f44336;
+    --fonte-pixel: 'Press Start 2P', cursive;
+    --fonte-padrao: 'Roboto', sans-serif;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--fonte-padrao);
+    background-color: var(--cor-fundo-app);
+    background-image: url("https://images4.alphacoders.com/949/thumb-1920-949067.jpg");
+    background-size: cover;
+    background-attachment: fixed;
+    color: var(--cor-texto-principal);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* --- 2. LAYOUTS PRINCIPAIS (Containers) --- */
+.container, .login-container, .perfil-container {
+    width: 100%;
+    max-width: 800px;
+    background-color: rgba(12, 12, 12, 0.85);
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+    border: 1px solid var(--cor-borda);
+    overflow: hidden;
+    padding: 30px;
+    backdrop-filter: blur(5px);
+}
+
+h2 {
+    font-family: var(--fonte-pixel);
+    color: var(--cor-acento);
+    margin-bottom: 30px;
+    font-size: 24px;
+    text-align: center;
+    text-shadow: 2px 2px 0px #f10909ee;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 15px;
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    background-color: var(--cor-primaria);
+    color: var(--cor-texto-principal);
+    font-size: 16px;
+}
+
+input::placeholder {
+    color: var(--cor-texto-secundario);
+}
+
+input:focus {
+    outline: none;
+    border-color: var(--cor-acento-hover);
+    box-shadow: 0 0 10px var(--cor-acento);
+}
+
+/* --- 3. PÁGINA DE LOGIN (index.html) --- */
+.login-container {
+    max-width: 400px;
+    text-align: center;
+}
+
+.login-container button {
+    width: 100%;
+    background-color: var(--cor-acento);
+    color: white;
+    padding: 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.login-container button:hover {
+    background-color: var(--cor-acento-hover);
+}
+
+#mensagemErro {
+    color: var(--cor-erro);
+    margin-top: 15px;
+    min-height: 20px;
+    font-weight: bold;
+}
+
+/* --- 4. PÁGINA DO MURAL (mural.html) --- */
+.header {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 20px;
+    background-color: rgba(0,0,0,0.2);
+    border-bottom: 1px solid var(--cor-borda);
+}
+.user-info-header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+}
+.main-content { padding: 0; }
+.new-post-section {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 15px;
+    flex-wrap: wrap;
+    padding: 20px;
+    border-bottom: 1px solid var(--cor-borda);
+}
+.new-post-section .foto-perfil-header { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cor-acento); }
+.new-post-section textarea { flex: 1; min-height: 80px; resize: vertical; background-color: var(--cor-primaria); border-radius: 8px; padding: 15px; color: var(--cor-texto-principal); font-size: 16px; border: 1px solid var(--cor-borda); }
+.new-post-section button { width: auto; align-self: flex-end; order: 3; background-color: var(--cor-acento); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; border: none; font-size: 16px;}
+.new-post-section button:hover { background-color: var(--cor-acento-hover); }
+.feed-posts { padding: 20px; }
+.tweet-post { border-bottom: 1px solid var(--cor-primaria); padding-bottom: 15px; margin-bottom: 15px; }
+.post-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.post-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+.post-info { display: flex; flex-direction: column; }
+.post-author { font-size: 16px; font-weight: 700; }
+.post-date { font-size: 12px; color: var(--cor-texto-secundario); }
+.post-content p { line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
+.nav-buttons { display: flex; align-items: center; gap: 10px; }
+.nav-buttons button { background-color: transparent; color: var(--cor-texto-secundario); border: 1px solid var(--cor-borda); padding: 8px 16px; font-weight: normal; cursor: pointer; transition: background-color 0.3s, color 0.3s; border-radius: 8px; font-size: 14px; }
+.nav-buttons button:hover { background-color: var(--cor-borda); color: var(--cor-texto-principal); }
+
+/* Estilos para Ações do Post (incluindo botão de apagar) */
+.post-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 10px;
+  margin-top: 15px;
+  border-top: 1px solid var(--cor-primaria);
+}
+.delete-button {
+  background: none;
+  border: none;
+  color: var(--cor-texto-secundario);
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  transition: color 0.3s, background-color 0.3s;
+}
+.delete-button:hover {
+  color: var(--cor-erro);
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+/* --- 5. PÁGINA DE PERFIL (perfil.html) --- */
+.perfil-container {
+    text-align: center;
+}
+.perfil-container > button {
+    background: var(--cor-acento);
+    border: 1px solid var(--cor-acento);
+    color: white;
+    margin-bottom: 30px;
+    cursor: pointer;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    border: none;
+}
+.perfil-container > button:hover {
+    background-color: var(--cor-acento-hover);
+}
+.perfil-imagem {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px auto;
+}
+.foto-perfil {
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--cor-acento);
+    cursor: pointer;
+    transition: filter 0.3s;
+}
+.foto-perfil:hover {
+    filter: brightness(0.7);
+}
+.perfil-imagem label span {
+    display: block;
+    margin-top: 10px;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+}
+.perfil-nome { margin-bottom: 30px; }
+.perfil-nome strong { display: block; margin-bottom: 10px; color: var(--cor-texto-secundario); }
+.perfil-nome input { text-align: center; max-width: 300px; margin: 0 auto; }
+#mensagemStatus { color: var(--cor-sucesso); margin-top: 20px; min-height: 22px; font-weight: bold; }
+
+/* --- 6. PÁGINAS DE JOGOS (pggame.html, jogo da velha.html) --- */
+.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%); z-index: -2; }
+.floating-particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; overflow: hidden; }
+.particle { position: absolute; bottom: -20px; background-color: rgba(224, 224, 224, 0.2); border-radius: 50%; animation: floatUp 15s linear infinite; }
+@keyframes floatUp {
+    from { transform: translateY(0) translateX(0); opacity: 0.7; }
+    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
+.btn {
+    display: inline-block;
+    font-family: var(--fonte-padrao);
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid var(--cor-acento);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    text-align: center;
+    background-color: var(--cor-acento);
+    color: white;
+}
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    background-color: var(--cor-acento-hover);
+}
+.btn.secondary {
+    background-color: transparent;
+    color: var(--cor-acento);
+}
+.btn.secondary:hover {
+    background-color: var(--cor-acento);
+    color: white;
+}
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
+    margin: 30px auto;
+    justify-content: center;
+}
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: var(--cor-primaria);
+    border: 2px solid var(--cor-borda);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4em;
+    font-family: var(--fonte-pixel);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}

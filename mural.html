@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mural Rubix</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <div class="user-info-header">
+        <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2>
+        <nav class="nav-buttons">
+          <button onclick="irParaPerfil()">Ver Perfil</button>
+          <button onclick="game()">Game</button>
+          <button onclick="sair()">Sair</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="new-post-section">
+        <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
+        <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
+        <button onclick="postarMensagem()">Rubitar</button>
+      </div>
+
+      <div id="mural" class="feed-posts">
+        </div>
+    </main>
+  </div>
+
+  <script>
+    // --- 1. INICIALIZAÇÃO DO SUPABASE ---
+    const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
+    const { createClient } = supabase;
+    const _supabase = createClient(supabaseUrl, supabaseKey);
+    let currentUser = null;
+
+    // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
+      if (sessionError || !session) {
+        window.location.href = "index.html";
+        return;
+      }
+      currentUser = session.user;
+      await carregarPerfilDoUsuario();
+      await carregarMensagens();
+    });
+
+    async function carregarPerfilDoUsuario() {
+      if (!currentUser) return;
+      const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', currentUser.id)
+        .single();
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao carregar perfil:', error);
+        return;
+      }
+      if (profile) {
+        document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
+        const fotoUrl = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+        document.getElementById("fotoPerfilHeader").src = fotoUrl;
+      }
+    }
+
+    async function carregarMensagens() {
+      const mural = document.getElementById("mural");
+      mural.innerHTML = "<p>Carregando mural...</p>";
+      const { data: messages, error } = await _supabase
+        .from('messages')
+        .select(`id, content, created_at, user_id, profiles (username, avatar_url)`) // Garantimos que id e user_id são selecionados
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error("Erro ao carregar mensagens:", error);
+        mural.innerHTML = "<p>Não foi possível carregar as mensagens. Tente novamente mais tarde.</p>";
+        return;
+      }
+      if (messages.length === 0) {
+        mural.innerHTML = "<p>Ainda não há nenhuma mensagem no mural. Seja o primeiro a postar!</p>";
+        return;
+      }
+      mural.innerHTML = "";
+      messages.forEach(msg => {
+        const postElement = document.createElement("div");
+        postElement.className = "tweet-post";
+        postElement.id = `post-${msg.id}`; // Adiciona um ID ao elemento do post
+
+        const autorNome = msg.profiles ? msg.profiles.username : 'Usuário Anônimo';
+        const autorAvatar = msg.profiles && msg.profiles.avatar_url ? msg.profiles.avatar_url : "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+
+        let deleteButtonHTML = '';
+        if (currentUser && msg.user_id === currentUser.id) {
+          deleteButtonHTML = `
+            <button class="delete-button" onclick="apagarMensagem('${msg.id}')">
+              <i class="fas fa-trash"></i> Apagar
+            </button>
+          `;
+        }
+
+        postElement.innerHTML = `
+          <div class="post-header">
+            <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
+            <div class="post-info">
+              <strong class="post-author">${autorNome}</strong>
+              <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+            </div>
+          </div>
+          <div class="post-content"><p>${msg.content}</p></div>
+          <div class="post-actions">
+            ${deleteButtonHTML}
+          </div>`;
+        mural.appendChild(postElement);
+      });
+    }
+
+    async function postarMensagem() {
+      const texto = document.getElementById("mensagem").value.trim();
+      if (texto === "" || !currentUser) return;
+      const { error } = await _supabase
+        .from('messages')
+        .insert({ content: texto, user_id: currentUser.id });
+      if (error) {
+        console.error("Erro ao postar mensagem:", error);
+        alert("Não foi possível postar sua mensagem. Tente novamente.");
+      } else {
+        document.getElementById("mensagem").value = "";
+        await carregarMensagens();
+      }
+    }
+
+    async function apagarMensagem(messageId) {
+        const confirmed = confirm("Tem certeza que deseja apagar este post? Esta ação não pode ser desfeita.");
+        if (!confirmed) {
+            return;
+        }
+
+        const { error } = await _supabase
+            .from('messages')
+            .delete()
+            .match({ id: messageId, user_id: currentUser.id });
+
+        if (error) {
+            console.error('Erro ao apagar a mensagem:', error);
+            alert('Não foi possível apagar a mensagem.');
+        } else {
+            const postElement = document.getElementById(`post-${messageId}`);
+            if (postElement) {
+                postElement.remove();
+            }
+        }
+    }
+
+    // --- 3. FUNÇÕES DE NAVEGAÇÃO ---
+    async function sair() {
+      const { error } = await _supabase.auth.signOut();
+      if (error) {
+        console.error("Erro ao sair:", error);
+      }
+      window.location.href = "index.html";
+    }
+    function irParaPerfil() {
+      window.location.href = "perfil.html";
+    }
+    function game() {
+      window.location.href = "pggame.html";
+    }
+  </script>
+</body>
+</html>

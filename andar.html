@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Boneco na Floresta 2D</title>
+    <link rel="stylesheet" href="andar.css">
+</head>
+<body>
+    <div id="game-container">
+        <div id="forest-background"></div>
+        <img id="character" src="boneco_parado.png" alt="Boneco">
+    </div>
+
+    <button id="voltar-mural" onclick="irParaMural()">Voltar ao Mural</button>
+
+    <div id="mobile-controls">
+        <button id="left-button">⬅️</button>
+        <button id="right-button">➡️</button>
+    </div>
+
+    <script src="andar.js"></script>
+    <script>
+        function irParaMural() {
+            window.location.href = "mural.html"; // Redireciona para a página do mural
+        }
+    </script>
+</body>
+</html>

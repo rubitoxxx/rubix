@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Perfil do Usuário - Mural Rubix</title>
+  <link rel="stylesheet" href="style.css">
+  
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="perfil-container">
+    <h2>Meu Perfil</h2>
+
+    <button onclick="irParaMural()">Ver Mural</button>
+
+    <div class="perfil-imagem">
+      <label for="fotoPerfilInput">
+        <img id="fotoPerfil" src="https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg" 
+             alt="Clique para alterar a foto de Perfil" class="foto-perfil">
+        <span><h5>Clique na imagem para alterar</h5></span>
+      </label>
+      <input type="file" id="fotoPerfilInput" accept="image/*" onchange="previewFotoPerfil(event)" style="display: none;">
+    </div>
+
+    <div class="perfil-nome">
+      <strong>Nome de Usuário:</strong>
+      <input type="text" id="nomePerfil" value="" placeholder="Digite seu nome de usuário">
+    </div>
+
+    <button onclick="salvarPerfil()">Salvar Perfil</button>
+    
+    <p id="mensagemStatus"></p>
+  </div>
+
+  <script>
+    // --- 1. INICIALIZAÇÃO DO SUPABASE ---
+    const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
+    
+    const { createClient } = supabase;
+    const _supabase = createClient(supabaseUrl, supabaseKey);
+
+    let currentUser = null;
+
+    // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Verifica a sessão do usuário
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "index.html"; // Redireciona se não estiver logado
+        return;
+      }
+      currentUser = session.user;
+
+      // Carrega os dados do perfil existente do banco de dados
+      const { data: profile, error } = await _supabase
+        .from('profiles')
+        .select('username, avatar_url')
+        .eq('id', currentUser.id)
+        .single();
+      
+      // Ignora o erro "PGRST116" que acontece quando o perfil ainda não foi criado
+      if (error && error.code !== 'PGRST116') {
+        console.error('Erro ao carregar perfil:', error);
+      }
+
+      // Se encontrou um perfil, preenche os campos na tela
+      if (profile) {
+        document.getElementById('nomePerfil').value = profile.username || '';
+        if (profile.avatar_url) {
+          document.getElementById('fotoPerfil').src = profile.avatar_url;
+        }
+      }
+    });
+
+    // Função para mostrar a pré-visualização da imagem escolhida pelo usuário
+    function previewFotoPerfil(event) {
+      const file = event.target.files[0];
+      if (file) {
+        document.getElementById('fotoPerfil').src = URL.createObjectURL(file);
+      }
+    }
+
+    // Função para salvar nome e foto do perfil
+    async function salvarPerfil() {
+      if (!currentUser) {
+        alert("Sessão expirada. Faça login novamente.");
+        window.location.href = "index.html";
+        return;
+      }
+      
+      const username = document.getElementById('nomePerfil').value.trim();
+      const avatarFile = document.getElementById('fotoPerfilInput').files[0];
+      const mensagemStatus = document.getElementById("mensagemStatus");
+      
+      if (!username) {
+          mensagemStatus.textContent = "O nome de usuário não pode ficar em branco.";
+          return;
+      }
+
+      mensagemStatus.textContent = "Salvando perfil, por favor aguarde...";
+      let avatarUrl = document.getElementById('fotoPerfil').src;
+
+      // 1. Se uma NOVA foto foi selecionada, faz o upload para o Storage
+      if (avatarFile) {
+        // Define um nome de arquivo único usando o ID do usuário
+        const filePath = `${currentUser.id}/${Date.now()}_${avatarFile.name}`;
+        
+        const { error: uploadError } = await _supabase.storage
+          .from('avatars') // Nome do seu bucket no Supabase Storage
+          .upload(filePath, avatarFile, { upsert: true }); // `upsert: true` substitui se já existir
+
+        if (uploadError) {
+          console.error('Erro no upload da foto:', uploadError);
+          mensagemStatus.textContent = "Erro ao enviar a foto. Tente novamente.";
+          return;
+        }
+        
+        // Pega a URL pública da imagem que acabamos de enviar
+        const { data } = _supabase.storage.from('avatars').getPublicUrl(filePath);
+        avatarUrl = data.publicUrl;
+      }
+
+      // 2. Salva (ou atualiza) os dados na tabela 'profiles' do banco de dados
+      const { error: updateError } = await _supabase
+        .from('profiles')
+        .upsert({
+          id: currentUser.id, // Chave primária para identificar o registro
+          username: username,
+          avatar_url: avatarUrl,
+          updated_at: new Date()
+        });
+
+      if (updateError) {
+        console.error('Erro ao salvar perfil:', updateError);
+        mensagemStatus.textContent = "Erro ao salvar os dados. Tente novamente.";
+      } else {
+        mensagemStatus.textContent = "Perfil salvo com sucesso!";
+        // Opcional: Limpa a mensagem após alguns segundos
+        setTimeout(() => { mensagemStatus.textContent = ""; }, 3000);
+      }
+    }
+
+    // --- 3. FUNÇÕES DE NAVEGAÇÃO ---
+    function irParaMural() {
+      window.location.href = "mural.html";
+    }
+  </script>
+</body>
+</html>

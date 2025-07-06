@@ -1,0 +1,558 @@
+/* Importar fonte 'Press Start 2P' do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* Estilos Gerais */
+body {
+    font-family: 'Press Start 2P', cursive;
+    background: linear-gradient(135deg, #4b6cb7, #182848); /* Fundo gradiente azul/roxo */
+    color: #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.4); /* Sombra para o texto */
+}
+
+/* Classe para fonte pixelada */
+.pixel-font {
+  font-family: 'Press Start 2P', cursive;
+}
+
+/* Header do Jogo */
+.game-header {
+    width: 100%;
+    max-width: 800px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 15px 25px;
+    background-color: rgba(36, 42, 54, 0.8); /* Fundo semitransparente */
+    border: 3px solid #ffcb05; /* Borda amarela Pokémon */
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
+}
+
+.game-header h1 {
+    margin: 0;
+    font-size: 2.5em;
+    color: #ffcb05;
+    text-shadow: 4px 4px 0 #3b4cca; /* Sombra azul Pokémon mais pronunciada */
+}
+
+/* Botão "Ver Mural" */
+#viewMuralBtn {
+    background-color: #007bff; /* Azul */
+    color: white;
+    padding: 12px 25px;
+    border: 2px solid #0056b3;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#viewMuralBtn:hover {
+    background-color: #0056b3;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+#viewMuralBtn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Contêiner Principal do Jogo */
+.game-container {
+    background-color: rgba(26, 30, 36, 0.9); /* Fundo mais escuro e semitransparente para o jogo */
+    border: 5px solid #ffcb05; /* Borda grossa amarela */
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+    padding: 40px;
+    width: 100%;
+    max-width: 950px;
+    min-height: 550px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Telas do Jogo (Seleção, Batalha, Ações) */
+.screen {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.6s ease-in-out, transform 0.6s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: rgba(44, 49, 58, 0.9); /* Fundo semi-transparente para cada tela */
+    border-radius: 15px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+.screen.active {
+    opacity: 1;
+    pointer-events: auto;
+    position: relative;
+    transform: translateX(0);
+}
+
+/* Tela de Seleção de Pokémon */
+#pokemonSelect h2 {
+    font-size: 3em;
+    color: #ffcb05;
+    margin-bottom: 50px;
+    text-shadow: 4px 4px 0 #3b4cca;
+    animation: pulse 1.5s infinite alternate; /* Animação de pulso para o título */
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.05); }
+}
+
+.selection-buttons {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.selection-buttons button {
+    background-color: #3b4cca; /* Azul escuro do logo Pokémon */
+    color: #ffd700; /* Amarelo dourado */
+    padding: 25px 50px;
+    border: 4px solid #ffcb05; /* Borda amarela */
+    border-radius: 12px;
+    font-size: 1.5em;
+    font-weight: bold;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    position: relative;
+    overflow: hidden; /* Para o efeito hover */
+}
+
+.selection-buttons button:hover {
+    background-color: #2a378f;
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5);
+}
+
+.selection-buttons button::before { /* Efeito de brilho ao passar o mouse */
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: all 0.5s ease;
+}
+
+.selection-buttons button:hover::before {
+    left: 100%;
+}
+
+/* Área de Batalha */
+#battleArea {
+    flex-direction: row;
+    justify-content: space-around;
+    gap: 30px;
+    background-color: rgba(44, 49, 58, 0.9);
+    border-radius: 15px;
+}
+
+.pokemon-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: rgba(58, 63, 71, 0.9);
+    border-radius: 15px;
+    padding: 25px;
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.3);
+    min-width: 280px;
+    position: relative; /* Para a barra de vida */
+    border: 3px solid; /* A cor da borda será definida por .player e .enemy */
+}
+
+.pokemon-display.player {
+    border-color: #007bff; /* Borda azul para o jogador */
+}
+
+.pokemon-display.enemy {
+    border-color: #dc3545; /* Borda vermelha para o inimigo */
+}
+
+.pokemon-display img {
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+    margin-bottom: 20px;
+    background-color: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    padding: 15px;
+    box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.6);
+    image-rendering: pixelated; /* Tenta manter a pixelização */
+}
+
+/* Animação de "bounce" para os Pokémons */
+.pokemon-bounce {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-15px); /* Mais alto */
+  }
+  60% {
+    transform: translateY(-8px);
+  }
+}
+
+.pokemon-display p {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow: 2px 2px 0 #000;
+}
+
+/* Barra de Vida */
+.health-bar-container {
+    width: 90%;
+    height: 25px;
+    background-color: #555;
+    border: 2px solid #333;
+    border-radius: 5px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.health-bar {
+    height: 100%;
+    width: 100%; /* Inicia com 100% de vida */
+    background: linear-gradient(to right, #4CAF50, #8bc34a); /* Verde */
+    transition: width 0.5s ease-in-out, background-color 0.5s ease-in-out;
+}
+
+/* Estilos para a barra de vida conforme a porcentagem */
+.health-bar[style*="width: 50%"] {
+    background: linear-gradient(to right, #FFC107, #FFEB3B); /* Amarelo */
+}
+
+.health-bar[style*="width: 20%"] {
+    background: linear-gradient(to right, #F44336, #FF5722); /* Vermelho */
+}
+
+/* Animação de Ataque */
+.attack-animation {
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85); /* Fundo mais escuro */
+    top: 0;
+    left: 0;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s ease-in-out;
+    border-radius: 20px;
+}
+
+.attack-animation.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.attack-animation img {
+    width: 300px;
+    height: 300px;
+    object-fit: contain;
+    border: 6px solid #ffcb05;
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(255, 215, 0, 0.9);
+    background-color: rgba(255, 255, 255, 0.1);
+    animation: attackEffect 0.6s ease-in-out; /* Animação de flash/escala */
+}
+
+@keyframes attackEffect {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    50% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+/* Animação de flash no fundo (quando um Pokémon é atingido) */
+.attack-flash {
+  animation: flash 0.5s ease-in-out;
+}
+
+@keyframes flash {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(255, 255, 0, 0.5); } /* Amarelo claro para flash */
+  100% { background-color: transparent; }
+}
+
+/* Efeitos de ataque específicos */
+.fire-attack {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  animation: fireGlow 0.5s ease-in-out forwards; /* 'forwards' mantém o estado final */
+}
+
+.electric-attack {
+  background: linear-gradient(45deg, #ffd700, #ffff00);
+  animation: electricGlow 0.5s ease-in-out forwards;
+}
+
+@keyframes fireGlow {
+  0% { box-shadow: 0 0 5px #ff6b35; }
+  50% { box-shadow: 0 0 25px #ff6b35, 0 0 40px #f7931e; }
+  100% { box-shadow: 0 0 5px #ff6b35; }
+}
+
+@keyframes electricGlow {
+  0% { box-shadow: 0 0 5px #ffd700; }
+  50% { box-shadow: 0 0 25px #ffd700, 0 0 40px #ffff00; }
+  100% { box-shadow: 0 0 5px #ffd700; }
+}
+
+
+/* Ações de Batalha */
+#actions {
+    flex-direction: row;
+    gap: 25px;
+    background-color: rgba(44, 49, 58, 0.9);
+    border-radius: 15px;
+    padding: 30px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+#actions button {
+    background-color: #17a2b8; /* Ciano vibrante */
+    padding: 15px 30px;
+    border: 3px solid #138496;
+    border-radius: 10px;
+    font-size: 1.1em;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+#actions button:hover {
+    background-color: #138496;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+#actions button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+#actions button:disabled {
+    background-color: #666;
+    border-color: #444;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Tela de Vitória/Derrota (exemplo, adicionei a estrutura no CSS) */
+#gameOverScreen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9); /* Fundo quase opaco */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 20; /* Acima de tudo */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.6s ease-in-out;
+    border-radius: 20px;
+}
+
+#gameOverScreen.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+#gameOverScreen h2 {
+    font-size: 4em;
+    margin-bottom: 20px;
+    text-shadow: 5px 5px 0 rgba(0, 0, 0, 0.6);
+    animation: popIn 0.8s ease-out;
+}
+
+#gameOverScreen p {
+    font-size: 1.8em;
+    margin-bottom: 40px;
+    color: #c0c0c0;
+    animation: fadeIn 1.2s ease-in;
+}
+
+#gameOverScreen button {
+    background-color: #28a745; /* Verde para reiniciar */
+    border: 3px solid #218838;
+    padding: 20px 40px;
+    font-size: 1.5em;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+#gameOverScreen button:hover {
+    background-color: #218838;
+}
+
+/* Cores específicas para vitória/derrota */
+#gameOverScreen.victory h2 {
+    color: #ffcb05; /* Amarelo para vitória */
+    text-shadow: 5px 5px 0 #3b4cca;
+}
+
+#gameOverScreen.defeat h2 {
+    color: #dc3545; /* Vermelho para derrota */
+    text-shadow: 5px 5px 0 #8f1f2a;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.5); opacity: 0; }
+    80% { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+/* Responsividade */
+@media (max-width: 992px) {
+    .game-header h1 {
+        font-size: 2em;
+    }
+    .selection-buttons {
+        flex-direction: column;
+        gap: 20px;
+    }
+    .selection-buttons button {
+        padding: 18px 35px;
+        font-size: 1.2em;
+    }
+    #battleArea {
+        flex-direction: column;
+    }
+    .pokemon-display {
+        width: 85%;
+        min-width: unset;
+    }
+    #actions {
+        flex-direction: column;
+        gap: 15px;
+        width: 85%;
+    }
+    #actions button {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+    .attack-animation img {
+        width: 200px;
+        height: 200px;
+    }
+    #pokemonSelect h2 {
+        font-size: 2.2em;
+        margin-bottom: 30px;
+    }
+    #gameOverScreen h2 {
+        font-size: 3em;
+    }
+    #gameOverScreen p {
+        font-size: 1.5em;
+    }
+    #gameOverScreen button {
+        padding: 15px 30px;
+        font-size: 1.2em;
+    }
+}
+
+@media (max-width: 576px) {
+    .game-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 10px 15px;
+    }
+    .game-header h1 {
+        font-size: 1.5em;
+    }
+    #viewMuralBtn {
+        padding: 10px 20px;
+        font-size: 0.9em;
+    }
+    .game-container {
+        padding: 20px;
+        min-height: 450px;
+    }
+    #pokemonSelect h2 {
+        font-size: 1.8em;
+    }
+    .selection-buttons button {
+        font-size: 1em;
+        padding: 15px 30px;
+    }
+    .pokemon-display img {
+        width: 150px;
+        height: 150px;
+        padding: 10px;
+    }
+    .pokemon-display p {
+        font-size: 1.1em;
+    }
+    .health-bar-container {
+        height: 20px;
+    }
+    #actions button {
+        font-size: 0.9em;
+        padding: 10px 20px;
+    }
+    .attack-animation img {
+        width: 150px;
+        height: 150px;
+    }
+    #gameOverScreen h2 {
+        font-size: 2.5em;
+    }
+    #gameOverScreen p {
+        font-size: 1.2em;
+    }
+    #gameOverScreen button {
+        padding: 12px 25px;
+        font-size: 1em;
+    }
+}

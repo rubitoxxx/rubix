@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro - Mural Rubix</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <div class="login-container">
+    <h2>Criar Conta no Mural Rubix</h2>
+    <input type="email" id="email" placeholder="Seu melhor e-mail">
+    <input type="password" id="password" placeholder="Crie uma senha forte">
+    <button onclick="cadastrar()">Cadastrar</button>
+    <p id="mensagemStatus"></p>
+    <a href="index.html">Já tem uma conta? Faça login</a>
+  </div>
+
+  <script>
+    const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
+    const { createClient } = supabase;
+    const _supabase = createClient(supabaseUrl, supabaseKey);
+
+    async function cadastrar() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const mensagemStatus = document.getElementById('mensagemStatus');
+
+      mensagemStatus.textContent = 'Criando sua conta...';
+
+      const { data, error } = await _supabase.auth.signUp({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        mensagemStatus.textContent = `Erro no cadastro: ${error.message}`;
+      } else {
+        mensagemStatus.textContent = 'Cadastro realizado com sucesso! Verifique seu e-mail para confirmar a conta.';
+        // Neste caso, o usuário precisa confirmar o e-mail antes de poder fazer login.
+      }
+    }
+  </script>
+</body>
+</html>

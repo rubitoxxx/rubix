@@ -1,0 +1,103 @@
+body {
+    margin: 0;
+    overflow: hidden; /* Esconde as barras de rolagem */
+    background-color: #14abe7; /* Cor do céu */
+}
+
+#game-container {
+    position: relative;
+    width: 100vw; /* Largura total da tela */
+    height: 100vh; /* Altura total da tela */
+    background-color: #a0d8a0; /* Cor de fundo para a floresta, se não tiver imagem */
+}
+
+#forest-background {
+    position: absolute;
+    width: 500%; /* Duas vezes a largura da tela para permitir rolagem */
+    height: 200%;
+    background-image: url('chao.png'); /* Imagem do chão que vai se mover */
+    background-repeat: repeat-x; /* Repete a imagem horizontalmente */
+    background-position: 0% 100%; /* Começa no canto inferior esquerdo */
+    bottom: 0; /* Alinha na parte inferior */
+    left: 0;
+    transition: left 0.1s linear; /* Animação suave para o movimento */
+}
+
+#character {
+    position: absolute;
+    bottom: 10%; /* Posição do boneco em relação à base */
+    left: 50%; /* Centraliza horizontalmente */
+    transform: translateX(-50%); /* Ajuste para centralizar perfeitamente */
+    width: 100px; /* Ajuste o tamanho do seu boneco */
+    height: 150px; /* Ajuste o tamanho do seu boneco */
+    object-fit: contain; /* Garante que a imagem se ajuste */
+    transition: transform 0.1s linear; /* Para virar o boneco */
+    z-index: 10; /* Garante que o boneco fique acima do fundo */
+}
+
+/* Estilo do Botão de Voltar ao Mural */
+#voltar-mural {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+
+    padding: 12px 25px;
+    background-color: #da1107;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+#voltar-mural:hover {
+    background-color: #ff332a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* ESTILOS PARA OS NOVOS BOTÕES DE CONTROLE MOBILE */
+#mobile-controls {
+    position: absolute;
+    bottom: 20px; /* Posiciona os controles na parte inferior da tela */
+    left: 50%;
+    transform: translateX(-50%); /* Centraliza os controles horizontalmente */
+    display: flex; /* Para alinhar os botões lado a lado */
+    gap: 20px; /* Espaço entre os botões */
+    z-index: 99; /* Garante que fiquem acima do fundo, mas abaixo do botão de mural */
+}
+
+#mobile-controls button {
+    width: 80px; /* Tamanho dos botões */
+    height: 80px;
+    border-radius: 50%; /* Botões circulares */
+    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
+    color: white;
+    font-size: 2.5em; /* Tamanho do ícone da seta */
+    border: 2px solid rgba(255, 255, 255, 0.8); /* Borda branca */
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    user-select: none; /* Previne a seleção de texto ao tocar */
+    -webkit-tap-highlight-color: transparent; /* Remove o destaque de toque padrão */
+}
+
+#mobile-controls button:active {
+    background-color: rgba(0, 0, 0, 0.8); /* Mudar cor ao tocar/clicar */
+    transform: scale(0.95); /* Pequeno efeito de clique */
+}
+
+/* Mídia Query para esconder os controles mobile em telas maiores (desktops) */
+@media (min-width: 768px) {
+    #mobile-controls {
+        display: none; /* Esconde os botões de toque em telas maiores */
+    }
+}

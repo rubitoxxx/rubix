@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batalha Pokémon</title>
+    <link rel="stylesheet" href="pokemon3.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="game-header">
+        <h1>Batalha Pokémon</h1>
+        <button id="viewMuralBtn" onclick="irParaMural()">Ver Mural</button>
+    </header>
+
+    <main class="game-container">
+        <div id="pokemonSelect" class="screen active">
+            <h2>Escolha seu Pokémon!</h2>
+            <div class="selection-buttons">
+                <button onclick="choosePokemon('charmander')">🔥<br>CHARMANDER<br><span style="font-size:0.7em;">Tipo: Fogo<br>Poder: Chamas</span></button>
+                <button onclick="choosePokemon('pikachu')">⚡<br>PIKACHU<br><span style="font-size:0.7em;">Tipo: Elétrico<br>Poder: Raio</span></button>
+            </div>
+        </div>
+
+        <div id="battleArea" class="screen">
+            <div id="playerPokemon" class="pokemon-display player">
+                <img id="playerImage" alt="Pokémon do Jogador" class="pokemon-bounce">
+                <div class="health-bar-container">
+                    <div id="playerHealthBar" class="health-bar"></div>
+                </div>
+                <p id="playerStatus"></p>
+            </div>
+            <div id="attackAnimation" class="attack-animation">
+                <img id="attackGif" src="" alt="Animação do Ataque">
+            </div>
+            <div id="enemyPokemon" class="pokemon-display enemy">
+                <img id="enemyImage" alt="Pokémon Inimigo" class="pokemon-bounce">
+                 <div class="health-bar-container">
+                    <div id="enemyHealthBar" class="health-bar"></div>
+                </div>
+                <p id="enemyStatus"></p>
+            </div>
+        </div>
+        
+        <div id="actions" class="screen action-buttons">
+            <button onclick="attackFogo()">Ataque de Fogo</button>
+            <button onclick="attackRaio()">Ataque de Raio</button>
+            <button onclick="defend()">Defender</button>
+        </div>
+
+        <div id="gameMessages" class="game-messages">
+            <p id="messageText">Bem-vindo à Batalha Pokémon!</p>
+        </div>
+
+        <div id="gameOverScreen" class="screen">
+            <h2 id="gameOverTitle">🏆 VITÓRIA!</h2>
+            <p id="gameOverMessage">Você venceu a batalha!</p>
+            <button onclick="resetGame()">🔄 JOGAR NOVAMENTE</button>
+        </div>
+    </main>
+
+    <script src="pokemon.js"></script>
+</body>
+</html>
