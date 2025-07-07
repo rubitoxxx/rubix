@@ -146,17 +146,24 @@
         }
 
         function desenharTabuleiro() {
-            gameBoard.innerHTML = ''; // Limpa o tabuleiro
-            currentGame.board_state.forEach((cellValue, index) => {
-                const cellElement = document.createElement('div');
-                cellElement.classList.add('cell');
-                cellElement.classList.add(cellValue.toLowerCase()); // Adiciona classe 'x' ou 'o'
-                cellElement.dataset.cellIndex = index;
-                cellElement.textContent = cellValue;
-                cellElement.addEventListener('click', () => fazerJogada(index));
-                gameBoard.appendChild(cellElement);
-            });
+    gameBoard.innerHTML = ''; // Limpa o tabuleiro
+    currentGame.board_state.forEach((cellValue, index) => {
+        const cellElement = document.createElement('div');
+        cellElement.classList.add('cell');
+        
+        // --- CORREÇÃO APLICADA AQUI ---
+        // Só adiciona a classe 'x' ou 'o' se a célula não estiver vazia.
+        if (cellValue) {
+            cellElement.classList.add(cellValue.toLowerCase());
         }
+        // --- FIM DA CORREÇÃO ---
+
+        cellElement.dataset.cellIndex = index;
+        cellElement.textContent = cellValue;
+        cellElement.addEventListener('click', () => fazerJogada(index));
+        gameBoard.appendChild(cellElement);
+    });
+}
         
         function atualizarStatus() {
             if (currentGame.status === 'waiting') {
