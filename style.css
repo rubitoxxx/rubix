@@ -209,12 +209,112 @@ input:focus {
 }
 
 /* --- 5. PÁGINA DE PERFIL (perfil.html) --- */
-/* ... (Seus estilos de perfil aqui) ... */
+.perfil-container {
+    text-align: center;
+}
+.perfil-container > button {
+    background: var(--cor-acento);
+    border: 1px solid var(--cor-acento);
+    color: white;
+    margin-bottom: 30px;
+    cursor: pointer;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    border: none;
+}
+.perfil-container > button:hover {
+    background-color: var(--cor-acento-hover);
+}
+.perfil-imagem {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 20px auto;
+}
+.foto-perfil {
+    width: 100%; /* Ocupa 100% do container .perfil-imagem */
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid var(--cor-acento);
+    cursor: pointer;
+    transition: filter 0.3s;
+}
+.foto-perfil:hover {
+    filter: brightness(0.7);
+}
+.perfil-imagem label span {
+    display: block;
+    margin-top: 10px;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+}
+.perfil-nome { margin-bottom: 30px; }
+.perfil-nome strong { display: block; margin-bottom: 10px; color: var(--cor-texto-secundario); }
+.perfil-nome input { text-align: center; max-width: 300px; margin: 0 auto; }
+#mensagemStatus { color: var(--cor-sucesso); margin-top: 20px; min-height: 22px; font-weight: bold; }
 
-/* --- 6. PÁGINAS DE JOGOS (pggame.html) --- */
-/* ... (Seus estilos de jogos aqui) ... */
 
-
+/* --- 6. PÁGINAS DE JOGOS (pggame.html, jogo da velha.html) --- */
+.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%); z-index: -2; }
+.floating-particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; overflow: hidden; }
+.particle { position: absolute; bottom: -20px; background-color: rgba(224, 224, 224, 0.2); border-radius: 50%; animation: floatUp 15s linear infinite; }
+@keyframes floatUp {
+    from { transform: translateY(0) translateX(0); opacity: 0.7; }
+    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
+.btn {
+    display: inline-block;
+    font-family: var(--fonte-padrao);
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid var(--cor-acento);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    text-align: center;
+    background-color: var(--cor-acento);
+    color: white;
+}
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    background-color: var(--cor-acento-hover);
+}
+.btn.secondary {
+    background-color: transparent;
+    color: var(--cor-acento);
+}
+.btn.secondary:hover {
+    background-color: var(--cor-acento);
+    color: white;
+}
+#game-board {
+    display: grid;
+    grid-template-columns: repeat(3, 100px);
+    grid-template-rows: repeat(3, 100px);
+    gap: 8px;
+    margin: 30px auto;
+    justify-content: center;
+}
+.cell {
+    width: 100px;
+    height: 100px;
+    background-color: var(--cor-primaria);
+    border: 2px solid var(--cor-borda);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 4em;
+    font-family: var(--fonte-pixel);
+    cursor: pointer;
+    border-radius: 8px;
+    transition: background-color 0.2s;
+}
 /* --- 7. ESTILOS DA SEÇÃO DE COMENTÁRIOS --- */
 .post-actions {
     display: flex;
