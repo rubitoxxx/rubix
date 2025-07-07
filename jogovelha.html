@@ -11,6 +11,7 @@
         #game-code-display { margin: 20px 0; font-size: 1.2em; }
         #game-code-display span { background: #333; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
         #join-game-section input { padding: 10px; font-size: 1em; margin-right: 10px; }
+        #reset-button { margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -34,7 +35,7 @@
             <div id="game-board">
                 </div>
             <div id="status">Aguardando oponente...</div>
-            <button id="reset-button" style="display:none;">Jogar Novamente</button>
+            <button id="reset-button" style="display:none;" onclick="location.reload()">Sair da Partida</button>
         </div>
     </div>
 
@@ -50,10 +51,17 @@
         const gameBoard = document.getElementById('game-board');
         const statusDisplay = document.getElementById('status');
         const gameCodeDisplay = document.getElementById('game-code-display');
+        const resetButton = document.getElementById('reset-button');
 
         let currentUser = null;
         let currentGame = null;
         let gameSubscription = null;
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8],
+            [0, 3, 6], [1, 4, 7], [2, 5, 8],
+            [0, 4, 8], [2, 4, 6]
+        ];
 
         // --- LÓGICA PRINCIPAL ---
         document.addEventListener('DOMContentLoaded', async () => {
@@ -88,12 +96,13 @@
                 alert("Por favor, insira um código de jogo.");
                 return;
             }
-
-            // Atualiza o jogo para adicionar o player 2 e mudar o status
+            
             const { data, error } = await _supabase
                 .from('games')
                 .update({ player2_id: currentUser.id, status: 'in_progress' })
                 .eq('id', gameId)
+                .eq('status', 'waiting') // Garante que só pode entrar em jogos que estão esperando
+                .is('player2_id', null) // E que não têm um segundo jogador
                 .select()
                 .single();
 
@@ -121,7 +130,6 @@
                 .then(() => alert("Código copiado para a área de transferência!"));
         }
 
-        // A MÁGICA DO REALTIME!
         function escutarMudancasNoJogo(gameId) {
             if (gameSubscription) {
                 gameSubscription.unsubscribe();
@@ -142,6 +150,7 @@
             currentGame.board_state.forEach((cellValue, index) => {
                 const cellElement = document.createElement('div');
                 cellElement.classList.add('cell');
+                cellElement.classList.add(cellValue.toLowerCase()); // Adiciona classe 'x' ou 'o'
                 cellElement.dataset.cellIndex = index;
                 cellElement.textContent = cellValue;
                 cellElement.addEventListener('click', () => fazerJogada(index));
@@ -157,6 +166,7 @@
                                  (currentGame.current_turn === 'O' && currentUser.id === currentGame.player2_id);
                 statusDisplay.textContent = isMyTurn ? 'É a sua vez!' : 'Aguardando jogada do oponente...';
             } else if (currentGame.status === 'finished') {
+                resetButton.style.display = 'block';
                 if (currentGame.winner_id) {
                     statusDisplay.textContent = currentUser.id === currentGame.winner_id ? 'Você venceu!' : 'Você perdeu!';
                 } else {
@@ -166,17 +176,14 @@
         }
 
         async function fazerJogada(index) {
-            // Validações
             const mySymbol = currentUser.id === currentGame.player1_id ? 'X' : 'O';
             if (currentGame.status !== 'in_progress' || mySymbol !== currentGame.current_turn || currentGame.board_state[index] !== '') {
                 return; // Não é sua vez ou a célula já está ocupada
             }
 
-            // Atualiza o estado do tabuleiro localmente
             const newBoardState = [...currentGame.board_state];
             newBoardState[index] = mySymbol;
             
-            // Verifica se há um vencedor ou empate
             const [isFinished, winnerSymbol] = verificarVencedor(newBoardState);
             let newStatus = 'in_progress';
             let newWinnerId = null;
@@ -187,7 +194,6 @@
                 }
             }
             
-            // Prepara a atualização para o banco
             const nextTurn = mySymbol === 'X' ? 'O' : 'X';
             const updatePayload = {
                 board_state: newBoardState,
@@ -196,7 +202,6 @@
                 winner_id: newWinnerId
             };
             
-            // Envia a jogada para o Supabase
             const { error } = await _supabase
                 .from('games')
                 .update(updatePayload)
@@ -217,60 +222,6 @@
             }
             return [false, null]; // [nao_terminou, sem_vencedor]
         }
-       // NOVO CÓDIGO PARA DIAGNÓSTICO - SUBSTITUA A FUNÇÃO ANTIGA POR ESTA
-async function entrarEmJogo() {
-    const gameId = document.getElementById('game-code-input').value.trim();
-    if (!gameId) {
-        alert("Por favor, insira um código de jogo.");
-        return;
-    }
-
-    try {
-        // ETAPA 1: TENTAR ENCONTRAR O JOGO PRIMEIRO
-        console.log(`Procurando pelo jogo com ID: ${gameId}`);
-        const { data: gameData, error: findError } = await _supabase
-            .from('games')
-            .select('*')
-            .eq('id', gameId)
-            .eq('status', 'waiting')
-            .is('player2_id', null)
-            .single();
-
-        // Se não encontrar um jogo aberto, o erro acontece aqui.
-        if (findError || !gameData) {
-            console.error("ERRO DE DIAGNÓSTICO (ETAPA 1 - ENCONTRAR):", findError);
-            alert("Não foi possível encontrar um jogo aberto com este código. Verifique se o código está correto e se o jogo já não foi iniciado por outra pessoa.");
-            return;
-        }
-
-        console.log("Jogo encontrado e está aberto! Tentando entrar...", gameData);
-
-        // ETAPA 2: TENTAR ATUALIZAR O JOGO PARA O JOGADOR 2 ENTRAR
-        const { data: updateData, error: updateError } = await _supabase
-            .from('games')
-            .update({ player2_id: currentUser.id, status: 'in_progress' })
-            .eq('id', gameId)
-            .select()
-            .single();
-
-        // Se a permissão de UPDATE falhar, o erro acontece aqui.
-        if (updateError || !updateData) {
-            console.error("ERRO DE DIAGNÓSTICO (ETAPA 2 - ENTRAR):", updateError);
-            alert("Encontramos o jogo, mas um erro de permissão (RLS) impediu a entrada. Verifique a política de UPDATE na tabela 'games'.");
-            return;
-        }
-
-        // Se tudo deu certo:
-        console.log("Entrou no jogo com sucesso!");
-        currentGame = updateData;
-        iniciarVisualizacaoDeJogo();
-        escutarMudancasNoJogo(currentGame.id);
-
-    } catch (e) {
-        console.error("Um erro inesperado ocorreu:", e);
-        alert("Ocorreu um erro inesperado.");
-    }
-}
     </script>
 </body>
 </html>
