@@ -13,8 +13,8 @@
   <div class="container">
     <header class="header">
       <div class="user-info-header">
-        <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2> <h6>ao nosso projeto de rede social! Começou para a faculdade,
-           mas com a ajuda de vocês meus amigos, estamos construindo um espaço feito do nosso jeito, quem sabe um dia ele se torne algo maior.</h6><br>
+        <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2>
+        <h6>ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês meus amigos, estamos construindo um espaço feito do nosso jeito, quem sabe um dia ele se torne algo maior.</h6><br>
         <nav class="nav-buttons">
           <button onclick="irParaPerfil()">Ver Perfil</button>
           <button onclick="game()">Game</button>
@@ -29,9 +29,7 @@
         <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
         <button onclick="postarMensagem()">Rubitar</button>
       </div>
-
-      <div id="mural" class="feed-posts">
-        </div>
+      <div id="mural" class="feed-posts"></div>
     </main>
   </div>
 
@@ -45,8 +43,8 @@
 
     // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
     document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session }, error: sessionError } = await _supabase.auth.getSession();
-      if (sessionError || !session) {
+      const { data: { session } } = await _supabase.auth.getSession();
+      if (!session) {
         window.location.href = "index.html";
         return;
       }
@@ -56,125 +54,149 @@
     });
 
     async function carregarPerfilDoUsuario() {
-      if (!currentUser) return;
-      const { data: profile, error } = await _supabase
-        .from('profiles')
-        .select('username, avatar_url')
-        .eq('id', currentUser.id)
-        .single();
-      if (error && error.code !== 'PGRST116') {
-        console.error('Erro ao carregar perfil:', error);
-        return;
-      }
-      if (profile) {
-        document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
-        const fotoUrl = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-        document.getElementById("fotoPerfilHeader").src = fotoUrl;
-      }
+        if (!currentUser) return;
+        const { data: profile } = await _supabase.from('profiles').select('username, avatar_url').eq('id', currentUser.id).single();
+        if (profile) {
+            document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
+            document.getElementById("fotoPerfilHeader").src = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+        }
     }
 
     async function carregarMensagens() {
-      const mural = document.getElementById("mural");
-      mural.innerHTML = "<p>Carregando mural...</p>";
-      const { data: messages, error } = await _supabase
-        .from('messages')
-        .select(`id, content, created_at, user_id, profiles (username, avatar_url)`) // Garantimos que id e user_id são selecionados
-        .order('created_at', { ascending: false });
+        const mural = document.getElementById("mural");
+        mural.innerHTML = "<p>Carregando mural...</p>";
+        
+        // MUDANÇA AQUI: Agora também seleciona os comentários e os perfis dos comentaristas
+        const { data: messages, error } = await _supabase
+            .from('messages')
+            .select(`
+                *,
+                profiles (username, avatar_url),
+                comments ( *, profiles (username, avatar_url) )
+            `)
+            .order('created_at', { ascending: false });
 
-      if (error) {
-        console.error("Erro ao carregar mensagens:", error);
-        mural.innerHTML = "<p>Não foi possível carregar as mensagens. Tente novamente mais tarde.</p>";
-        return;
-      }
-      if (messages.length === 0) {
-        mural.innerHTML = "<p>Ainda não há nenhuma mensagem no mural. Seja o primeiro a postar!</p>";
-        return;
-      }
-      mural.innerHTML = "";
-      messages.forEach(msg => {
-        const postElement = document.createElement("div");
-        postElement.className = "tweet-post";
-        postElement.id = `post-${msg.id}`; // Adiciona um ID ao elemento do post
-
-        const autorNome = msg.profiles ? msg.profiles.username : 'Usuário Anônimo';
-        const autorAvatar = msg.profiles && msg.profiles.avatar_url ? msg.profiles.avatar_url : "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-
-        let deleteButtonHTML = '';
-        if (currentUser && msg.user_id === currentUser.id) {
-          deleteButtonHTML = `
-            <button class="delete-button" onclick="apagarMensagem('${msg.id}')">
-              <i class="fas fa-trash"></i> Apagar
-            </button>
-          `;
+        if (error) {
+            console.error("Erro ao carregar mensagens:", error);
+            mural.innerHTML = "<p>Não foi possível carregar as mensagens.</p>";
+            return;
         }
+        mural.innerHTML = "";
+        
+        messages.forEach(msg => {
+            const postElement = document.createElement("div");
+            postElement.className = "tweet-post";
+            postElement.id = `post-${msg.id}`;
 
-        postElement.innerHTML = `
-          <div class="post-header">
-            <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
-            <div class="post-info">
-              <strong class="post-author">${autorNome}</strong>
-              <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
-            </div>
-          </div>
-          <div class="post-content"><p>${msg.content}</p></div>
-          <div class="post-actions">
-            ${deleteButtonHTML}
-          </div>`;
-        mural.appendChild(postElement);
-      });
+            const autorNome = msg.profiles ? msg.profiles.username : 'Anônimo';
+            const autorAvatar = msg.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+            
+            // Renderiza os comentários
+            let commentsHTML = '';
+            if (msg.comments && msg.comments.length > 0) {
+                msg.comments.forEach(comment => {
+                    const commenterName = comment.profiles ? comment.profiles.username : 'Anônimo';
+                    const commenterAvatar = comment.profiles?.avatar_url || "caminho/para/avatar_padrao.jpg";
+                    commentsHTML += `
+                        <div class="comment">
+                            <img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}">
+                            <div class="comment-content">
+                                <strong>${commenterName}</strong>
+                                <p>${comment.content}</p>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            postElement.innerHTML = `
+                <div class="post-header">
+                    <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
+                    <div class="post-info">
+                        <strong class="post-author">${autorNome}</strong>
+                        <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+                    </div>
+                </div>
+                <div class="post-content"><p>${msg.content}</p></div>
+                <div class="post-actions">
+                    <button class="action-button" onclick="toggleComentarios('${msg.id}')">
+                        <i class="fas fa-comment"></i> Comentar
+                    </button>
+                    ${msg.user_id === currentUser?.id ? `<button class="delete-button" onclick="apagarMensagem('${msg.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                </div>
+                <div class="comments-section" id="comments-section-${msg.id}" style="display:none;">
+                    <div class="comments-list">${commentsHTML}</div>
+                    <div class="new-comment-form">
+                        <textarea id="comment-input-${msg.id}" placeholder="Escreva seu comentário..."></textarea>
+                        <button onclick="postarComentario('${msg.id}')">Publicar</button>
+                    </div>
+                </div>
+            `;
+            mural.appendChild(postElement);
+        });
     }
 
     async function postarMensagem() {
-      const texto = document.getElementById("mensagem").value.trim();
-      if (texto === "" || !currentUser) return;
-      const { error } = await _supabase
-        .from('messages')
-        .insert({ content: texto, user_id: currentUser.id });
-      if (error) {
-        console.error("Erro ao postar mensagem:", error);
-        alert("Não foi possível postar sua mensagem. Tente novamente.");
-      } else {
-        document.getElementById("mensagem").value = "";
-        await carregarMensagens();
-      }
+        const texto = document.getElementById("mensagem").value.trim();
+        if (texto === "" || !currentUser) return;
+        const { error } = await _supabase.from('messages').insert({ content: texto, user_id: currentUser.id });
+        if (error) {
+            console.error("Erro ao postar mensagem:", error);
+        } else {
+            document.getElementById("mensagem").value = "";
+            await carregarMensagens();
+        }
     }
 
     async function apagarMensagem(messageId) {
-        const confirmed = confirm("Tem certeza que deseja apagar este post? Esta ação não pode ser desfeita.");
-        if (!confirmed) {
-            return;
-        }
-
-        const { error } = await _supabase
-            .from('messages')
-            .delete()
-            .match({ id: messageId, user_id: currentUser.id });
-
+        if (!confirm("Tem certeza que deseja apagar este post?")) return;
+        const { error } = await _supabase.from('messages').delete().match({ id: messageId });
         if (error) {
             console.error('Erro ao apagar a mensagem:', error);
-            alert('Não foi possível apagar a mensagem.');
         } else {
-            const postElement = document.getElementById(`post-${messageId}`);
-            if (postElement) {
-                postElement.remove();
-            }
+            await carregarMensagens();
+        }
+    }
+    
+    // --- FUNÇÕES NOVAS PARA COMENTÁRIOS ---
+    function toggleComentarios(messageId) {
+        const commentsSection = document.getElementById(`comments-section-${messageId}`);
+        if (commentsSection) {
+            const isVisible = commentsSection.style.display === 'block';
+            commentsSection.style.display = isVisible ? 'none' : 'block';
         }
     }
 
-    // --- 3. FUNÇÕES DE NAVEGAÇÃO ---
+    async function postarComentario(messageId) {
+        const input = document.getElementById(`comment-input-${messageId}`);
+        const content = input.value.trim();
+        if (content === "" || !currentUser) return;
+
+        const { error } = await _supabase
+            .from('comments')
+            .insert({
+                content: content,
+                user_id: currentUser.id,
+                message_id: messageId
+            });
+
+        if (error) {
+            console.error('Erro ao postar comentário:', error);
+            alert('Não foi possível enviar seu comentário.');
+        } else {
+            input.value = '';
+            // Recarrega tudo para mostrar o novo comentário
+            await carregarMensagens();
+        }
+    }
+
+    // --- FUNÇÕES DE NAVEGAÇÃO ---
     async function sair() {
-      const { error } = await _supabase.auth.signOut();
-      if (error) {
-        console.error("Erro ao sair:", error);
-      }
-      window.location.href = "index.html";
+        await _supabase.auth.signOut();
+        window.location.href = "index.html";
     }
-    function irParaPerfil() {
-      window.location.href = "perfil.html";
-    }
-    function game() {
-      window.location.href = "pggame.html";
-    }
+    function irParaPerfil() { window.location.href = "perfil.html"; }
+    function game() { window.location.href = "pggame.html"; }
   </script>
 </body>
 </html>
