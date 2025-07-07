@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Memória - Rubix</title>
+    <link rel="stylesheet" href="memoria.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Jogo da Memória</h1>
+
+        <div id="main-menu-view">
+            <div id="ranking-section">
+                <h2><i class="fas fa-trophy"></i> Ranking</h2>
+                <div id="ranking-board"><p>Carregando ranking...</p></div>
+            </div>
+            <div id="mode-selection">
+                <button class="btn" onclick="selecionarModo('computer')">Jogar contra a Máquina</button>
+                <button class="btn" onclick="selecionarModo('online')">Jogar Online</button>
+            </div>
+            <a href="mural.html" class="btn secondary" style="margin-top: 20px;">Voltar ao Mural</a>
+        </div>
+        
+        <div id="online-lobby-view" style="display: none;">
+            <h2>Modo Online</h2>
+            <div id="create-game-section">
+                <button class="btn" onclick="criarNovoJogo()">Criar Novo Jogo</button>
+            </div>
+            <hr style="margin: 20px 0;">
+            <div id="join-game-section">
+                <input type="text" id="game-code-input" placeholder="Cole o código do jogo aqui">
+                <button class="btn secondary" onclick="entrarEmJogo()">Entrar no Jogo</button>
+            </div>
+            <button class="btn secondary" style="margin-top: 20px;" onclick="voltarParaMenuPrincipal()">Voltar</button>
+        </div>
+
+        <div id="game-view" style="display: none;">
+            <div class="game-stats-online">
+                <span id="online-moves">Movimentos: 0</span>
+                <span id="online-timer">Tempo: 0s</span>
+            </div>
+            <div id="game-code-display"></div>
+            <div id="online-game-board">
+                </div>
+            <div id="status"></div>
+            <button id="reset-button" class="btn" style="display:none;"></button>
+            <button id="back-to-menu-button" class="btn secondary" onclick="location.reload()">Menu Principal</button>
+        </div>
+    </div>
+
+    <script src="memoria.js"></script>
+</body>
+</html>
