@@ -265,6 +265,13 @@ input:focus {
     from { transform: translateY(0) translateX(0); opacity: 0.7; }
     to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
 }
+.game-buttons-layout { /* Novo estilo para agrupar os botões de jogo */
+    display: flex;
+    flex-direction: column; /* Coloca os itens um abaixo do outro */
+    gap: 15px; /* Espaçamento entre os botões */
+    align-items: center; /* Centraliza os botões horizontalmente dentro do container */
+    margin-bottom: 30px; /* Adiciona um espaço abaixo do bloco de botões */
+}
 .btn {
     display: inline-block;
     font-family: var(--fonte-padrao);
@@ -279,6 +286,8 @@ input:focus {
     text-align: center;
     background-color: var(--cor-acento);
     color: white;
+    width: 100%; /* Garante que os botões dentro do layout ocupem a largura total do container */
+    max-width: 250px; /* Limita a largura máxima para não ficarem muito grandes */
 }
 .btn:hover {
     transform: translateY(-3px);
@@ -436,5 +445,90 @@ input:focus {
 
 /* --- 8. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
 @media (max-width: 768px) {
-    /* ... (Seus estilos responsivos aqui) ... */
+    body {
+        padding: 10px; /* Reduz o padding do corpo para aproveitar melhor a tela */
+    }
+
+    .container, .login-container, .perfil-container {
+        padding: 15px; /* Diminui o padding interno dos containers */
+        border: none; /* Remove a borda para um visual mais limpo */
+    }
+
+    h2 {
+        font-size: 20px; /* Ajusta o tamanho da fonte dos títulos */
+    }
+
+    /* --- Cabeçalho e Navegação do Mural --- */
+    .header {
+        flex-direction: column; /* Empilha os elementos do cabeçalho */
+        gap: 20px;
+        padding: 15px;
+    }
+
+    .nav-buttons {
+        width: 100%;
+        justify-content: space-around; /* Distribui os botões de navegação */
+    }
+
+    /* --- Seção de Nova Postagem --- */
+    .new-post-section {
+        flex-direction: column; /* Empilha a área de texto e o botão */
+        gap: 10px;
+    }
+
+    .new-post-section button {
+        width: 100%; /* Faz o botão ocupar a largura total */
+    }
+    
+    /* --- Cabeçalho dos Posts --- */
+    .post-header {
+        flex-direction: column; /* Empilha as informações do post e o botão de excluir */
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .delete-button {
+        align-self: flex-end; /* Move o botão de deletar para o canto direito */
+    }
+
+    /* --- Página de Perfil --- */
+    .perfil-imagem {
+        width: 120px;
+        height: 120px;
+    }
+
+    /* --- Páginas de Jogos --- */
+    #game-board {
+        /* Usa unidades de viewport (vw) para o grid se adaptar à largura da tela */
+        grid-template-columns: repeat(3, 25vw);
+        grid-template-rows: repeat(3, 25vw);
+        max-width: 320px; /* Limita o tamanho máximo em telas um pouco maiores */
+        gap: 5px;
+    }
+
+    .cell {
+        /* O tamanho da célula é herdado do grid, não precisa de width/height fixo */
+        font-size: 2.5em; /* Reduz o tamanho da fonte (X/O) para caber nas células menores */
+    }
+
+    /* --- Ações e Comentários dos Posts --- */
+    .post-actions {
+        flex-direction: column;
+        align-items: stretch; /* Faz os botões ocuparem a largura total */
+        gap: 10px;
+    }
+
+    .action-button {
+        justify-content: center; /* Centraliza o conteúdo dos botões de ação */
+    }
+
+    .new-comment-form {
+        flex-direction: column;
+        align-items: stretch; /* Empilha e estica os elementos do formulário */
+        gap: 10px;
+    }
+
+    .new-comment-form button {
+        width: 100%;
+    }
 }
