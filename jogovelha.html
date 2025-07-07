@@ -139,15 +139,37 @@
             escutarMudancasNoJogo(currentGame.id);
         }
 
-        async function entrarEmJogo() {
-            const gameId = document.getElementById('game-code-input').value.trim();
-            if (!gameId) { alert("Por favor, insira um código de jogo."); return; }
-            const { data, error } = await _supabase.from('games').update({ player2_id: currentUser.id, status: 'in_progress' }).eq('id', gameId).eq('status', 'waiting').is('player2_id', null).select().single();
-            if (error || !data) { alert("Código de jogo inválido ou o jogo já começou."); return; }
-            currentGame = data;
-            iniciarVisualizacaoDeJogo();
-            escutarMudancasNoJogo(currentGame.id);
+       async function entrarEmJogo() {
+    const gameId = document.getElementById('game-code-input').value.trim();
+    if (!gameId) {
+        alert("Por favor, insira um código de jogo.");
+        return;
+    }
+
+    const { data, error } = await _supabase.from('games')
+        .update({ player2_id: currentUser.id, status: 'in_progress' })
+        .eq('id', gameId)
+        .eq('status', 'waiting')
+        .is('player2_id', null)
+        .select()
+        .single();
+
+    if (error || !data) {
+        console.error("Erro ao tentar entrar no jogo:", error); // Adicione este log para depuração
+        if (error && error.message.includes('duplicate key value')) {
+            alert("Este jogo já tem dois jogadores ou o código está incorreto.");
+        } else if (error && error.code === 'PGRST116') { // Código para "Row not found"
+            alert("Código de jogo inválido ou o jogo não está mais disponível para entrada.");
+        } else {
+            alert("Não foi possível entrar no jogo. Verifique o código ou tente novamente.");
         }
+        return;
+    }
+
+    currentGame = data;
+    iniciarVisualizacaoDeJogo();
+    escutarMudancasNoJogo(currentGame.id);
+}
 
         function iniciarVisualizacaoDeJogo() {
             onlineLobby.style.display = 'none';
