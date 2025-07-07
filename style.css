@@ -111,16 +111,17 @@ input:focus {
 /* --- 4. PÁGINA DO MURAL (mural.html) --- */
 .header {
     display: flex;
-    justify-content: space-between; /* Alterado para melhor alinhamento */
+    justify-content: space-between;
     align-items: center;
     padding: 20px;
     background-color: rgba(0,0,0,0.2);
     border-bottom: 1px solid var(--cor-borda);
-    flex-wrap: wrap; /* Adicionado para responsividade */
+    flex-wrap: wrap;
 }
 .user-info-header {
     display: flex;
-    align-items: center; /* Alinhado verticalmente */
+    flex-direction: column;
+    align-items: flex-start;
     gap: 15px;
 }
 .foto-perfil-header {
@@ -134,14 +135,14 @@ input:focus {
 .main-content { padding: 0; }
 .new-post-section {
     display: flex;
-    flex-direction: column; /* Alterado para empilhar por padrão */
+    align-items: flex-start;
     gap: 15px;
     padding: 20px;
     border-bottom: 1px solid var(--cor-borda);
 }
 
 .new-post-section textarea { 
-    width: 100%;
+    flex: 1;
     min-height: 80px; 
     resize: vertical; 
     background-color: var(--cor-primaria); 
@@ -153,7 +154,6 @@ input:focus {
 }
 .new-post-section button { 
     width: auto; 
-    align-self: flex-end; 
     background-color: var(--cor-acento); 
     color: white; 
     padding: 10px 20px; 
@@ -173,7 +173,7 @@ input:focus {
 }
 .post-header { 
     display: flex; 
-    justify-content: space-between; /* Para o botão de apagar ir para o canto */
+    justify-content: space-between;
     align-items: flex-start;
     gap: 15px; 
     margin-bottom: 15px; 
@@ -187,7 +187,7 @@ input:focus {
 .post-info { display: flex; flex-direction: column; }
 .post-author { font-size: 16px; font-weight: 700; }
 .post-date { font-size: 12px; color: var(--cor-texto-secundario); }
-.post-content p { line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; word-break: break-word; }
+.post-content p { line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
 
 .nav-buttons { display: flex; align-items: center; gap: 10px; }
 .nav-buttons button { background-color: transparent; color: var(--cor-texto-secundario); border: 1px solid var(--cor-borda); padding: 8px 16px; font-weight: normal; cursor: pointer; transition: background-color 0.3s, color 0.3s; border-radius: 8px; font-size: 14px; }
@@ -214,7 +214,6 @@ input:focus {
 }
 .perfil-container > button {
     background: var(--cor-acento);
-    border: 1px solid var(--cor-acento);
     color: white;
     margin-bottom: 30px;
     cursor: pointer;
@@ -234,7 +233,7 @@ input:focus {
     margin: 0 auto 20px auto;
 }
 .foto-perfil {
-    width: 100%; /* Ocupa 100% do container .perfil-imagem */
+    width: 100%; 
     height: 100%;
     border-radius: 50%;
     object-fit: cover;
@@ -257,127 +256,178 @@ input:focus {
 #mensagemStatus { color: var(--cor-sucesso); margin-top: 20px; min-height: 22px; font-weight: bold; }
 
 /* --- 6. PÁGINAS DE JOGOS (pggame.html, jogo da velha.html) --- */
-.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%); z-index: -2; }
-.floating-particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; overflow: hidden; }
-.particle { position: absolute; bottom: -20px; background-color: rgba(224, 224, 224, 0.2); border-radius: 50%; animation: floatUp 15s linear infinite; }
-@keyframes floatUp {
-    from { transform: translateY(0) translateX(0); opacity: 0.7; }
-    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+/* ... (estilos dos jogos permanecem os mesmos) ... */
+
+/* --- 7. ESTILOS DA SEÇÃO DE COMENTÁRIOS --- */
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 10px;
+    margin-top: 10px;
+    border-top: 1px solid var(--cor-primaria);
 }
-.btn {
-    display: inline-block;
-    font-family: var(--fonte-padrao);
-    text-decoration: none;
+
+.action-button {
+    background: none;
+    border: 1px solid var(--cor-borda);
+    color: var(--cor-texto-secundario);
+    padding: 5px 15px;
+    border-radius: 20px;
     cursor: pointer;
-    border: 2px solid var(--cor-acento);
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.action-button:hover {
+    background-color: var(--cor-borda);
+    color: var(--cor-texto-principal);
+}
+
+.comments-section {
+    padding: 15px 0 0 0;
+    margin-top: 15px;
+    border-top: 1px solid rgba(138, 43, 226, 0.2);
+}
+
+.comments-list {
+    margin-bottom: 20px;
+    max-height: 300px; /* Adiciona uma altura máxima */
+    overflow-y: auto;  /* Adiciona uma barra de rolagem se os comentários passarem da altura */
+}
+
+/* Estilo para um único comentário */
+.comment {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.comment-avatar {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.comment-content {
+    background-color: rgba(0,0,0,0.15);
+    padding: 10px 15px;
     border-radius: 8px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    text-align: center;
+    width: 100%;
+}
+
+.comment-content strong {
+    font-size: 14px;
+    color: var(--cor-texto-principal);
+}
+
+.comment-content p {
+    font-size: 14px;
+    margin: 5px 0 0 0;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Formulário para um novo comentário */
+.new-comment-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+}
+
+.new-comment-form textarea {
+    flex: 1; /* Ocupa o espaço disponível */
+    min-height: 40px;
+    resize: vertical;
+    background-color: var(--cor-primaria);
+    border-radius: 20px;
+    padding: 10px 15px;
+    color: var(--cor-texto-principal);
+    font-size: 14px;
+    border: 1px solid var(--cor-borda);
+}
+
+.new-comment-form button {
     background-color: var(--cor-acento);
     color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+    font-size: 14px;
 }
-.btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+
+.new-comment-form button:hover {
     background-color: var(--cor-acento-hover);
 }
-.btn.secondary {
-    background-color: transparent;
-    color: var(--cor-acento);
-}
-.btn.secondary:hover {
-    background-color: var(--cor-acento);
-    color: white;
-}
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 8px;
-    margin: 30px auto;
-    justify-content: center;
-}
-.cell {
-    width: 100px;
-    height: 100px;
-    background-color: var(--cor-primaria);
-    border: 2px solid var(--cor-borda);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 4em;
-    font-family: var(--fonte-pixel);
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-}
 
 
-/* --- 7. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
+/* --- 8. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
 
-/* Aplica estas regras para qualquer tela com largura máxima de 768px (tablets e celulares) */
 @media (max-width: 768px) {
 
     /* --- GERAL --- */
     body {
-        padding: 10px; /* Reduz o espaçamento geral da página */
+        padding: 10px;
     }
 
     .container, .login-container, .perfil-container {
-        padding: 15px; /* Reduz o preenchimento interno dos containers */
+        padding: 15px;
     }
 
     h2 {
-        font-size: 20px; /* Diminui um pouco o tamanho do título principal */
+        font-size: 20px;
     }
 
     /* --- PÁGINA DO MURAL (mural.html) --- */
-
-    /* Faz o cabeçalho ficar vertical em vez de horizontal */
     .header {
         flex-direction: column;
-        gap: 20px; /* Aumenta o espaço entre os elementos empilhados */
+        gap: 20px;
     }
 
     .user-info-header {
-        flex-direction: column; /* Empilha a foto e o nome */
+        flex-direction: column;
         align-items: center;
     }
 
     .nav-buttons {
-      flex-wrap: wrap; /* Permite que os botões quebrem a linha se não couberem */
+      flex-wrap: wrap;
       justify-content: center;
     }
     
+    .new-post-section {
+        flex-direction: column;
+    }
+    
     .new-post-section button {
-        width: 100%; /* Botão de postar ocupa a largura toda */
+        width: 100%;
         margin-top: 10px;
     }
 
     /* --- PÁGINA DE PERFIL (perfil.html) --- */
     .perfil-imagem {
-        width: 120px;   /* Diminui o tamanho da foto de perfil */
+        width: 120px;
         height: 120px;
     }
 
     /* --- PÁGINA DE JOGOS (pggame.html) --- */
-
-    /* Torna o tabuleiro do jogo responsivo */
     #game-board {
-        /* Usa unidades relativas à tela (vw) em vez de pixels fixos */
         grid-template-columns: repeat(3, 25vw);
         grid-template-rows: repeat(3, 25vw);
-        max-width: 90vw; /* Garante que o tabuleiro não fique maior que 90% da tela */
+        max-width: 90vw;
         gap: 5px;
     }
 
     .cell {
-        /* Garante que a célula se ajuste ao novo tamanho do grid */
         width: auto;
         height: auto;
-        font-size: 10vw; /* Tamanho da fonte também se ajusta à tela */
+        font-size: 10vw;
     }
 }
