@@ -111,68 +111,101 @@ input:focus {
 /* --- 4. PÁGINA DO MURAL (mural.html) --- */
 .header {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between; /* Alterado para melhor alinhamento */
     align-items: center;
     padding: 20px;
     background-color: rgba(0,0,0,0.2);
     border-bottom: 1px solid var(--cor-borda);
+    flex-wrap: wrap; /* Adicionado para responsividade */
 }
 .user-info-header {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
+    align-items: center; /* Alinhado verticalmente */
     gap: 15px;
 }
+.foto-perfil-header {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--cor-acento);
+}
+
 .main-content { padding: 0; }
 .new-post-section {
     display: flex;
-    flex-direction: row;
-    align-items: flex-start;
+    flex-direction: column; /* Alterado para empilhar por padrão */
     gap: 15px;
-    flex-wrap: wrap;
     padding: 20px;
     border-bottom: 1px solid var(--cor-borda);
 }
-.new-post-section .foto-perfil-header { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--cor-acento); }
-.new-post-section textarea { flex: 1; min-height: 80px; resize: vertical; background-color: var(--cor-primaria); border-radius: 8px; padding: 15px; color: var(--cor-texto-principal); font-size: 16px; border: 1px solid var(--cor-borda); }
-.new-post-section button { width: auto; align-self: flex-end; order: 3; background-color: var(--cor-acento); color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; transition: background-color 0.3s; border: none; font-size: 16px;}
+
+.new-post-section textarea { 
+    width: 100%;
+    min-height: 80px; 
+    resize: vertical; 
+    background-color: var(--cor-primaria); 
+    border-radius: 8px; 
+    padding: 15px; 
+    color: var(--cor-texto-principal); 
+    font-size: 16px; 
+    border: 1px solid var(--cor-borda); 
+}
+.new-post-section button { 
+    width: auto; 
+    align-self: flex-end; 
+    background-color: var(--cor-acento); 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 8px; 
+    cursor: pointer; 
+    transition: background-color 0.3s; 
+    border: none; 
+    font-size: 16px;
+}
 .new-post-section button:hover { background-color: var(--cor-acento-hover); }
+
 .feed-posts { padding: 20px; }
-.tweet-post { border-bottom: 1px solid var(--cor-primaria); padding-bottom: 15px; margin-bottom: 15px; }
-.post-header { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+.tweet-post { 
+    border-bottom: 1px solid var(--cor-primaria); 
+    padding-bottom: 15px; 
+    margin-bottom: 15px; 
+}
+.post-header { 
+    display: flex; 
+    justify-content: space-between; /* Para o botão de apagar ir para o canto */
+    align-items: flex-start;
+    gap: 15px; 
+    margin-bottom: 15px; 
+}
+.post-header-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
 .post-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
 .post-info { display: flex; flex-direction: column; }
 .post-author { font-size: 16px; font-weight: 700; }
 .post-date { font-size: 12px; color: var(--cor-texto-secundario); }
-.post-content p { line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; }
+.post-content p { line-height: 1.6; margin-bottom: 20px; white-space: pre-wrap; word-break: break-word; }
+
 .nav-buttons { display: flex; align-items: center; gap: 10px; }
 .nav-buttons button { background-color: transparent; color: var(--cor-texto-secundario); border: 1px solid var(--cor-borda); padding: 8px 16px; font-weight: normal; cursor: pointer; transition: background-color 0.3s, color 0.3s; border-radius: 8px; font-size: 14px; }
 .nav-buttons button:hover { background-color: var(--cor-borda); color: var(--cor-texto-principal); }
 
-/* Estilos para Ações do Post (incluindo botão de apagar) */
-.post-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 10px;
-  margin-top: 15px;
-  border-top: 1px solid var(--cor-primaria);
-}
 .delete-button {
-  background: none;
-  border: none;
-  color: var(--cor-texto-secundario);
-  cursor: pointer;
-  font-size: 14px;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
-  border-radius: 5px;
-  transition: color 0.3s, background-color 0.3s;
+    background: none;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    border-radius: 50%;
+    transition: color 0.3s, background-color 0.3s;
 }
 .delete-button:hover {
-  color: var(--cor-erro);
-  background-color: rgba(244, 67, 54, 0.1);
+    color: var(--cor-erro);
+    background-color: rgba(244, 67, 54, 0.1);
 }
 
 /* --- 5. PÁGINA DE PERFIL (perfil.html) --- */
@@ -201,8 +234,8 @@ input:focus {
     margin: 0 auto 20px auto;
 }
 .foto-perfil {
-    width: 80%;
-    height: 80%;
+    width: 100%; /* Ocupa 100% do container .perfil-imagem */
+    height: 100%;
     border-radius: 50%;
     object-fit: cover;
     border: 4px solid var(--cor-acento);
@@ -280,4 +313,71 @@ input:focus {
     cursor: pointer;
     border-radius: 8px;
     transition: background-color 0.2s;
+}
+
+
+/* --- 7. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
+
+/* Aplica estas regras para qualquer tela com largura máxima de 768px (tablets e celulares) */
+@media (max-width: 768px) {
+
+    /* --- GERAL --- */
+    body {
+        padding: 10px; /* Reduz o espaçamento geral da página */
+    }
+
+    .container, .login-container, .perfil-container {
+        padding: 15px; /* Reduz o preenchimento interno dos containers */
+    }
+
+    h2 {
+        font-size: 20px; /* Diminui um pouco o tamanho do título principal */
+    }
+
+    /* --- PÁGINA DO MURAL (mural.html) --- */
+
+    /* Faz o cabeçalho ficar vertical em vez de horizontal */
+    .header {
+        flex-direction: column;
+        gap: 20px; /* Aumenta o espaço entre os elementos empilhados */
+    }
+
+    .user-info-header {
+        flex-direction: column; /* Empilha a foto e o nome */
+        align-items: center;
+    }
+
+    .nav-buttons {
+      flex-wrap: wrap; /* Permite que os botões quebrem a linha se não couberem */
+      justify-content: center;
+    }
+    
+    .new-post-section button {
+        width: 100%; /* Botão de postar ocupa a largura toda */
+        margin-top: 10px;
+    }
+
+    /* --- PÁGINA DE PERFIL (perfil.html) --- */
+    .perfil-imagem {
+        width: 120px;   /* Diminui o tamanho da foto de perfil */
+        height: 120px;
+    }
+
+    /* --- PÁGINA DE JOGOS (pggame.html) --- */
+
+    /* Torna o tabuleiro do jogo responsivo */
+    #game-board {
+        /* Usa unidades relativas à tela (vw) em vez de pixels fixos */
+        grid-template-columns: repeat(3, 25vw);
+        grid-template-rows: repeat(3, 25vw);
+        max-width: 90vw; /* Garante que o tabuleiro não fique maior que 90% da tela */
+        gap: 5px;
+    }
+
+    .cell {
+        /* Garante que a célula se ajuste ao novo tamanho do grid */
+        width: auto;
+        height: auto;
+        font-size: 10vw; /* Tamanho da fonte também se ajusta à tela */
+    }
 }
