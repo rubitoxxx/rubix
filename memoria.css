@@ -15,18 +15,18 @@
     --fonte-pixel: 'Press Start 2P', cursive;
     --fonte-padrao: 'Roboto', sans-serif;
 
-    /* Novas variáveis para o tema do Jogo da Memória, baseadas nas suas existentes */
-    --memoria-card-front: #ff69b4; /* Rosa choque para o verso do card */
-    --memoria-card-front-text: #2a2a2a; /* Preto para o "?" */
-    --memoria-card-front-border: #ffc0cb; /* Rosa claro para borda do verso */
-    --memoria-card-back: #e0b0ff; /* Lilás/Rosa claro para o fundo da imagem */
-    --memoria-card-back-border: #d8bfd8; /* Rosa claro para borda da frente */
-    --memoria-card-matched: #8a2be2; /* Roxo vibrante para cards combinados */
-    --memoria-card-matched-shadow: rgba(138, 43, 226, 0.5); /* Sombra roxa para combinados */
-    --memoria-card-hover-shadow: rgba(255, 105, 180, 0.5); /* Sombra rosa no hover */
-    --memoria-stats-bg: #3a3a3a; /* Fundo das estatísticas escuras */
-    --memoria-stats-text: #ffe0f0; /* Texto das estatísticas em rosa bem claro */
-    --memoria-input-bg: #4a4a4a; /* Fundo de inputs online */
+    /* Variáveis para o tema do Jogo da Memória */
+    --memoria-card-front: #ff69b4;
+    --memoria-card-front-text: #2a2a2a;
+    --memoria-card-front-border: #ffc0cb;
+    --memoria-card-back: #e0b0ff;
+    --memoria-card-back-border: #d8bfd8;
+    --memoria-card-matched: #8a2be2;
+    --memoria-card-matched-shadow: rgba(138, 43, 226, 0.5);
+    --memoria-card-hover-shadow: rgba(255, 105, 180, 0.5);
+    --memoria-stats-bg: #3a3a3a;
+    --memoria-stats-text: #ffe0f0;
+    --memoria-input-bg: #4a4a4a;
 }
 
 * {
@@ -50,7 +50,7 @@ body {
 }
 
 /* --- 2. LAYOUTS PRINCIPAIS (Containers) --- */
-.container, .login-container, .perfil-container {
+.container {
     width: 100%;
     max-width: 800px;
     background-color: rgba(12, 12, 12, 0.85);
@@ -62,15 +62,14 @@ body {
     backdrop-filter: blur(5px);
 }
 
-h1 { /* Adicionado ou ajustado para o título do Jogo da Memória */
-    font-family: var(--fonte-pixel); /* Usando sua fonte pixel */
-    color: var(--memoria-card-front); /* Rosa choque para o título */
+h1 { 
+    font-family: var(--fonte-pixel);
+    color: var(--memoria-card-front);
     margin-bottom: 20px;
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3); /* Sombra no título */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
     text-align: center;
-    font-size: 2.5em; /* Aumenta um pouco o tamanho */
+    font-size: 2.5em;
 }
-
 
 h2 {
     font-family: var(--fonte-pixel);
@@ -81,213 +80,6 @@ h2 {
     text-shadow: 2px 2px 0px #f10909ee;
 }
 
-input[type="text"], input[type="password"], input[type="email"] {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background-color: var(--cor-primaria);
-    color: var(--cor-texto-principal);
-    font-size: 16px;
-}
-
-input::placeholder {
-    color: var(--cor-texto-secundario);
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--cor-acento-hover);
-    box-shadow: 0 0 10px var(--cor-acento);
-}
-
-/* --- 3. PÁGINA DE LOGIN (index.html) --- */
-.login-container {
-    max-width: 400px;
-    text-align: center;
-}
-
-.login-container button {
-    width: 100%;
-    background-color: var(--cor-acento);
-    color: white;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.login-container button:hover {
-    background-color: var(--cor-acento-hover);
-}
-
-#mensagemErro {
-    color: var(--cor-erro);
-    margin-top: 15px;
-    min-height: 20px;
-    font-weight: bold;
-}
-
-/* --- 4. PÁGINA DO MURAL (mural.html) --- */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: rgba(0,0,0,0.2);
-    border-bottom: 10px solid var(--cor-borda);
-    flex-wrap: wrap;
-}
-.user-info-header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-}
-.foto-perfil-header {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--cor-acento);
-}
-
-.main-content { padding: 0; }
-.new-post-section {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 20px;
-    border-bottom: 1px solid var(--cor-borda);
-}
-
-.new-post-section textarea { 
-    flex: 1;
-    min-height: 80px; 
-    resize: vertical; 
-    background-color: var(--cor-primaria); 
-    border-radius: 8px; 
-    padding: 15px; 
-    color: var(--cor-texto-principal); 
-    font-size: 16px; 
-    border: 1px solid var(--cor-borda); 
-}
-.new-post-section button { 
-    width: auto; 
-    background-color: var(--cor-acento); 
-    color: white; 
-    padding: 10px 20px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    transition: background-color 0.3s; 
-    border: none; 
-    font-size: 16px;
-}
-.new-post-section button:hover { background-color: var(--cor-acento-hover); }
-
-.feed-posts { padding: 20px; }
-.tweet-post { 
-    border-bottom: 1px solid var(--cor-primaria); 
-    padding-bottom: 15px; 
-    margin-bottom: 15px; 
-}
-.post-header { 
-    display: flex; 
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 15px; 
-    margin-bottom: 15px; 
-}
-.post-header-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-.post-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-.post-info { display: flex; flex-direction: column; }
-.post-author { font-size: 16px; font-weight: 700; }
-.post-date { font-size: 12px; color: var(--cor-texto-secundario); }
-.post-content p { line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
-
-.nav-buttons { display: flex; align-items: center; gap: 10px; }
-.nav-buttons button { background-color: transparent; color: var(--cor-texto-secundario); border: 1px solid var(--cor-borda); padding: 8px 16px; font-weight: normal; cursor: pointer; transition: background-color 0.3s, color 0.3s; border-radius: 8px; font-size: 14px; }
-.nav-buttons button:hover { background-color: var(--cor-borda); color: var(--cor-texto-principal); }
-
-.delete-button {
-    background: none;
-    border: none;
-    color: var(--cor-texto-secundario);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 5px;
-    border-radius: 50%;
-    transition: color 0.3s, background-color 0.3s;
-}
-.delete-button:hover {
-    color: var(--cor-erro);
-    background-color: rgba(244, 67, 54, 0.1);
-}
-
-/* --- 5. PÁGINA DE PERFIL (perfil.html) --- */
-.perfil-container {
-    text-align: center;
-}
-.perfil-container > button {
-    background: var(--cor-acento);
-    border: 1px solid var(--cor-acento);
-    color: white;
-    margin-bottom: 30px;
-    cursor: pointer;
-    padding: 12px 24px;
-    border-radius: 8px;
-    transition: background-color 0.3s;
-    font-size: 16px;
-    border: none;
-}
-.perfil-container > button:hover {
-    background-color: var(--cor-acento-hover);
-}
-.perfil-imagem {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 20px auto;
-}
-.foto-perfil {
-    width: 100%; /* Ocupa 100% do container .perfil-imagem */
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--cor-acento);
-    cursor: pointer;
-    transition: filter 0.3s;
-}
-.foto-perfil:hover {
-    filter: brightness(0.7);
-}
-.perfil-imagem label span {
-    display: block;
-    margin-top: 10px;
-    color: var(--cor-texto-secundario);
-    cursor: pointer;
-}
-.perfil-nome { margin-bottom: 30px; }
-.perfil-nome strong { display: block; margin-bottom: 10px; color: var(--cor-texto-secundario); }
-.perfil-nome input { text-align: center; max-width: 300px; margin: 0 auto; }
-#mensagemStatus { color: var(--cor-sucesso); margin-top: 20px; min-height: 22px; font-weight: bold; }
-
-
-/* --- 6. PÁGINAS DE JOGOS (pggame.html, jogo da velha.html) --- */
-.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%); z-index: -2; }
-.floating-particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; overflow: hidden; }
-.particle { position: absolute; bottom: -20px; background-color: rgba(224, 224, 224, 0.2); border-radius: 50%; animation: floatUp 15s linear infinite; }
-@keyframes floatUp {
-    from { transform: translateY(0) translateX(0); opacity: 0.7; }
-    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
-}
 .btn {
     display: inline-block;
     font-family: var(--fonte-padrao);
@@ -317,151 +109,8 @@ input:focus {
     color: white;
 }
 
-/* ESTILOS PARA O JOGO DA VELHA - MANTIDOS COMO ESTÃO */
-#game-board { /* ID do jogo da velha */
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 8px;
-    margin: 30px auto;
-    justify-content: center;
-}
-.cell { /* Células do jogo da velha */
-    width: 100px;
-    height: 100px;
-    background-color: var(--cor-primaria);
-    border: 2px solid var(--cor-borda);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 4em;
-    font-family: var(--fonte-pixel);
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-}
+/* --- ESTILOS DO JOGO DA MEMÓRIA --- */
 
-/* --- 7. ESTILOS DA SEÇÃO DE COMENTÁRIOS --- */
-.post-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
-    margin-top: 10px;
-    border-top: 1px solid var(--cor-primaria);
-}
-
-.action-button {
-    background: none;
-    border: 1px solid var(--cor-borda);
-    color: var(--cor-texto-secundario);
-    padding: 5px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.action-button:hover {
-    background-color: var(--cor-borda);
-    color: var(--cor-texto-principal);
-}
-
-.comment-count {
-    background-color: var(--cor-borda);
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-left: 8px;
-}
-
-.comments-section {
-    padding: 15px 0 0 0;
-    margin-top: 15px;
-    border-top: 1px solid rgba(138, 43, 226, 0.2);
-}
-
-.comments-list {
-    margin-bottom: 20px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.comment {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.comment-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.comment-content {
-    background-color: rgba(0,0,0,0.15);
-    padding: 10px 15px;
-    border-radius: 8px;
-    width: 100%;
-}
-
-.comment-content strong {
-    font-size: 14px;
-    color: var(--cor-texto-principal);
-}
-
-.comment-content p {
-    font-size: 14px;
-    margin: 5px 0 0 0;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.new-comment-form {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.new-comment-form textarea {
-    flex: 1;
-    min-height: 40px;
-    resize: vertical;
-    background-color: var(--cor-primaria);
-    border-radius: 20px;
-    padding: 10px 15px;
-    color: var(--cor-texto-principal);
-    font-size: 14px;
-    border: 1px solid var(--cor-borda);
-}
-
-.new-comment-form button {
-    background-color: var(--cor-acento);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s;
-    font-size: 14px;
-}
-
-.new-comment-form button:hover {
-    background-color: var(--cor-acento-hover);
-}
-
-/* --- 9. ESTILOS DO JOGO DA MEMÓRIA --- */
-
-/* Ranking e Lobby Online */
 #ranking-section { 
     margin-bottom: 30px; 
     text-align: center; 
@@ -474,10 +123,10 @@ input:focus {
     display: flex; 
     justify-content: space-between; 
     padding: 8px; 
-    border-bottom: 1px solid var(--memoria-card-front); /* Usando rosa choque para a linha do ranking */
+    border-bottom: 1px solid var(--memoria-card-front);
     font-size: 1.1em; 
     text-align: left; 
-    color: var(--memoria-stats-text); /* Texto das estatísticas em rosa bem claro */
+    color: var(--memoria-stats-text);
 }
 #ranking-board li:last-child { 
     border-bottom: none; 
@@ -487,27 +136,26 @@ input:focus {
     margin: 20px 0; 
     font-size: 1.2em; 
     text-align: center; 
-    color: var(--memoria-stats-text); /* Cor do texto do código */
+    color: var(--memoria-stats-text);
 }
 #game-code-display span { 
-    background: var(--memoria-stats-bg); /* Fundo escuro */
+    background: var(--memoria-stats-bg);
     padding: 5px 10px; 
     border-radius: 5px; 
     cursor: pointer; 
-    color: var(--memoria-card-front-border); /* Cor do código para destaque */
+    color: var(--memoria-card-front-border);
 }
 #online-lobby-view input { 
     padding: 10px; 
     font-size: 1em; 
     margin-right: 10px; 
-    background-color: var(--memoria-input-bg); /* Fundo do input */
-    border: 1px solid var(--memoria-card-front); /* Borda rosa para input */
-    color: var(--memoria-stats-text); /* Texto do input */
+    background-color: var(--memoria-input-bg);
+    border: 1px solid var(--memoria-card-front);
+    color: var(--memoria-stats-text);
     border-radius: 5px; 
 }
 
-/* Estatísticas do Jogo Online (Movimentos e Tempo) */
-.game-stats-online {
+.game-stats {
     display: flex;
     justify-content: space-around;
     margin-bottom: 20px;
@@ -516,54 +164,48 @@ input:focus {
     background-color: var(--memoria-stats-bg);
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid var(--memoria-card-front); /* Borda rosa */
+    border: 1px solid var(--memoria-card-front);
 }
 
-/* Tabuleiro do Jogo da Memória */
-#online-game-board {
+#game-board {
     display: grid;
-    grid-template-columns: repeat(4, 1fr); /* 4 colunas */
-    grid-gap: 12px; /* Espaço entre os cards */
-    perspective: 1000px; /* Necessário para o efeito 3D de virar */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    perspective: 1000px;
     margin: 0 auto 30px auto;
-    max-width: 460px; /* Ajuste para caber 4 cards de 100px + gaps (4*100 + 3*12 = 436px) */
+    max-width: 460px;
 }
 
-/* Estilo base para cada card individual do Jogo da Memória */
 .card {
     width: 100px;
     height: 100px;
     position: relative;
     transform-style: preserve-3d;
-    transition: transform 0.6s ease-out; /* Animação mais suave */
+    transition: transform 0.6s ease-out;
     cursor: pointer;
-    border-radius: 10px; /* Bordas arredondadas nos cards */
+    border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    border: 2px solid var(--cor-borda); /* Borda sutil para os cards, usando sua cor de borda principal */
+    border: 2px solid var(--cor-borda);
 }
 
-/* Efeito ao passar o mouse */
 .card:not(.matched):hover {
-    transform: scale(1.03); /* Leve aumento ao passar o mouse */
-    box-shadow: 0 6px 15px var(--memoria-card-hover-shadow); /* Sombra rosa no hover */
+    transform: scale(1.03);
+    box-shadow: 0 6px 15px var(--memoria-card-hover-shadow);
 }
 
-/* O "contêiner interno" que faz a rotação */
 .card-inner {
     position: absolute;
     width: 100%;
     height: 100%;
     text-align: center;
-    transition: transform 0.6s ease-out; /* Transição para o efeito de virar */
+    transition: transform 0.6s ease-out;
     transform-style: preserve-3d;
 }
 
-/* Quando o card está "virado" (flipped), ele gira */
 .card.flipped .card-inner {
     transform: rotateY(180deg);
 }
 
-/* Estilo comum para as duas faces do card */
 .card-front, .card-back {
     position: absolute;
     width: 100%;
@@ -573,167 +215,124 @@ input:focus {
     justify-content: center;
     align-items: center;
     border-radius: 8px;
-    font-size: 2.2em; /* Tamanho do '?' maior */
+    font-size: 2.2em;
     font-weight: bold;
 }
 
-/* A face que mostra o "?", o padrão do card */
 .card-front {
-    background-color: var(--memoria-card-front); /* Rosa choque vibrante */
-    color: var(--memoria-card-front-text); /* Texto do '?' em preto */
+    background-color: var(--memoria-card-front);
+    color: var(--memoria-card-front-text);
     transform: rotateY(0deg);
-    border: 1px solid var(--memoria-card-front-border); /* Borda rosa claro para o verso */
+    border: 1px solid var(--memoria-card-front-border);
 }
 
-/* A face que mostra a figura/símbolo */
 .card-back {
-    background-color: var(--memoria-card-back); /* Um tom de lilás/rosa claro para o fundo da imagem */
-    color: var(--cor-texto-principal); /* Cor do texto (se houver) */
+    background-color: var(--memoria-card-back);
+    color: var(--cor-texto-principal);
     transform: rotateY(180deg);
     overflow: hidden;
-    border: 1px solid var(--memoria-card-back-border); /* Borda rosa bem claro para a frente */
+    border: 1px solid var(--memoria-card-back-border);
 }
 
-/* REGRA PARA AJUSTAR A IMAGEM DENTRO DO CARD */
 .card-back img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Mantém 'cover' para preencher o card completamente */
+    object-fit: cover;
     display: block;
-    border-radius: 8px; /* Arredonda as bordas da imagem também */
+    border-radius: 8px;
 }
 
-/* Estilos para cards combinados */
 .card.matched .card-front,
 .card.matched .card-back {
-    background-color: var(--memoria-card-matched); /* Roxo vibrante para os cards combinados */
-    color: var(--cor-texto-principal); /* Cor do texto em branco */
-    box-shadow: 0 4px 10px var(--memoria-card-matched-shadow); /* Sombra roxa */
-    border-color: var(--memoria-card-matched); /* Borda roxa */
+    background-color: var(--memoria-card-matched);
+    color: var(--cor-texto-principal);
+    box-shadow: 0 4px 10px var(--memoria-card-matched-shadow);
+    border-color: var(--memoria-card-matched);
 }
 
 .card.matched {
     cursor: default;
-    opacity: 0.8; /* Levemente mais transparente quando combinado */
+    opacity: 0.8;
 }
 
-/* Ajustes no botão de Reiniciar e Voltar (para se adequar aos botões existentes) */
 #reset-button, #back-to-menu-button { 
-    margin-top: 30px; /* Mais espaço */
+    margin-top: 30px;
 }
-/* O estilo do .btn já é aplicado a eles, então não precisa de redefinição extensa */
 
-/* --- 8. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
+/* --- DESIGN RESPONSIVO PARA MOBILE --- */
 @media (max-width: 768px) {
-    .container, .login-container, .perfil-container {
-        padding: 20px;
-        border-radius: 5px;
-    }
-
-    h1 {
-        font-size: 2em;
-        margin-bottom: 20px;
-    }
-
-    h2 {
-        font-size: 20px;
-        margin-bottom: 20px;
-    }
-
-    input[type="text"], input[type="password"], input[type="email"] {
-        padding: 12px;
-        font-size: 14px;
-    }
-
-    .btn {
-        padding: 10px 20px;
-        font-size: 14px;
-    }
-
-    /* Mural */
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-        padding: 15px;
-    }
-    .nav-buttons {
-        width: 100%;
-        justify-content: space-around;
-        margin-top: 15px;
-    }
-    .new-post-section {
-        flex-direction: column;
-        padding: 15px;
-        gap: 10px;
-    }
-    .new-post-section textarea {
-        min-height: 60px;
+    /* Reduz o espaçamento geral no corpo da página */
+    body {
         padding: 10px;
     }
-    .new-post-section button {
-        width: 100%;
-        padding: 12px;
+
+    /* Diminui o preenchimento interno do container principal */
+    .container {
+        padding: 20px;
     }
-    .feed-posts {
-        padding: 15px;
+
+    /* Ajusta o tamanho dos títulos para caberem melhor */
+    h1 {
+        font-size: 1.8em;
     }
-    .post-header {
+    h2 {
+        font-size: 1.5em; /* Ajustado para 1.5em */
+        margin-bottom: 20px;
+    }
+
+    /* Empilha os botões do menu e do lobby online */
+    #mode-selection, 
+    #create-game-section,
+    #join-game-section {
+        display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        gap: 10px;
-    }
-    .post-content p {
-        font-size: 15px;
-    }
-    .action-button {
-        padding: 5px 10px;
-        font-size: 12px;
-    }
-    .comment-content {
-        padding: 8px 12px;
-    }
-    .comment-content p {
-        font-size: 13px;
-    }
-    .new-comment-form textarea {
-        padding: 8px 12px;
-        font-size: 13px;
-    }
-    .new-comment-form button {
-        padding: 8px 12px;
-        font-size: 13px;
+        gap: 15px; /* Adiciona espaço entre os itens empilhados */
     }
 
-    /* Perfil */
-    .perfil-imagem {
-        width: 120px;
-        height: 120px;
-    }
-    .perfil-container > button {
-        padding: 10px 20px;
-        font-size: 14px;
+    /* Faz o input de código ocupar a largura total */
+    #online-lobby-view input {
+        width: 100%;
+        margin-right: 0;
+        text-align: center;
     }
 
-    /* Jogo da Memória */
-    #online-game-board {
-        grid-template-columns: repeat(4, 1fr); /* Mantém 4 colunas */
-        grid-gap: 8px; /* Reduz o gap */
-        max-width: 360px; /* Ajuste para telas menores (4*80px + 3*8px = 344px) */
+    /* Torna o tabuleiro do jogo totalmente fluido e adaptável */
+    #game-board {
+        max-width: 100%; /* Permite que o tabuleiro use toda a largura disponível */
+        gap: 8px; /* Reduz o espaço entre os cards */
     }
+
+    /* Remove o tamanho fixo dos cards, fazendo-os se ajustarem ao grid.
+       O aspect-ratio garante que eles permaneçam quadrados. */
     .card {
-        width: 80px; /* Cards menores */
-        height: 80px;
-        border-radius: 8px;
+        width: 100%; /* Ocupa o espaço da coluna do grid */
+        height: auto; /* A altura se ajusta automaticamente */
+        aspect-ratio: 1 / 1; /* Garante que o card seja sempre um quadrado */
     }
+
+    /* Reduz o tamanho da fonte dentro dos cards */
     .card-front, .card-back {
-        font-size: 1.8em; /* '?' menor */
+        font-size: 1.8em;
     }
-    .game-stats-online {
+
+    /* Ajusta o tamanho da fonte das estatísticas e do ranking */
+    .game-stats {
         font-size: 1em;
-        padding: 8px;
+        flex-direction: column; /* Empilha os stats em telas muito pequenas */
+        gap: 5px;
+        align-items: center;
     }
+
     #ranking-board li {
         font-size: 0.9em;
+        flex-direction: column; /* Empilha nome e pontuação */
+        align-items: flex-start;
+        gap: 4px;
+    }
+
+    /* Ajusta o tamanho e o preenchimento dos botões */
+    .btn {
+        padding: 10px 15px;
+        font-size: 1em; /* Tamanho da fonte relativo */
     }
 }
