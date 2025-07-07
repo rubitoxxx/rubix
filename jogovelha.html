@@ -217,6 +217,33 @@
             }
             return [false, null]; // [nao_terminou, sem_vencedor]
         }
+        async function entrarEmJogo() {
+    const gameId = document.getElementById('game-code-input').value.trim();
+    if (!gameId) {
+        alert("Por favor, insira um código de jogo.");
+        return;
+    }
+
+    // MUDANÇA AQUI: Adicionamos filtros para garantir que o jogo está realmente aberto
+    const { data, error } = await _supabase
+        .from('games')
+        .update({ player2_id: currentUser.id, status: 'in_progress' })
+        .eq('id', gameId)
+        .eq('status', 'waiting') // Só permite a entrada se o status for 'waiting'
+        .is('player2_id', null)  // E se ainda não houver um jogador 2
+        .select()
+        .single();
+
+    if (error || !data) {
+        console.error("Erro ao entrar no jogo:", error);
+        alert("Código de jogo inválido ou o jogo já começou.");
+        return;
+    }
+
+    currentGame = data;
+    iniciarVisualizacaoDeJogo();
+    escutarMudancasNoJogo(currentGame.id);
+}
     </script>
 </body>
 </html>
