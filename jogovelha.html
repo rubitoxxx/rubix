@@ -57,16 +57,17 @@
         const { createClient } = supabase;
         const _supabase = createClient(supabaseUrl, supabaseKey);
 
+        // Elementos do DOM
         const initialView = document.getElementById('initial-view');
         const gameView = document.getElementById('game-view');
         const gameBoard = document.getElementById('game-board');
         const statusDisplay = document.getElementById('status');
         const gameCodeDisplay = document.getElementById('game-code-display');
         const resetButton = document.getElementById('reset-button');
-        // VARIÁVEIS DO RANKING (ADICIONADAS DE VOLTA)
         const rankingBoard = document.getElementById('ranking-board');
         const rankingSection = document.getElementById('ranking-section');
 
+        // Variáveis de estado
         let currentUser = null;
         let currentGame = null;
         let gameSubscription = null;
@@ -85,7 +86,7 @@
                 return;
             }
             currentUser = session.user;
-            await carregarRanking(); // <-- CHAMADA DA FUNÇÃO DE RANKING RESTAURADA
+            await carregarRanking(); // Carrega o ranking assim que a página abre
         });
 
         // --- FUNÇÃO DO RANKING (ADICIONADA DE VOLTA) ---
@@ -95,7 +96,7 @@
                 .from('game_scores')
                 .select(`wins, profiles(username)`)
                 .order('wins', { ascending: false })
-                .limit(5); // Pega os 5 melhores
+                .limit(5);
 
             if (error) {
                 console.error("Erro ao carregar ranking:", error);
@@ -158,7 +159,7 @@
 
         function iniciarVisualizacaoDeJogo() {
             initialView.style.display = 'none';
-            rankingSection.style.display = 'none'; // <-- LÓGICA PARA ESCONDER O RANKING RESTAURADA
+            rankingSection.style.display = 'none'; // Esconde o ranking ao iniciar o jogo
             gameView.style.display = 'block';
             gameCodeDisplay.innerHTML = `Código do Jogo: <span onclick="copiarCodigo()">${currentGame.id}</span> (clique para copiar)`;
             desenharTabuleiro();
@@ -201,11 +202,10 @@
                 resetButton.style.display = 'block';
                 if (currentGame.winner_id) {
                     const venci = currentUser.id === currentGame.winner_id;
-                    statusDisplay.textContent = venci ? 'Você venceu!' : 'Você perdeu!';
+                    statusDisplay.textContent = venci ? 'Você venceu! Pontos registrados!' : 'Você perdeu!';
                     // Se eu venci, chamo a função para registrar os pontos
                     if (venci) {
                         await _supabase.rpc('increment_wins', { user_id_to_update: currentUser.id });
-                        // Não precisa chamar carregarRanking aqui, pois a tela vai recarregar para um novo jogo
                     }
                 } else {
                     statusDisplay.textContent = 'O jogo empatou!';
