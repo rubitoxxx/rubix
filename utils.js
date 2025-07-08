@@ -87,3 +87,22 @@ async function gastarRubixCoins(userId, amount) {
 // Exponha as funções globalmente para serem usadas em outros arquivos
 window.adicionarRubixCoins = adicionarRubixCoins;
 window.gastarRubixCoins = gastarRubixCoins;
+
+document.addEventListener('DOMContentLoaded', () => {
+     const coinAnimationContainer = document.getElementById('coin-animation-container');
+
+     window.addEventListener('rubixcoin-gasta', () => {
+         const coinImage = document.createElement('img');
+         coinImage.src = 'coin.png'; // Certifique-se que 'coin.png' está no mesmo diretório (ou o caminho correto)
+         coinImage.classList.add('coin-animation');
+         coinAnimationContainer.appendChild(coinImage);
+
+         // Remove a imagem após um tempo
+         setTimeout(() => {
+             coinImage.classList.add('fade-out');
+             setTimeout(() => {
+                 coinImage.remove();
+             }, 500); // Espera a transição de fade-out terminar
+         }, 1500); // Tempo que a moeda fica visível (1.5 segundos)
+     });
+ });

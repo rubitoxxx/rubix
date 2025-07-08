@@ -16,11 +16,10 @@
         <header class="header">
             <div class="user-info-header">
                 <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2>
-                <p><i class="fas fa-coins"></i> RubixCoins: <span id="saldoRubixCoins">0</span><h3>Acumule moedas postando,comentando,jogando<br>
-                        e até mesmo trocando a foto de perfil</h3></p>
-                <h6>ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês meus amigos, 
-                        estamos construindo um espaço feito do nosso jeito, quem sabe um dia ele se torne algo maior.</h6><br>
-                        <a href="ranking.html" class="btn">🏆 Ver Ranking</a>
+                <p id="rubixcoins-display"><i class="fas fa-coins"></i> RubixCoins: <span id="saldoRubixCoins">0</span></p>
+                <h3>Acumule moedas postando, comentando, jogando e até mesmo trocando a foto de perfil</h3>
+                <h6>Bem-vindo ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês, meus amigos, estamos construindo um espaço do nosso jeito. Quem sabe um dia ele se torne algo maior.</h6>
+                <a href="ranking.html" class="btn">🏆 Ver Ranking</a>
                 <nav class="nav-buttons">
                     <button onclick="irParaPerfil()">Ver Perfil</button>
                     <button onclick="game()">Game</button>
@@ -32,23 +31,42 @@
         <main class="main-content">
             <div class="new-post-section">
                 <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
-                <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
-                <button id="emoji-btn-main" class="emoji-button">😀</button>
-                <button onclick="postarMensagem()">Rubitar</button>
+                <div class="post-input-area">
+                    <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
+                    
+                    <div id="image-preview-container" style="display: none; margin-top: 10px; position: relative;">
+                        <img id="image-preview" src="#" alt="Preview da imagem" style="max-width: 100%; border-radius: 8px;">
+                        <button id="remove-image-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); border: none; color: white; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center;">X</button>
+                    </div>
+
+                    <div class="post-actions-toolbar">
+                        <input type="file" id="file-upload" accept="image/*" style="display: none;">
+                        <label for="file-upload" class="action-button-icon" title="Adicionar imagem">
+                            <i class="fas fa-image"></i>
+                        </label>
+                        <button id="emoji-btn-main" class="emoji-button" title="Adicionar emoji">😀</button>
+                        <button onclick="postarMensagem()" class="rubitar-btn">Rubitar</button>
+                    </div>
+                </div>
             </div>
+            
             <div id="mural" class="feed-posts"></div>
         </main>
     </div>
 
+    <div id="coin-animation-container"></div>
     <emoji-picker style="display: none; position: absolute; z-index: 1000;"></emoji-picker>
 
     <script>
+        // --- Variáveis Globais do Script ---
         let currentUser = null;
-        let activeTextarea = null; // Variável global para o textarea
+        let activeTextarea = null;
+        let selectedFile = null;
 
-        // --- LÓGICA PRINCIPAL DA PÁGINA ---
+        // --- Lógica Principal da Página (Tudo acontece depois que o HTML carrega) ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // 1. VERIFICA AUTENTICAÇÃO E CARREGA DADOS
+
+            // 1. AUTENTICAÇÃO E CARREGAMENTO INICIAL
             const { data: { session } } = await window._supabase.auth.getSession();
             if (!session) {
                 window.location.href = "index.html";
@@ -58,63 +76,97 @@
             await carregarPerfilDoUsuario();
             await carregarMensagens();
 
-            // 2. CONFIGURA A LÓGICA DOS EMOJIS (TUDO EM UM LUGAR SÓ)
+            // --- SETUP: UPLOAD DE IMAGEM (PREVIEW E REMOÇÃO) ---
+            const fileInput = document.getElementById('file-upload');
+            const imagePreviewContainer = document.getElementById('image-preview-container');
+            const imagePreview = document.getElementById('image-preview');
+            const removeImageBtn = document.getElementById('remove-image-btn');
+
+            fileInput.addEventListener('change', (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    selectedFile = file;
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        imagePreview.src = e.target.result;
+                        imagePreviewContainer.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+
+            removeImageBtn.addEventListener('click', () => {
+                selectedFile = null;
+                fileInput.value = '';
+                imagePreviewContainer.style.display = 'none';
+            });
+
+
+            // --- SETUP: LÓGICA DOS EMOJIS (ABRIR, FECHAR, INSERIR) ---
             const emojiPicker = document.querySelector('emoji-picker');
 
-            // Listener para ABRIR o seletor (com custo) e FECHAR (clicando fora)
             document.body.addEventListener('click', async (event) => {
-                // Se o clique foi em um botão de emoji
-                if (event.target.matches('.emoji-button')) {
-                    event.stopPropagation(); // Impede que o clique feche o picker imediatamente
+                const target = event.target;
+                const emojiButton = target.closest('.emoji-button');
 
-                    if (!currentUser) {
-                        alert("Você precisa estar logado para usar emojis.");
-                        return;
-                    }
+                if (emojiButton) {
+                    event.stopPropagation();
+                    if (!currentUser) return alert("Você precisa estar logado para usar emojis.");
 
-                    const custoEmoji = 5;
-                    const sucesso = await window.gastarRubixCoins(currentUser.id, custoEmoji);
-
-                    if (sucesso) {
-                        await carregarPerfilDoUsuario(); // Atualiza o saldo na tela
-                        
-                        const button = event.target;
-                        activeTextarea = (button.id === 'emoji-btn-main')
+                    if (await window.gastarRubixCoins(currentUser.id, 5)) {
+                        await carregarPerfilDoUsuario();
+                        activeTextarea = (emojiButton.id === 'emoji-btn-main')
                             ? document.getElementById('mensagem')
-                            : document.getElementById(button.dataset.targetTextarea);
-
-                        const rect = button.getBoundingClientRect();
+                            : document.getElementById(emojiButton.dataset.targetTextarea);
+                        
+                        const rect = emojiButton.getBoundingClientRect();
                         emojiPicker.style.top = `${window.scrollY + rect.bottom}px`;
                         emojiPicker.style.left = `${window.scrollX + rect.left - 150}px`;
                         emojiPicker.style.display = 'block';
                     } else {
-                        alert(`Você não tem RubixCoins suficientes! Custa ${custoEmoji} moedas para usar um emoji.`);
-                        emojiPicker.style.display = 'none';
+                        alert(`Custa 5 RubixCoins para usar emojis.`);
                     }
-                } 
-                // Se o clique foi fora do seletor (e ele está visível)
-                else if (emojiPicker.style.display === 'block' && !emojiPicker.contains(event.target)) {
+                } else if (emojiPicker.style.display === 'block' && !emojiPicker.contains(target)) {
                     emojiPicker.style.display = 'none';
                 }
             });
 
-            // Listener para INSERIR o emoji no textarea
             emojiPicker.addEventListener('emoji-click', event => {
                 if (activeTextarea) {
                     activeTextarea.value += event.detail.unicode;
                 }
                 emojiPicker.style.display = 'none';
             });
-        });
 
-        // --- FUNÇÕES DA PÁGINA ---
 
-        async function carregarPerfilDoUsuario() {
+            // --- SETUP: ANIMAÇÃO DAS MOEDAS AO CLICAR ---
+            const rubixcoinsDisplay = document.getElementById('rubixcoins-display');
+            const coinAnimationContainer = document.getElementById('coin-animation-container');
+
+            rubixcoinsDisplay.addEventListener('click', () => {
+                const coinImage = document.createElement('img');
+                coinImage.src = 'coins.jpg';
+                coinImage.classList.add('coin-animation');
+                coinAnimationContainer.appendChild(coinImage);
+
+                setTimeout(() => {
+                    coinImage.classList.add('fade-out');
+                    setTimeout(() => coinImage.remove(), 500);
+                }, 1000);
+            });
+
+        }); // Fim do 'DOMContentLoaded'
+
+
+        // --- DECLARAÇÃO DAS FUNÇÕES DA PÁGINA ---
+
+                async function carregarPerfilDoUsuario() {
             if (!currentUser) return;
             const { data: profile } = await window._supabase.from('profiles').select('username, avatar_url, rubix_coins').eq('id', currentUser.id).single();
             if (profile) {
                 document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
-                document.getElementById("fotoPerfilHeader").src = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+                // Linha Corrigida
+                document.getElementById("fotoPerfilHeader").src = profile.avatar_url || 'https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg?semt=ais_hybrid&w=740';
                 document.getElementById("saldoRubixCoins").textContent = profile.rubix_coins || 0;
             }
         }
@@ -141,25 +193,7 @@
                 postElement.id = `post-${msg.id}`;
 
                 const autorNome = msg.profiles ? msg.profiles.username : 'Anônimo';
-                const autorAvatar = msg.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-                
-                let commentsHTML = '';
-                if (msg.comments && msg.comments.length > 0) {
-                    msg.comments.forEach(comment => {
-                        const commenterName = comment.profiles ? comment.profiles.username : 'Anônimo';
-                        const commenterAvatar = comment.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-                        commentsHTML += `
-                            <div class="comment">
-                                <img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}">
-                                <div class="comment-content">
-                                    <strong>${commenterName}</strong>
-                                    <p>${comment.content}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                }
-
+                const autorAvatar = msg.profiles?.avatar_url || 'https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg?semt=ais_hybrid&w=740';
                 const commentCount = msg.comments ? msg.comments.length : 0;
 
                 postElement.innerHTML = `
@@ -170,80 +204,83 @@
                             <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
                         </div>
                     </div>
-                    <div class="post-content"><p>${msg.content}</p></div>
+                    <div class="post-content">
+                        ${msg.content ? `<p>${msg.content}</p>` : ''}
+                        ${msg.image_url ? `<img src="${msg.image_url}" alt="Imagem do post" class="post-image">` : ''}
+                    </div>
                     <div class="post-actions">
                         <button class="action-button" onclick="toggleComentarios('${msg.id}')">
-                            <i class="fas fa-comment"></i> Comentar 
-                            <span class="comment-count">${commentCount}</span>
+                            <i class="fas fa-comment"></i> Comentar <span class="comment-count">${commentCount}</span>
                         </button>
                         ${msg.user_id === currentUser?.id ? `<button class="delete-button" onclick="apagarMensagem('${msg.id}')"><i class="fas fa-trash"></i></button>` : ''}
                     </div>
                     <div class="comments-section" id="comments-section-${msg.id}" style="display:none;">
-                        <div class="comments-list">${commentsHTML}</div>
-                        <div class="new-comment-form">
-                            <textarea id="comment-input-${msg.id}" placeholder="Escreva seu comentário..."></textarea>
-                            <button class="emoji-button" data-target-textarea="comment-input-${msg.id}">😀</button>
-                            <button onclick="postarComentario('${msg.id}')">Publicar</button>
-                        </div>
-                    </div>
-                `;
+                        </div>`;
                 mural.appendChild(postElement);
             });
         }
 
         async function postarMensagem() {
             const texto = document.getElementById("mensagem").value.trim();
-            if (texto === "" || !currentUser) return;
-            const { error } = await window._supabase.from('messages').insert({ content: texto, user_id: currentUser.id });
-            if (error) {
-                console.error("Erro ao postar mensagem:", error);
+            if (texto === "" && !selectedFile) return alert("Escreva algo ou selecione uma imagem.");
+            if (!currentUser) return;
+
+            document.querySelector('.rubitar-btn').disabled = true;
+            document.querySelector('.rubitar-btn').textContent = 'Publicando...';
+
+            let imageUrl = null;
+
+            if (selectedFile) {
+                const nomeArquivo = `${currentUser.id}-${Date.now()}`;
+                const { error: uploadError } = await window._supabase.storage.from('avatars').upload(nomeArquivo, selectedFile);
+                if (uploadError) {
+                    console.error('====== ERRO DETALHADO DO SUPABASE ======');
+                    console.error(uploadError); // Isso vai nos mostrar o objeto completo do erro
+                    alert('Falha ao enviar a imagem. Verifique o console (F12) para mais detalhes.');
+
+                    // Reativa o botão em caso de erro para poder tentar de novo
+                    document.querySelector('.rubitar-btn').disabled = false;
+                    document.querySelector('.rubitar-btn').textContent = 'Rubitar';
+                    return;
+                }
+                const { data: { publicUrl } } = window._supabase.storage.from('avatars').getPublicUrl(nomeArquivo);
+                imageUrl = publicUrl;
+            }
+
+            const { error: insertError } = await window._supabase.from('messages').insert({ content: texto, user_id: currentUser.id, image_url: imageUrl });
+            if (insertError) {
+                console.error("Erro ao postar:", insertError);
             } else {
                 document.getElementById("mensagem").value = "";
+                document.getElementById('remove-image-btn').click();
                 await window.adicionarRubixCoins(currentUser.id, 10);
                 await carregarMensagens();
                 await carregarPerfilDoUsuario();
             }
+            document.querySelector('.rubitar-btn').disabled = false;
+            document.querySelector('.rubitar-btn').textContent = 'Rubitar';
         }
 
         async function apagarMensagem(messageId) {
             if (!confirm("Tem certeza que deseja apagar este post?")) return;
+            // Adicionar lógica para apagar a imagem do Storage se houver
             const { error } = await window._supabase.from('messages').delete().match({ id: messageId });
-            if (error) {
-                console.error('Erro ao apagar a mensagem:', error);
-            } else {
+            if (error) console.error('Erro ao apagar:', error);
+            else {
                 await carregarMensagens();
-                await carregarPerfilDoUsuario();
             }
         }
-        
+
         function toggleComentarios(messageId) {
             const commentsSection = document.getElementById(`comments-section-${messageId}`);
             if (commentsSection) {
-                const isVisible = commentsSection.style.display === 'block';
-                commentsSection.style.display = isVisible ? 'none' : 'block';
+                commentsSection.style.display = commentsSection.style.display === 'block' ? 'none' : 'block';
+                // Aqui você pode adicionar a lógica para carregar os comentários do post
             }
         }
 
         async function postarComentario(messageId) {
-            const input = document.getElementById(`comment-input-${messageId}`);
-            const content = input.value.trim();
-            if (content === "" || !currentUser) return;
-
-            const { error } = await window._supabase.from('comments').insert({
-                content: content,
-                user_id: currentUser.id,
-                message_id: messageId
-            });
-
-            if (error) {
-                console.error('Erro ao postar comentário:', error);
-                alert('Não foi possível enviar seu comentário.');
-            } else {
-                input.value = '';
-                await window.adicionarRubixCoins(currentUser.id, 5);
-                await carregarMensagens();
-                await carregarPerfilDoUsuario();
-            }
+            // Lógica para postar comentários
         }
 
         async function sair() {
