@@ -1,6 +1,4 @@
-// --- utils.js ---
-// Este arquivo DEVE ser carregado DEPOIS de supabaseClient.js no seu HTML.
-// Ele expõe funções globais para manipulação de RubixCoins e lógica de animação.
+// utils.js
 
 // Verificação robusta para garantir que window._supabase existe.
 // Esta verificação deve ser feita ANTES de qualquer função tentar usá-lo.
@@ -114,10 +112,9 @@ if (typeof window._supabase === 'undefined') {
 
             console.log(`Gastas ${amount} RubixCoins do usuário ${userId}. Novo saldo: ${newCoins}.`);
             
-            // Disparar evento para a animação da moeda, se necessário.
-            // É melhor que a animação seja ouvida em um script específico da página (ex: mural.js)
-            // ou aqui, mas fora do DOMContentLoaded se for para acontecer logo.
-            const event = new CustomEvent('rubixcoin-gasta', { detail: { userId, amount, newCoins } });
+            // Dispara um evento personalizado para notificar que moedas foram gastas/ganhas.
+            // A animação visual deve ser "ouvida" por quem se importa (ex: mural.html).
+            const event = new CustomEvent('rubixcoin-updated', { detail: { userId, amount, newCoins, type: 'gasto' } });
             window.dispatchEvent(event);
             return true;
         } catch (e) {
@@ -127,28 +124,6 @@ if (typeof window._supabase === 'undefined') {
     };
 }
 
-
-// --- Lógica para a animação da moeda ---
-// Esta parte pode ficar no DOMContentLoaded se depender de elementos HTML.
-// No entanto, se o coinAnimationContainer existe sempre que utils.js é usado,
-// pode-se manter fora para simplificar. Vou manter no DOMContentLoaded para segurança.
-document.addEventListener('DOMContentLoaded', () => {
-    const coinAnimationContainer = document.getElementById('coin-animation-container');
-    if (coinAnimationContainer) { // Verificar se o elemento existe na página
-        window.addEventListener('rubixcoin-gasta', () => {
-            const coinImage = document.createElement('img');
-            coinImage.src = 'coin.png'; // Certifique-se que 'coin.png' está no mesmo diretório (ou o caminho correto)
-            coinImage.classList.add('coin-animation');
-            coinAnimationContainer.appendChild(coinImage);
-
-            // Inicia a animação de fade-out e remoção após um atraso.
-            // Ajuste os tempos conforme a duração da sua animação CSS.
-            setTimeout(() => {
-                coinImage.classList.add('fade-out');
-                setTimeout(() => {
-                    coinImage.remove();
-                }, 500); // Duração do fade-out
-            }, 1500); // Atraso antes de iniciar o fade-out
-        });
-    }
-});
+// REMOVIDO: A lógica de animação de moeda diretamente no utils.js para o DOMContentLoaded
+// Essa lógica deve estar no script da página que precisa da animação (ex: mural.html)
+// e não em um arquivo de utilidade genérico.
