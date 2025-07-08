@@ -61,8 +61,8 @@ const charmanderAtaques = [
 ];
 
 const pikachuAtaques = [
-    { nome: "Choque do Trovão", dano: 25, tipo: "Elétrico", gif: "https://i.pinimg.com/originals/f1/b6/c7/f1b6c7591a909b12eda1d980fe83a16a.gif" },
-    { nome: "Cauda de Ferro", dano: 18, tipo: "Normal", gif: "https://i.gifer.com/origin/c9/c94b293881457813a364834863076c11.gif" }
+    { nome: "Choque do Trovão", dano: 25, tipo: "Elétrico", gif: "https://media1.tenor.com/m/qF-2UrMmvXkAAAAC/pikachu-pokemon.gif" },
+    { nome: "Cauda de Ferro", dano: 18, tipo: "Normal", gif: "https://media1.tenor.com/m/qF-2UrMmvXkAAAAC/pikachu-pokemon.gif" }
 ];
 
 // Inicializando os Pokémons com suas listas de ataques
