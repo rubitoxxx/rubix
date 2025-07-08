@@ -14,11 +14,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ground = document.getElementById('ground');
     const mobileControls = document.getElementById('mobile-controls');
 
-    // --- Configurações do Supabase ---
-    const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
-    const { createClient } = supabase;
-    const _supabase = createClient(supabaseUrl, supabaseKey);
+    // --- REMOVA ESTE BLOCO! AS CONFIGURAÇÕES DO SUPABASE DEVEM ESTAR EM 'utils.js' OU 'config.js'
+    // const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
+    // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtX-tL0';
+    // const { createClient } = supabase;
+    // const _supabase = createClient(supabaseUrl, supabaseKey);
+    // --- FIM DO BLOCO A SER REMOVIDO ---
 
     // --- Variáveis de Estado do Jogo ---
     let currentUser = null;
@@ -48,12 +49,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     };
 
     // Verificação de sessão de usuário no início
-    const { data: { session } } = await _supabase.auth.getSession();
+    // Garanta que window._supabase esteja definido em utils.js
+    const { data: { session } } = await window._supabase.auth.getSession(); 
     if (!session) {
         window.location.href = 'index.html';
         return;
     }
-    currentUser = session.user;
+    currentUser = session.user; 
+    window.currentUser = currentUser; // Torna o usuário atual globalmente acessível, se necessário
 
     // --- LÓGICA DE CONTROLE DE TELAS ---
     function showMainMenu() {
@@ -69,8 +72,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainMenu.classList.add('hidden');
         gameContainer.classList.remove('hidden');
         startGame();
-        // A visibilidade dos controles mobile é controlada principalmente pelo CSS
-        // mas esta linha garante que eles sejam mostrados se o CSS permitir
         if (window.innerWidth <= 768) {
             mobileControls.classList.remove('hidden');
         } else {
@@ -85,7 +86,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadMenuRanking() {
         rankingBoardMenu.innerHTML = '<p>Carregando ranking...</p>';
 
-        const { data, error } = await _supabase
+        // Use window._supabase aqui também, ou apenas _supabase se você tiver feito const _supabase = window._supabase;
+        const { data, error } = await window._supabase
             .from('runner_scores')
             .select('score, profiles(username)')
             .order('score', { ascending: false })
@@ -117,7 +119,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function saveScore(finalScore) {
         if (!currentUser) return;
 
-        const { error } = await _supabase
+        // Use window._supabase aqui também
+        const { error } = await window._supabase
             .from('runner_scores')
             .insert([{ user_id: currentUser.id, score: finalScore }]);
 
@@ -131,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ==========================================================
     // --- LÓGICA PRINCIPAL DO JOGO ---
     // ==========================================================
-
     function startGame() {
         gameState = 'playing';
         score = 0;
@@ -190,7 +192,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         obstacle.src = 'capivara.png';
         obstacle.classList.add('obstacle');
         obstacle.style.right = '-50px';
-        obstacle.style.bottom = `${groundHeight - 2}px`; // Garante que o obstáculo nasça na altura correta do chão
+        obstacle.style.bottom = `${groundHeight - 2}px`; 
         gameContainer.appendChild(obstacle);
 
         const baseInterval = 1800;
@@ -200,13 +202,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function moveObstacles() {
-        // Obtém a largura do #game-container para que os obstáculos sumam ao sair da tela do jogo
         const gameContainerWidth = gameContainer.offsetWidth;
 
         document.querySelectorAll('.obstacle').forEach(obstacle => {
             let obsRight = parseFloat(obstacle.style.right);
             obstacle.style.right = `${obsRight + gameSpeed}px`;
-            // Verifica se o obstáculo saiu da tela do jogo (à esquerda)
             if (obsRight > gameContainerWidth + obstacle.offsetWidth) {
                 obstacle.remove();
             }
@@ -226,7 +226,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const charRect = character.getBoundingClientRect();
         document.querySelectorAll('.obstacle').forEach(obstacle => {
             const obsRect = obstacle.getBoundingClientRect();
-            // Lógica de colisão
             if (charRect.right > obsRect.left &&
                 charRect.left < obsRect.right &&
                 charRect.bottom > obsRect.top &&
@@ -235,7 +234,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
     }
-
+    
     async function handleGameOver() {
         if (gameState === 'gameOver') return;
         gameState = 'gameOver';
@@ -250,6 +249,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         mobileControls.classList.add('hidden');
 
         await saveScore(score);
+
+        // Certifique-se de que 'adicionarRubixCoins' está definida em 'utils.js'
+        if (currentUser && typeof adicionarRubixCoins === 'function') {
+            const coinsEarned = 10; 
+            await adicionarRubixCoins(currentUser.id, coinsEarned);
+            console.log(`Você ganhou ${coinsEarned} RubixCoins por jogar Corrida da Lisa!`);
+        }
     }
 
     // --- Eventos de Input ---
@@ -273,9 +279,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     // --- Início do Script ---
-    // Ajusta a posição inicial dos elementos ao carregar a página e ao redimensionar
     window.addEventListener('resize', setGroundAndCharacterPosition);
-    setGroundAndCharacterPosition(); // Chama a função uma vez no carregamento inicial
+    setGroundAndCharacterPosition(); 
 
     showMainMenu();
 });

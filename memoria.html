@@ -6,7 +6,10 @@
     <title>Jogo da Memória - Rubix</title>
     <link rel="stylesheet" href="memoria.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- Carregue o Supabase e utilitários APENAS UMA VEZ no <head> -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script>
 </head>
 <body>
     <div class="container">
@@ -29,12 +32,12 @@
         <div id="online-lobby-view" style="display: none;">
             <h2>Modo Online</h2>
             <div id="create-game-section">
-                 <button class="btn" onclick="criarNovoJogoMemoria()">Criar Novo Jogo</button>
+                   <button class="btn" onclick="criarNovoJogoMemoria()">Criar Novo Jogo</button>
             </div>
             <hr style="margin: 20px 0;">
             <div id="join-game-section">
                 <input type="text" id="game-code-input" placeholder="Cole o código do jogo aqui">
-                 <button class="btn secondary" onclick="entrarEmJogoMemoria()">Entrar no Jogo</button>
+                   <button class="btn secondary" onclick="entrarEmJogoMemoria()">Entrar no Jogo</button>
             </div>
             <button class="btn secondary" style="margin-top: 20px;" onclick="voltarParaMenuPrincipal()">Voltar</button>
         </div>
@@ -53,6 +56,8 @@
         </div>
     </div>
 
+    <!-- Carregue o script principal do jogo no final do body -->
+    <!-- Ele precisa que os elementos HTML já existam para interagir com eles -->
     <script src="memoria.js"></script>
 </body>
 </html>

@@ -1,199 +1,220 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mural Rubix</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mural Rubix</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script>
 </head>
 <body>
-  <div class="container">
-    <header class="header">
-      <div class="user-info-header">
-        <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2>
-        <h6>ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês meus amigos, estamos construindo um espaço feito do nosso jeito, quem sabe um dia ele se torne algo maior.</h6><br>
-        <nav class="nav-buttons">
-          <button onclick="irParaPerfil()">Ver Perfil</button>
-          <button onclick="game()">Game</button>
-          <button onclick="sair()">Sair</button>
-        </nav>
-      </div>
-    </header>
+    <div class="container">
+        <header class="header">
+            <div class="user-info-header">
+                <h2>Olá, <span id="nomeUsuario">Carregando...</span>!</h2>
+                <p><i class="fas fa-coins"></i> RubixCoins: <span id="saldoRubixCoins">0</span><h3>Acumule moedas postando,comentando,jogando<br>
+                    e até mesmo trocando a foto de perfil</h3></p>
+                <h6>ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês meus amigos, estamos construindo um espaço feito do nosso jeito, quem sabe um dia ele se torne algo maior.</h6><br>
+                <nav class="nav-buttons">
+                    <button onclick="irParaPerfil()">Ver Perfil</button>
+                    <button onclick="game()">Game</button>
+                    <button onclick="sair()">Sair</button>
+                </nav>
+            </div>
+        </header>
 
-    <main class="main-content">
-      <div class="new-post-section">
-        <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
-        <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
-        <button onclick="postarMensagem()">Rubitar</button>
-      </div>
-      <div id="mural" class="feed-posts"></div>
-    </main>
-  </div>
+        <main class="main-content">
+            <div class="new-post-section">
+                <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
+                <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
+                <button onclick="postarMensagem()">Rubitar</button>
+            </div>
+            <div id="mural" class="feed-posts"></div>
+        </main>
+    </div>
 
-  <script>
-    // --- 1. INICIALIZAÇÃO DO SUPABASE ---
-    const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
-    const { createClient } = supabase;
-    const _supabase = createClient(supabaseUrl, supabaseKey);
-    let currentUser = null;
-
-    // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
-    document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session } } = await _supabase.auth.getSession();
-      if (!session) {
-        window.location.href = "index.html";
-        return;
-      }
-      currentUser = session.user;
-      await carregarPerfilDoUsuario();
-      await carregarMensagens();
-    });
-
-    async function carregarPerfilDoUsuario() {
-        if (!currentUser) return;
-        const { data: profile } = await _supabase.from('profiles').select('username, avatar_url').eq('id', currentUser.id).single();
-        if (profile) {
-            document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
-            document.getElementById("fotoPerfilHeader").src = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-        }
-    }
-
-    async function carregarMensagens() {
-        const mural = document.getElementById("mural");
-        mural.innerHTML = "<p>Carregando mural...</p>";
+    <script>
+        // Não é mais necessário inicializar o Supabase aqui, utils.js já faz isso.
+        // const supabaseUrl = '...';
+        // const supabaseKey = '...';
+        // const { createClient } = supabase;
+        // const _supabase = createClient(supabaseUrl, supabaseKey);
         
-        const { data: messages, error } = await _supabase
-            .from('messages')
-            .select(`
-                *,
-                profiles (username, avatar_url),
-                comments ( *, profiles (username, avatar_url) )
-            `)
-            .order('created_at', { ascending: false });
+        let currentUser = null; // Mantenha esta declaração aqui, pois `currentUser` é específico desta página
 
-        if (error) {
-            console.error("Erro ao carregar mensagens:", error);
-            mural.innerHTML = "<p>Não foi possível carregar as mensagens.</p>";
-            return;
-        }
-        mural.innerHTML = "";
-        
-        messages.forEach(msg => {
-            const postElement = document.createElement("div");
-            postElement.className = "tweet-post";
-            postElement.id = `post-${msg.id}`;
+        // Não é mais necessário definir adicionarRubixCoins aqui, utils.js já faz isso e a expõe globalmente.
+        // async function adicionarRubixCoins(userId, amount) { ... }
 
-            const autorNome = msg.profiles ? msg.profiles.username : 'Anônimo';
-            const autorAvatar = msg.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-            
-            let commentsHTML = '';
-            if (msg.comments && msg.comments.length > 0) {
-                msg.comments.forEach(comment => {
-                    const commenterName = comment.profiles ? comment.profiles.username : 'Anônimo';
-                    const commenterAvatar = comment.profiles?.avatar_url || "caminho/para/avatar_padrao.jpg";
-                    commentsHTML += `
-                        <div class="comment">
-                            <img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}">
-                            <div class="comment-content">
-                                <strong>${commenterName}</strong>
-                                <p>${comment.content}</p>
-                            </div>
-                        </div>
-                    `;
-                });
+        // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Use window._supabase para acessar a instância global
+            const { data: { session } } = await window._supabase.auth.getSession();
+            if (!session) {
+                window.location.href = "index.html";
+                return;
             }
-
-            // --- LÓGICA DO CONTADOR ADICIONADA AQUI ---
-            const commentCount = msg.comments ? msg.comments.length : 0;
-
-            postElement.innerHTML = `
-                <div class="post-header">
-                    <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
-                    <div class="post-info">
-                        <strong class="post-author">${autorNome}</strong>
-                        <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
-                    </div>
-                </div>
-                <div class="post-content"><p>${msg.content}</p></div>
-                <div class="post-actions">
-                    <button class="action-button" onclick="toggleComentarios('${msg.id}')">
-                        <i class="fas fa-comment"></i> Comentar 
-                        <span class="comment-count">${commentCount}</span>
-                    </button>
-                    ${msg.user_id === currentUser?.id ? `<button class="delete-button" onclick="apagarMensagem('${msg.id}')"><i class="fas fa-trash"></i></button>` : ''}
-                </div>
-                <div class="comments-section" id="comments-section-${msg.id}" style="display:none;">
-                    <div class="comments-list">${commentsHTML}</div>
-                    <div class="new-comment-form">
-                        <textarea id="comment-input-${msg.id}" placeholder="Escreva seu comentário..."></textarea>
-                        <button onclick="postarComentario('${msg.id}')">Publicar</button>
-                    </div>
-                </div>
-            `;
-            mural.appendChild(postElement);
-        });
-    }
-
-    async function postarMensagem() {
-        const texto = document.getElementById("mensagem").value.trim();
-        if (texto === "" || !currentUser) return;
-        const { error } = await _supabase.from('messages').insert({ content: texto, user_id: currentUser.id });
-        if (error) {
-            console.error("Erro ao postar mensagem:", error);
-        } else {
-            document.getElementById("mensagem").value = "";
+            currentUser = session.user;
+            await carregarPerfilDoUsuario();
             await carregarMensagens();
-        }
-    }
-
-    async function apagarMensagem(messageId) {
-        if (!confirm("Tem certeza que deseja apagar este post?")) return;
-        const { error } = await _supabase.from('messages').delete().match({ id: messageId });
-        if (error) {
-            console.error('Erro ao apagar a mensagem:', error);
-        } else {
-            await carregarMensagens();
-        }
-    }
-    
-    function toggleComentarios(messageId) {
-        const commentsSection = document.getElementById(`comments-section-${messageId}`);
-        if (commentsSection) {
-            const isVisible = commentsSection.style.display === 'block';
-            commentsSection.style.display = isVisible ? 'none' : 'block';
-        }
-    }
-
-    async function postarComentario(messageId) {
-        const input = document.getElementById(`comment-input-${messageId}`);
-        const content = input.value.trim();
-        if (content === "" || !currentUser) return;
-
-        const { error } = await _supabase.from('comments').insert({
-            content: content,
-            user_id: currentUser.id,
-            message_id: messageId
         });
 
-        if (error) {
-            console.error('Erro ao postar comentário:', error);
-            alert('Não foi possível enviar seu comentário.');
-        } else {
-            input.value = '';
-            await carregarMensagens();
+        async function carregarPerfilDoUsuario() {
+            if (!currentUser) return;
+            // Use window._supabase
+            const { data: profile } = await window._supabase.from('profiles').select('username, avatar_url, rubix_coins').eq('id', currentUser.id).single();
+            if (profile) {
+                document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
+                document.getElementById("fotoPerfilHeader").src = profile.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+                document.getElementById("saldoRubixCoins").textContent = profile.rubix_coins || 0;
+            }
         }
-    }
 
-    async function sair() {
-        await _supabase.auth.signOut();
-        window.location.href = "index.html";
-    }
-    function irParaPerfil() { window.location.href = "perfil.html"; }
-    function game() { window.location.href = "pggame.html"; }
-  </script>
+        async function carregarMensagens() {
+            const mural = document.getElementById("mural");
+            mural.innerHTML = "<p>Carregando mural...</p>";
+            
+            // Use window._supabase
+            const { data: messages, error } = await window._supabase
+                .from('messages')
+                .select(`
+                    *,
+                    profiles (username, avatar_url),
+                    comments ( *, profiles (username, avatar_url) )
+                `)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error("Erro ao carregar mensagens:", error);
+                mural.innerHTML = "<p>Não foi possível carregar as mensagens.</p>";
+                return;
+            }
+            mural.innerHTML = "";
+            
+            messages.forEach(msg => {
+                const postElement = document.createElement("div");
+                postElement.className = "tweet-post";
+                postElement.id = `post-${msg.id}`;
+
+                const autorNome = msg.profiles ? msg.profiles.username : 'Anônimo';
+                const autorAvatar = msg.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+                
+                let commentsHTML = '';
+                if (msg.comments && msg.comments.length > 0) {
+                    msg.comments.forEach(comment => {
+                        const commenterName = comment.profiles ? comment.profiles.username : 'Anônimo';
+                        const commenterAvatar = comment.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
+                        commentsHTML += `
+                            <div class="comment">
+                                <img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}">
+                                <div class="comment-content">
+                                    <strong>${commenterName}</strong>
+                                    <p>${comment.content}</p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                const commentCount = msg.comments ? msg.comments.length : 0;
+
+                postElement.innerHTML = `
+                    <div class="post-header">
+                        <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
+                        <div class="post-info">
+                            <strong class="post-author">${autorNome}</strong>
+                            <span class="post-date">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+                        </div>
+                    </div>
+                    <div class="post-content"><p>${msg.content}</p></div>
+                    <div class="post-actions">
+                        <button class="action-button" onclick="toggleComentarios('${msg.id}')">
+                            <i class="fas fa-comment"></i> Comentar 
+                            <span class="comment-count">${commentCount}</span>
+                        </button>
+                        ${msg.user_id === currentUser?.id ? `<button class="delete-button" onclick="apagarMensagem('${msg.id}')"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>
+                    <div class="comments-section" id="comments-section-${msg.id}" style="display:none;">
+                        <div class="comments-list">${commentsHTML}</div>
+                        <div class="new-comment-form">
+                            <textarea id="comment-input-${msg.id}" placeholder="Escreva seu comentário..."></textarea>
+                            <button onclick="postarComentario('${msg.id}')">Publicar</button>
+                        </div>
+                    </div>
+                `;
+                mural.appendChild(postElement);
+            });
+        }
+
+        async function postarMensagem() {
+            const texto = document.getElementById("mensagem").value.trim();
+            if (texto === "" || !currentUser) return;
+            // Use window._supabase
+            const { error } = await window._supabase.from('messages').insert({ content: texto, user_id: currentUser.id });
+            if (error) {
+                console.error("Erro ao postar mensagem:", error);
+            } else {
+                document.getElementById("mensagem").value = "";
+                // Use window.adicionarRubixCoins
+                await window.adicionarRubixCoins(currentUser.id, 10);
+                await carregarMensagens();
+                await carregarPerfilDoUsuario();
+            }
+        }
+
+        async function apagarMensagem(messageId) {
+            if (!confirm("Tem certeza que deseja apagar este post?")) return;
+            // Use window._supabase
+            const { error } = await window._supabase.from('messages').delete().match({ id: messageId });
+            if (error) {
+                console.error('Erro ao apagar a mensagem:', error);
+            } else {
+                await carregarMensagens();
+                await carregarPerfilDoUsuario();
+            }
+        }
+        
+        function toggleComentarios(messageId) {
+            const commentsSection = document.getElementById(`comments-section-${messageId}`);
+            if (commentsSection) {
+                const isVisible = commentsSection.style.display === 'block';
+                commentsSection.style.display = isVisible ? 'none' : 'block';
+            }
+        }
+
+        async function postarComentario(messageId) {
+            const input = document.getElementById(`comment-input-${messageId}`);
+            const content = input.value.trim();
+            if (content === "" || !currentUser) return;
+
+            // Use window._supabase
+            const { error } = await window._supabase.from('comments').insert({
+                content: content,
+                user_id: currentUser.id,
+                message_id: messageId
+            });
+
+            if (error) {
+                console.error('Erro ao postar comentário:', error);
+                alert('Não foi possível enviar seu comentário.');
+            } else {
+                input.value = '';
+                // Use window.adicionarRubixCoins
+                await window.adicionarRubixCoins(currentUser.id, 5);
+                await carregarMensagens();
+                await carregarPerfilDoUsuario();
+            }
+        }
+
+        async function sair() {
+            // Use window._supabase
+            await window._supabase.auth.signOut();
+            window.location.href = "index.html";
+        }
+        function irParaPerfil() { window.location.href = "perfil.html"; }
+        function game() { window.location.href = "pggame.html"; }
+    </script>
 </body>
 </html>

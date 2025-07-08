@@ -1,8 +1,12 @@
-// --- INICIALIZAÇÃO E VARIÁVEIS GLOBAIS ---
-const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
-const { createClient } = supabase;
-const _supabase = createClient(supabaseUrl, supabaseKey);
+// --- FUNÇÕES DE INICIALIZAÇÃO GERAL ---
+document.addEventListener('DOMContentLoaded', async () => {
+    // Certifique-se que o _supabase está acessível via window._supabase do utils.js
+    const { data: { session } } = await window._supabase.auth.getSession(); // Use window._supabase
+    if (!session) { window.location.href = 'index.html'; return; }
+    currentUser = session.user;
+    window.currentUser = currentUser; // Opcional: torne-o global também para outros fins se precisar
+    await carregarRankingMemoria();
+});
 
 const mainMenu = document.getElementById('main-menu-view');
 const onlineLobby = document.getElementById('online-lobby-view');
@@ -18,19 +22,19 @@ const gameCodeDisplay = document.getElementById('game-code-display');
 const movesDisplay = document.getElementById('game-moves');
 const timerDisplay = document.getElementById('game-timer');
 
-let currentUser = null;
+let currentUser = null; // Apenas uma declaração. A atribuição é feita no DOMContentLoaded
 let gameMode = null; // 'computer' ou 'online'
 
 // --- Variáveis para Jogo da Memória ---
 const imagePaths = [
     'https://i.pinimg.com/736x/52/64/b0/5264b06cb12da2ab22134399699e462d.jpg',
-    'https://i.pinimg.com/736x/41/80/a6/4180a6b284fdefecaa1e54d6850020b8.jpg',
-    'https://i.pinimg.com/736x/46/7b/1b/467b1bae91d79ac51edeb7d8af5336a0.jpg',
-    'https://i.pinimg.com/736x/29/3d/38/293d38e5012912c311c365c29124b696.jpg',
-    'https://i.pinimg.com/736x/a2/5e/83/a25e83405b3d5613b2eef67c5c3e4bc8.jpg',
-    'https://i.pinimg.com/736x/f8/22/54/f822548760b95016414d7f42c93c8555.jpg',
-    'https://i.pinimg.com/736x/af/19/1e/af191e86d445a2c19319763dee7b2db0.jpg',
-    'https://i.pinimg.com/736x/a9/96/86/a996860ec5c13cc689f01430c5d345a6.jpg',
+    'https://i.pinimg.com/73x/41/80/a6/4180a6b284fdefecaa1e54d6850020b8.jpg',
+    'https://i.pinimg.com/73x/46/7b/1b/467b1bae91d79ac51edeb7d8af5336a0.jpg',
+    'https://i.pinimg.com/73x/29/3d/38/293d38e5012912c311c365c29124b696.jpg',
+    'https://i.pinimg.com/73x/a2/5e/83/a25e83405b3d5613b2eef67c5c3e4bc8.jpg',
+    'https://i.pinimg.com/73x/f8/22/54/f822548760b95016414d7f42c93c8555.jpg',
+    'https://i.pinimg.com/73x/af/19/1e/af191e86d445a2c19319763dee7b2db0.jpg',
+    'https://i.pinimg.com/73x/a9/96/86/a996860ec5c13cc689f01430c5d345a6.jpg',
 ];
 
 // --- Variáveis de Estado de Jogo ---
@@ -47,13 +51,14 @@ let localMoves = 0;
 let localTimer = 0;
 let localTimerInterval = null;
 
-// --- FUNÇÕES DE INICIALIZAÇÃO GERAL ---
-document.addEventListener('DOMContentLoaded', async () => {
-    const { data: { session } } = await _supabase.auth.getSession();
-    if (!session) { window.location.href = 'index.html'; return; } 
-    currentUser = session.user;
-    await carregarRankingMemoria();
-});
+// REMOVIDO: Segundo document.addEventListener('DOMContentLoaded').
+// Assegure-se que o usuário esteja logado e carregue o ranking
+// document.addEventListener('DOMContentLoaded', async () => {
+//     const { data: { session } } = await _supabase.auth.getSession(); // ERRO AQUI: _supabase não definido
+//     if (!session) { window.location.href = 'index.html'; return; } 
+//     currentUser = session.user;
+//     await carregarRankingMemoria();
+// });
 
 function selecionarModo(mode) {
     gameMode = mode;
@@ -80,7 +85,8 @@ function voltarParaMenuPrincipal() {
 
 // ranking
 async function carregarRankingMemoria() {
-    const { data, error } = await _supabase
+    // Usar window._supabase
+    const { data, error } = await window._supabase
         .from('memory_scores')
         .select('time_in_seconds, moves, profiles(username)')
         .order('time_in_seconds', { ascending: true })
@@ -101,7 +107,7 @@ async function carregarRankingMemoria() {
     data.forEach((score, index) => {
         const playerUsername = score.profiles ? score.profiles.username : 'Anônimo';
         const listItem = document.createElement('li');
-        listItem.innerHTML = `<span>#${index + 1} ${playerUsername}</span> <span>${score.time_in_seconds}s / ${score.moves} mov.</span>`; // CORRIGIDO
+        listItem.innerHTML = `<span>#${index + 1} ${playerUsername}</span> <span>${score.time_in_seconds}s / ${score.moves} mov.</span>`; 
         rankingList.appendChild(listItem);
     });
     rankingBoard.innerHTML = '';
@@ -242,7 +248,20 @@ async function endMemoryGameLocal() {
     statusDisplay.textContent = `Parabéns! Você completou em ${localMoves} movimentos e ${localTimer} segundos!`;
     await registrarRecordeMemoria(localTimer, localMoves);
     resetButton.textContent = 'Jogar Novamente';
-    await carregarRankingMemoria(); 
+    await carregarRankingMemoria();
+
+    // --- NOVO: RECOMPENSA DE RUBIXCOINS POR JOGO OFFLINE CONCLUÍDO ---
+    if (currentUser) {
+        const coinsEarned = 20; // Exemplo: 20 RubixCoins por completar o jogo offline
+        // Usar window.adicionarRubixCoins
+        if (typeof window.adicionarRubixCoins === 'function') {
+            await window.adicionarRubixCoins(currentUser.id, coinsEarned);
+            console.log(`Você ganhou ${coinsEarned} RubixCoins por completar o Jogo da Memória (offline)!`);
+        } else {
+            console.warn("Função adicionarRubixCoins não disponível no objeto window.");
+        }
+    }
+    // --- FIM DA RECOMPENSA ---
 }
 
 // --- LÓGICA DO JOGO DA MEMÓRIA ONLINE ---
@@ -253,7 +272,8 @@ async function criarNovoJogoMemoria() {
         id: index, symbol: symbolPath, flipped: false, matched: false
     }));
 
-    const { data, error } = await _supabase.from('memory_games').insert({
+    // Usar window._supabase
+    const { data, error } = await window._supabase.from('memory_games').insert({
         player1_id: currentUser.id,
         board_state: initialBoardState,
         current_turn_player_id: currentUser.id,
@@ -271,7 +291,8 @@ async function entrarEmJogoMemoria() {
     const gameId = document.getElementById('game-code-input').value.trim();
     if (!gameId) { alert("Por favor, insira um código de jogo."); return; }
 
-    const { data, error } = await _supabase.from('memory_games')
+    // Usar window._supabase
+    const { data, error } = await window._supabase.from('memory_games')
         .update({ player2_id: currentUser.id, status: 'in_progress' })
         .eq('id', gameId).eq('status', 'waiting').is('player2_id', null)
         .select().single();
@@ -305,7 +326,8 @@ function copiarCodigo() {
 function escutarMudancasNoJogoMemoria(gameId) {
     if (memoryGameSubscription) memoryGameSubscription.unsubscribe();
     
-    memoryGameSubscription = _supabase.channel(`memory_game-${gameId}`)
+    // Usar window._supabase
+    memoryGameSubscription = window._supabase.channel(`memory_game-${gameId}`)
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'memory_games', filter: `id=eq.${gameId}` }, payload => {
         currentMemoryGame = payload.new;
         desenharTabuleiroMemoriaOnline();
@@ -322,7 +344,7 @@ function desenharTabuleiroMemoriaOnline() {
     });
 }
 
-// ANOTAÇÃO: Lógica de jogada online foi completamente refatorada para ser mais segura.
+// Lógica de jogada online foi completamente refatorada para ser mais segura.
 async function makeMemoryMoveOnline(cardId) {
     if (!isMyTurnToPlay || currentMemoryGame.status !== 'in_progress') return;
 
@@ -366,7 +388,7 @@ async function makeMemoryMoveOnline(cardId) {
                 ? currentMemoryGame.player2_id 
                 : currentMemoryGame.player1_id;
             
-            // ANOTAÇÃO: A lógica de desvirar agora está no setTimeout visual
+            // A lógica de desvirar agora está no setTimeout visual
             // O banco de dados é atualizado primeiro com a troca de turno
         }
         
@@ -385,7 +407,7 @@ async function makeMemoryMoveOnline(cardId) {
             status: gameStatus
         };
         
-        // ANOTAÇÃO: O setTimeout é usado apenas para o efeito visual de desvirar.
+        // O setTimeout é usado apenas para o efeito visual de desvirar.
         // A atualização do estado do jogo no DB acontece antes.
         setTimeout(async () => {
             if (card1.symbol !== card2.symbol) {
@@ -393,7 +415,8 @@ async function makeMemoryMoveOnline(cardId) {
                 updatePayload.board_state.find(c => c.id === id2).flipped = false;
             }
             
-            const { error } = await _supabase.from('memory_games')
+            // Usar window._supabase
+            const { error } = await window._supabase.from('memory_games')
                 .update(updatePayload)
                 .eq('id', currentMemoryGame.id);
 
@@ -405,7 +428,8 @@ async function makeMemoryMoveOnline(cardId) {
         }, 1200);
 
     } else {
-        const { error } = await _supabase.from('memory_games').update({
+        // Usar window._supabase
+        const { error } = await window._supabase.from('memory_games').update({
             board_state: newBoardState,
             flipped_card_ids: newFlippedCardIds
         }).eq('id', currentMemoryGame.id);
@@ -429,6 +453,19 @@ async function atualizarStatusMemoriaOnline() {
         await registrarRecordeMemoria(currentMemoryGame.timer, currentMemoryGame.moves);
 
         await carregarRankingMemoria();
+
+        // --- NOVO: RECOMPENSA DE RUBIXCOINS POR JOGO ONLINE CONCLUÍDO ---
+        if (currentUser) {
+            const coinsEarned = 30; // Exemplo: 30 RubixCoins por completar o jogo online
+            // Usar window.adicionarRubixCoins
+            if (typeof window.adicionarRubixCoins === 'function') {
+                await window.adicionarRubixCoins(currentUser.id, coinsEarned);
+                console.log(`Você ganhou ${coinsEarned} RubixCoins por completar o Jogo da Memória (online)!`);
+            } else {
+                console.warn("Função adicionarRubixCoins não disponível no objeto window.");
+            }
+        }
+        // --- FIM DA RECOMPENSA ---
 
     } else if (currentMemoryGame.status === 'in_progress') {
         if (currentMemoryGame.player2_id === null) {
@@ -456,7 +493,8 @@ async function registrarRecordeMemoria(time, moves) {
     statusDisplay.innerHTML = `Registrando sua pontuação...`;
 
     // MUDANÇA FINAL: Inserimos TODAS as colunas que podem ser obrigatórias.
-    const { error } = await _supabase
+    // Usar window._supabase
+    const { error } = await window._supabase
         .from('memory_scores')
         .insert({
             user_id: currentUser.id,
@@ -483,7 +521,8 @@ function iniciarTimerOnline() {
     if (currentUser.id === currentMemoryGame.player1_id) {
         memoryGameTimerInterval = setInterval(async () => {
             if (currentMemoryGame && currentMemoryGame.status === 'in_progress') {
-                await _supabase.from('memory_games')
+                // Usar window._supabase
+                await window._supabase.from('memory_games')
                     .update({ timer: currentMemoryGame.timer + 1 })
                     .eq('id', currentMemoryGame.id);
             } else {
@@ -492,4 +531,3 @@ function iniciarTimerOnline() {
         }, 1000);
     }
 }
-

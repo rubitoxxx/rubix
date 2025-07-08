@@ -6,7 +6,10 @@
     <title>Jogo da Velha - Rubix</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script> 
+    
     <style>
         /* Estilos do ranking e lobby online (mantidos do seu código original) */
         #ranking-section { margin-bottom: 30px; text-align: center; }
@@ -97,11 +100,11 @@
     </div>
 
     <script>
-        // --- INICIALIZAÇÃO E VARIÁVEIS GLOBAIS ---
-        const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
-        const { createClient } = supabase;
-        const _supabase = createClient(supabaseUrl, supabaseKey);
+        // --- REMOVIDA: INICIALIZAÇÃO E VARIÁVEIS GLOBAIS DO SUPABASE. ELAS DEVEM ESTAR EM 'utils.js' ---
+        // const supabaseUrl = '...';
+        // const supabaseKey = '...';
+        // const { createClient } = supabase;
+        // const _supabase = createClient(supabaseUrl, supabaseKey);
 
         const mainMenu = document.getElementById('main-menu-view');
         const onlineLobby = document.getElementById('online-lobby-view');
@@ -126,7 +129,8 @@
         let localGameState = ['', '', '', '', '', '', '', '', ''];
         
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await _supabase.auth.getSession();
+            // Use window._supabase para acessar a instância Supabase de utils.js
+            const { data: { session } } = await window._supabase.auth.getSession();
             if (!session) { window.location.href = 'index.html'; return; }
             currentUser = session.user;
             await carregarRanking();
@@ -148,7 +152,8 @@
         }
 
         async function carregarRanking() {
-            const { data, error } = await _supabase.from('game_scores').select(`wins, profiles(username)`).order('wins', { ascending: false }).limit(5);
+            // Use window._supabase aqui também
+            const { data, error } = await window._supabase.from('game_scores').select(`wins, profiles(username)`).order('wins', { ascending: false }).limit(5);
             if (error || !data) { rankingBoard.innerHTML = '<p>Não foi possível carregar o ranking.</p>'; return; }
             if (data.length === 0) { rankingBoard.innerHTML = '<p>Ninguém venceu ainda. Seja o primeiro!</p>'; return; }
             const rankingList = document.createElement('ol');
@@ -164,29 +169,31 @@
 
         async function registrarVitoria() {
             if (!currentUser) return;
-            // A mensagem de vitória é tratada na validação do jogo, aqui apenas registramos o ponto.
-            const { error } = await _supabase.rpc('increment_wins', { user_id_to_update: currentUser.id });
+            // Use window._supabase aqui também
+            const { error } = await window._supabase.rpc('increment_wins', { user_id_to_update: currentUser.id });
             if (error) console.error('Erro ao registrar vitória:', error);
             else await carregarRanking();
         }
 
         // --- LÓGICA DO JOGO ONLINE ---
         async function criarNovoJogo() {
-            const { data, error } = await _supabase.from('games').insert({ player1_id: currentUser.id }).select().single();
+            // Use window._supabase aqui também
+            const { data, error } = await window._supabase.from('games').insert({ player1_id: currentUser.id }).select().single();
             if (error) { console.error("Erro ao criar jogo:", error); return; }
             currentGame = data;
             iniciarVisualizacaoDeJogo();
             escutarMudancasNoJogo(currentGame.id);
         }
 
-       async function entrarEmJogo() {
+        async function entrarEmJogo() {
             const gameId = document.getElementById('game-code-input').value.trim();
             if (!gameId) {
                 alert("Por favor, insira um código de jogo.");
                 return;
             }
 
-            const { data, error } = await _supabase.from('games')
+            // Use window._supabase aqui também
+            const { data, error } = await window._supabase.from('games')
                 .update({ player2_id: currentUser.id, status: 'in_progress' })
                 .eq('id', gameId)
                 .eq('status', 'waiting')
@@ -224,7 +231,8 @@
 
         function escutarMudancasNoJogo(gameId) {
             if (gameSubscription) { gameSubscription.unsubscribe(); }
-            gameSubscription = _supabase.channel(`game-${gameId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` }, payload => {
+            // Use window._supabase aqui também
+            gameSubscription = window._supabase.channel(`game-${gameId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` }, payload => {
                 currentGame = payload.new;
                 desenharTabuleiroOnline();
                 atualizarStatusOnline();
@@ -260,7 +268,8 @@
             }
             
             const nextTurn = mySymbol === 'X' ? 'O' : 'X';
-            const { error } = await _supabase.from('games').update({ board_state: newBoardState, current_turn: nextTurn, status: newStatus, winner_id: newWinnerId }).eq('id', currentGame.id);
+            // Use window._supabase aqui também
+            const { error } = await window._supabase.from('games').update({ board_state: newBoardState, current_turn: nextTurn, status: newStatus, winner_id: newWinnerId }).eq('id', currentGame.id);
             if (error) console.error("Erro ao fazer jogada:", error);
         }
 
@@ -273,7 +282,15 @@
                 if (currentGame.winner_id) {
                     const venci = currentUser.id === currentGame.winner_id;
                     statusDisplay.textContent = venci ? 'Você venceu!' : 'Você perdeu!';
-                    if (venci) await registrarVitoria();
+                    if (venci) {
+                        await registrarVitoria();
+                        // Opcional: Adicionar rubixcoins para vitória online
+                        // if (typeof adicionarRubixCoins === 'function') {
+                        //     const coinsEarned = 20; // Exemplo
+                        //     await adicionarRubixCoins(currentUser.id, coinsEarned);
+                        //     console.log(`Você ganhou ${coinsEarned} RubixCoins por vencer!`);
+                        // }
+                    }
                 } else { 
                     statusDisplay.textContent = 'O jogo empatou!'; 
                 }
@@ -290,9 +307,9 @@
             gameView.style.display = 'block';
             resetButton.style.display = 'block';
             resetButton.textContent = 'Reiniciar Jogo';
-            resetButton.onclick = iniciarJogoLocal; // Reinicia o jogo local
+            resetButton.onclick = iniciarJogoLocal; 
             localGameActive = true;
-            localCurrentPlayer = 'X'; // O jogador humano é sempre 'X'
+            localCurrentPlayer = 'X'; 
             localGameState = ['', '', '', '', '', '', '', '', ''];
             statusDisplay.innerHTML = `Sua vez (X)`;
             gameBoard.innerHTML = '';
@@ -309,17 +326,14 @@
             const clickedCell = event.target;
             const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
-            // Só permite jogada se for a vez do jogador e a célula estiver vazia
             if (localGameState[clickedCellIndex] !== '' || !localGameActive || localCurrentPlayer !== 'X') {
                 return;
             }
 
-            // Realiza a jogada do jogador
             localGameState[clickedCellIndex] = 'X';
             clickedCell.innerHTML = 'X';
             clickedCell.classList.add('x');
 
-            // Verifica o resultado após a jogada do jogador
             const [isFinished, winnerSymbol] = verificarVencedor(localGameState);
 
             if (isFinished) {
@@ -327,47 +341,51 @@
                 if (winnerSymbol === 'X') {
                     statusDisplay.innerHTML = `Você venceu!`;
                     registrarVitoria();
+                    // Opcional: Adicionar rubixcoins para vitória contra a máquina
+                    // if (typeof adicionarRubixCoins === 'function') {
+                    //     const coinsEarned = 5; // Exemplo
+                    //     await adicionarRubixCoins(currentUser.id, coinsEarned);
+                    //     console.log(`Você ganhou ${coinsEarned} RubixCoins por vencer a máquina!`);
+                    // }
                 } else {
                     statusDisplay.innerHTML = `O jogo empatou!`;
                 }
                 return;
             }
 
-            // Se o jogo não terminou, é a vez da máquina
-            localCurrentPlayer = 'O'; // Define o jogador atual para a máquina
+            localCurrentPlayer = 'O'; 
             statusDisplay.innerHTML = `Vez da máquina (O)`;
-            setTimeout(makeComputerMove, 700); // Dá um pequeno delay para a jogada da máquina
+            setTimeout(makeComputerMove, 700); 
         }
 
         // Algoritmo Minimax para a IA
         function minimax(board, depth, isMaximizingPlayer) {
             const [isFinished, winnerSymbol] = verificarVencedor(board);
 
-            // Casos base (condições de término)
             if (isFinished) {
-                if (winnerSymbol === 'O') return 100 - depth; // IA (O) vence: pontuação alta, penaliza jogadas mais longas
-                if (winnerSymbol === 'X') return -100 + depth; // Jogador (X) vence: pontuação baixa, recompensa vitória mais rápida do jogador (pior para IA)
-                return 0; // Empate
+                if (winnerSymbol === 'O') return 100 - depth; 
+                if (winnerSymbol === 'X') return -100 + depth; 
+                return 0; 
             }
 
-            if (isMaximizingPlayer) { // Vez da IA ('O') - Quer maximizar a pontuação
+            if (isMaximizingPlayer) { 
                 let bestScore = -Infinity;
                 for (let i = 0; i < board.length; i++) {
                     if (board[i] === '') {
-                        board[i] = 'O'; // Tenta a jogada da IA
-                        let score = minimax(board, depth + 1, false); // Chama para o próximo turno (jogador, minimizando)
-                        board[i] = ''; // Desfaz a jogada (backtracking)
+                        board[i] = 'O'; 
+                        let score = minimax(board, depth + 1, false); 
+                        board[i] = ''; 
                         bestScore = Math.max(bestScore, score);
                     }
                 }
                 return bestScore;
-            } else { // Vez do Jogador ('X') - Quer minimizar a pontuação da IA (ou seja, maximizar a própria)
+            } else { 
                 let bestScore = Infinity;
                 for (let i = 0; i < board.length; i++) {
                     if (board[i] === '') {
-                        board[i] = 'X'; // Tenta a jogada do jogador
-                        let score = minimax(board, depth + 1, true); // Chama para o próximo turno (IA, maximizando)
-                        board[i] = ''; // Desfaz a jogada
+                        board[i] = 'X'; 
+                        let score = minimax(board, depth + 1, true); 
+                        board[i] = ''; 
                         bestScore = Math.min(bestScore, score);
                     }
                 }
@@ -382,13 +400,11 @@
             let bestScore = -Infinity;
             let bestMove = -1;
 
-            // Percorre todas as células vazias para encontrar a melhor jogada
             for (let i = 0; i < localGameState.length; i++) {
                 if (localGameState[i] === '') {
-                    localGameState[i] = 'O'; // Tenta a jogada da máquina
-                    // Chama o minimax assumindo que o próximo turno é do jogador (isMaximizingPlayer = false)
+                    localGameState[i] = 'O'; 
                     let score = minimax(localGameState, 0, false); 
-                    localGameState[i] = ''; // Desfaz a jogada (importante para não alterar o estado real do tabuleiro para as próximas simulações)
+                    localGameState[i] = ''; 
 
                     if (score > bestScore) {
                         bestScore = score;
@@ -397,13 +413,11 @@
                 }
             }
             
-            // Realiza a melhor jogada encontrada
             const cellElement = document.querySelector(`.cell[data-cell-index='${bestMove}']`);
             localGameState[bestMove] = 'O';
             cellElement.innerHTML = 'O';
             cellElement.classList.add('o');
 
-            // Verifica o resultado após a jogada da máquina
             const [isFinished, winnerSymbol] = verificarVencedor(localGameState);
 
             if (isFinished) {
@@ -414,20 +428,18 @@
                     statusDisplay.innerHTML = `O jogo empatou!`;
                 }
             } else {
-                // Se o jogo não terminou, troca para a vez do jogador
                 localCurrentPlayer = 'X';
                 statusDisplay.innerHTML = `Sua vez (X)`;
             }
         }
 
-        // Função compartilhada de verificação de vitória (mantida do seu código original)
         function verificarVencedor(board) {
             for (const condition of winningConditions) {
                 const [a, b, c] = condition;
                 if (board[a] && board[a] === board[b] && board[a] === board[c]) return [true, board[a]];
             }
-            if (!board.includes('')) return [true, null]; // Empate
-            return [false, null]; // Jogo continua
+            if (!board.includes('')) return [true, null]; 
+            return [false, null]; 
         }
     </script>
 </body>

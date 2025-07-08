@@ -8,6 +8,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
 </head>
 <body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script>
     <header class="game-header">
         <h1>Batalha Pokémon</h1>
         <button id="viewMuralBtn" onclick="irParaMural()">Ver Mural</button>
@@ -35,7 +37,7 @@
             </div>
             <div id="enemyPokemon" class="pokemon-display enemy">
                 <img id="enemyImage" alt="Pokémon Inimigo" class="pokemon-bounce">
-                 <div class="health-bar-container">
+                <div class="health-bar-container">
                     <div id="enemyHealthBar" class="health-bar"></div>
                 </div>
                 <p id="enemyStatus"></p>
@@ -43,8 +45,6 @@
         </div>
         
         <div id="actions" class="screen action-buttons">
-            <button onclick="attackFogo()">Ataque de Fogo</button>
-            <button onclick="attackRaio()">Ataque de Raio</button>
             <button onclick="defend()">Defender</button>
         </div>
 
