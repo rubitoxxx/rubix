@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Perfil do Usuário - Mural Rubix</title>
     <link rel="stylesheet" href="style.css">
-    
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script src="supabaseClient.js"></script>
+
     <script src="utils.js"></script>
 </head>
 <body>
@@ -17,8 +20,8 @@
 
         <div class="perfil-imagem">
             <label for="fotoPerfilInput">
-                <img id="fotoPerfil" src="https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg" 
-                             alt="Clique para alterar a foto de Perfil" class="foto-perfil">
+                <img id="fotoPerfil" src="https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg"
+                                     alt="Clique para alterar a foto de Perfil" class="foto-perfil">
                 <span><h5>Clique na imagem para alterar</h5></span><br>
                 <br>
             </label>
@@ -31,28 +34,19 @@
         </div>
 
         <button onclick="salvarPerfil()">Salvar Perfil</button>
-        
+
         <p id="mensagemStatus"></p>
     </div>
 
     <script>
-        // Não é mais necessário inicializar o Supabase aqui, pois window._supabase já é definido em utils.js
-        // const supabaseUrl = '...';
-        // const supabaseKey = '...';
-        // const { createClient } = supabase;
-        // const _supabase = createClient(supabaseUrl, supabaseKey);
-
         let currentUser = null;
-
-        // Não é mais necessário definir adicionarRubixCoins aqui, pois window.adicionarRubixCoins já é definido em utils.js
-        // async function adicionarRubixCoins(userId, amount) { ... }
 
         // --- 2. LÓGICA PRINCIPAL DA PÁGINA ---
         document.addEventListener('DOMContentLoaded', async () => {
             // Use window._supabase para acessar a instância global do Supabase
             const { data: { session } } = await window._supabase.auth.getSession();
             if (!session) {
-                window.location.href = "index.html"; 
+                window.location.href = "index.html";
                 return;
             }
             currentUser = session.user;
@@ -62,7 +56,7 @@
                 .select('username, avatar_url, rubix_coins')
                 .eq('id', currentUser.id)
                 .single();
-            
+
             if (error && error.code !== 'PGRST116') {
                 console.error('Erro ao carregar perfil:', error);
             }
@@ -88,11 +82,11 @@
                 window.location.href = "index.html";
                 return;
             }
-            
+
             const username = document.getElementById('nomePerfil').value.trim();
             const avatarFile = document.getElementById('fotoPerfilInput').files[0];
             const mensagemStatus = document.getElementById("mensagemStatus");
-            
+
             if (!username) {
                 mensagemStatus.textContent = "O nome de usuário não pode ficar em branco.";
                 return;
@@ -104,7 +98,7 @@
 
             if (avatarFile) {
                 const filePath = `${currentUser.id}/${Date.now()}_${avatarFile.name}`;
-                
+
                 // Use window._supabase
                 const { error: uploadError } = await window._supabase.storage
                     .from('avatars')
@@ -115,7 +109,7 @@
                     mensagemStatus.textContent = "Erro ao enviar a foto. Tente novamente.";
                     return;
                 }
-                
+
                 // Use window._supabase
                 const { data } = window._supabase.storage.from('avatars').getPublicUrl(filePath);
                 avatarUrl = data.publicUrl;

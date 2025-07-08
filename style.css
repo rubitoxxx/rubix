@@ -1,5 +1,5 @@
 /* ====================================================== */
-/* ARQUIVO DE ESTILO PRINCIPAL - MURAL RUBIX E OUTROS     */
+/* ARQUIVO DE ESTILO PRINCIPAL - MURAL RUBIX E OUTROS    */
 /* ====================================================== */
 
 /* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS DE COR --- */
@@ -8,19 +8,20 @@
 
 :root {
     --cor-fundo-app: #0c0c0c;
-    --cor-primaria: #eca8e73f;
-    --cor-borda: #8A2BE2;
-    --cor-texto-principal: #e0e0e0;
-    --cor-texto-secundario: #a0a0a0;
-    --cor-acento: #c609f5db;
-    --cor-acento-hover: #9932CC;
-    --cor-sucesso: #4CAF50;
-    --cor-erro: #f44336;
-    --cor-moeda: #FFD700;
+    --cor-primaria: #eca8e73f; /* Uma cor primária com transparência */
+    --cor-borda: #8A2BE2; /* Azul violeta */
+    --cor-texto-principal: #e0e0e0; /* Cinza claro */
+    --cor-texto-secundario: #a0a0a0; /* Cinza médio */
+    --cor-acento: #c609f5db; /* Roxo vibrante com transparência */
+    --cor-acento-hover: #9932CC; /* Roxo médio para hover */
+    --cor-sucesso: #4CAF50; /* Verde */
+    --cor-erro: #f44336; /* Vermelho */
+    --cor-moeda: #FFD700; /* Dourado */
     --fonte-pixel: 'Press Start 2P', cursive;
     --fonte-padrao: 'Roboto', sans-serif;
 }
 
+/* Reset básico para todos os elementos */
 * {
     margin: 0;
     padding: 0;
@@ -39,19 +40,20 @@ body {
     align-items: center;
     min-height: 100vh;
     padding: 20px;
+    overflow-x: hidden; /* Evita rolagem horizontal indesejada */
 }
 
 /* --- 2. LAYOUTS PRINCIPAIS (CONTAINERS) --- */
 .container, .login-container, .perfil-container, .pggame-container, .jogo-da-velha-container {
     width: 100%;
     max-width: 800px;
-    background-color: rgba(12, 12, 12, 0.85);
+    background-color: rgba(12, 12, 12, 0.85); /* Fundo semi-transparente para o conteúdo */
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
     border: 1px solid var(--cor-borda);
-    overflow: hidden;
+    overflow: hidden; /* Garante que o conteúdo não vaze */
     padding: 30px;
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(5px); /* Efeito de desfoque no fundo */
 }
 
 h2 {
@@ -60,10 +62,14 @@ h2 {
     margin-bottom: 30px;
     font-size: 24px;
     text-align: center;
-    text-shadow: 2px 2px 0px #f10909ee;
+    text-shadow: 2px 2px 0px #f10909ee; /* Sombra para efeito retrô */
 }
 
-input[type="text"], input[type="password"], input[type="email"] {
+/* Estilo para campos de entrada de texto, senha e email */
+input[type="text"],
+input[type="password"],
+input[type="email"],
+textarea { /* Adicionado textarea aqui para consistência */
     width: 100%;
     padding: 15px;
     margin-bottom: 15px;
@@ -74,11 +80,13 @@ input[type="text"], input[type="password"], input[type="email"] {
     font-size: 16px;
 }
 
-input::placeholder {
+input::placeholder,
+textarea::placeholder { /* Placeholder para textarea também */
     color: var(--cor-texto-secundario);
 }
 
-input:focus {
+input:focus,
+textarea:focus { /* Focus para textarea também */
     outline: none;
     border-color: var(--cor-acento-hover);
     box-shadow: 0 0 10px var(--cor-acento);
@@ -109,26 +117,40 @@ input:focus {
 #mensagemErro {
     color: var(--cor-erro);
     margin-top: 15px;
-    min-height: 20px;
+    min-height: 20px; /* Garante espaço mesmo sem mensagem */
     font-weight: bold;
 }
 
 /* --- 4. PÁGINA DO MURAL (CABEÇALHO) --- */
 .header {
     display: flex;
-    justify-content: space-between;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
     padding-bottom: 20px;
     border-bottom: 1px solid var(--cor-borda);
     flex-wrap: wrap;
-    gap: 20px;
+    gap: 24px;
+    text-align: center;
+    margin-bottom: 24px;
 }
 
 .user-info-header {
     display: flex;
     flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
+    align-items: center;
+    gap: 16px;
+    text-align: center;
+}
+
+/* Espaçamento entre os elementos de texto e botões */
+.user-info-header h2,
+.user-info-header p,
+.user-info-header h3,
+.user-info-header h6,
+.user-info-header .btn,
+.user-info-header .nav-buttons {
+    margin-bottom: 10px;
 }
 
 .user-info-header .fas.fa-coins {
@@ -144,8 +166,8 @@ input:focus {
 }
 
 .foto-perfil-header {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
     border: 2px solid var(--cor-acento);
@@ -153,15 +175,19 @@ input:focus {
 
 .nav-buttons {
     display: flex;
+    justify-content: center;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    margin-bottom: 24px;
 }
 
 .nav-buttons button {
     background-color: transparent;
     color: var(--cor-texto-secundario);
     border: 1px solid var(--cor-borda);
-    padding: 8px 16px;
+    padding: 10px 18px;
     cursor: pointer;
     transition: background-color 0.3s, color 0.3s;
     border-radius: 8px;
@@ -172,28 +198,32 @@ input:focus {
     background-color: var(--cor-borda);
     color: var(--cor-texto-principal);
 }
+.nav-buttons button.active {
+    background-color: var(--cor-acento);
+    color: white;
+    border-color: var(--cor-acento);
+}
 
 /* --- 5. SEÇÃO DE NOVO POST (MURAL) --- */
 .main-content {
-    padding: 0;
+    padding: 0; /* Geralmente o .container já tem padding */
 }
 
 .new-post-section {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-start; /* Alinha o avatar e a caixa de texto no topo */
     gap: 15px;
     padding: 20px 0;
     border-bottom: 1px solid var(--cor-borda);
 }
 
 .post-input-area {
-    flex-grow: 1;
+    flex-grow: 1; /* Permite que ocupe o espaço restante */
     display: flex;
     flex-direction: column;
 }
 
 .post-input-area textarea {
-    width: 100%;
     min-height: 80px;
     resize: vertical;
     background-color: var(--cor-primaria);
@@ -224,7 +254,7 @@ input:focus {
 }
 
 .rubitar-btn {
-    margin-left: auto;
+    margin-left: auto; /* Empurra o botão para a direita */
     background-color: var(--cor-acento);
     color: white;
     padding: 10px 20px;
@@ -241,6 +271,7 @@ input:focus {
 .rubitar-btn:disabled {
     background-color: var(--cor-texto-secundario);
     cursor: not-allowed;
+    opacity: 0.7; /* Adiciona uma pequena opacidade para indicar desativado */
 }
 
 /* --- 6. FEED DE POSTS (MURAL) --- */
@@ -270,10 +301,11 @@ input:focus {
 }
 
 .post-avatar {
-    width: 48px;
-    height: 48px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
     border: 2px solid var(--cor-acento);
+    object-fit: cover;
 }
 
 .post-info {
@@ -302,21 +334,64 @@ input:focus {
     font-size: 1em;
     line-height: 1.6;
     color: var(--cor-texto-principal);
-    white-space: pre-wrap;
-    word-wrap: break-word;
+    white-space: pre-wrap; /* Preserva espaços em branco e quebras de linha */
+    word-wrap: break-word; /* Quebra palavras longas */
 }
 
 .post-image {
     display: block;
     max-width: 100%;
-    width: auto;
-    max-height: 200px;
+    height: auto;
+    max-height: 350px;
     margin-top: 15px;
     margin-left: auto;
     margin-right: auto;
     border-radius: 10px;
     border: 1px solid var(--cor-primaria);
+    object-fit: contain; /* Garante que a imagem se ajuste sem cortar */
+}
+
+/* Área de preview da imagem antes de postar */
+#image-preview-container { /* Adicionado container para posicionar o botão de remover */
+    position: relative;
+    margin-top: 15px;
+    text-align: center; /* Centraliza a imagem dentro do container */
+}
+
+#image-preview {
+    max-width: 100%;
+    height: auto;
+    max-height: 350px;
+    border-radius: 10px;
+    border: 1px solid var(--cor-primaria);
     object-fit: contain;
+    display: block; /* Garante que a imagem se comporte como um bloco para centralização */
+    margin: 0 auto;
+}
+
+#remove-image-btn {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    background: rgba(244, 67, 54, 0.9);
+    border: none;
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    z-index: 10; /* Garante que o botão fique acima da imagem */
+}
+
+#remove-image-btn:hover {
+    background: var(--cor-erro);
+    transform: scale(1.1);
 }
 
 .post-actions {
@@ -378,8 +453,9 @@ input:focus {
 
 .comments-list {
     margin-bottom: 20px;
-    max-height: 300px;
+    max-height: 300px; /* Limita a altura para que os comentários sejam scrolláveis */
     overflow-y: auto;
+    padding-right: 10px; /* Adiciona um pequeno padding para não "colar" na scrollbar */
 }
 
 .comment {
@@ -400,7 +476,7 @@ input:focus {
     background-color: rgba(0, 0, 0, 0.15);
     padding: 10px 15px;
     border-radius: 12px;
-    width: 100%;
+    flex-grow: 1; /* Permite que ocupe o espaço restante */
 }
 
 .comment-content strong {
@@ -416,13 +492,72 @@ input:focus {
     word-break: break-word;
 }
 
-.new-comment-form {
+/* === ÁREA DE COMENTÁRIOS DINÂMICOS (SOLUÇÃO PROPOSTA) === */
+.comment-input-area {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #1a1a2e; /* Uma cor de fundo sólida para a área de input */
+    border-radius: 20px;
+    border: 1px solid var(--cor-borda);
+    box-shadow: 0 0 8px rgba(138, 43, 226, 0.1); /* Sombra para destacar */
+}
+
+.comment-input-area textarea {
+    flex: 1;
+    min-height: 40px;
+    background-color: var(--cor-primaria);
+    border: 1px solid var(--cor-borda);
+    border-radius: 20px;
+    padding: 10px 15px;
+    font-size: 14px;
+    color: var(--cor-texto-principal);
+    resize: vertical;
+    box-shadow: 0 0 4px rgba(138, 43, 226, 0.2);
+    margin-bottom: 0; /* Remove a margem padrão do input/textarea global */
+}
+
+.comment-input-area .btn-post-comment {
+    background-color: var(--cor-acento);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.comment-input-area .btn-post-comment:hover {
+    background-color: var(--cor-acento-hover);
+}
+
+.comment-input-area .comment-emoji-btn {
+    background-color: transparent;
+    border: none;
+    font-size: 20px; /* Aumenta um pouco o ícone para melhor visibilidade */
+    cursor: pointer;
+    color: var(--cor-texto-principal);
+    transition: transform 0.2s;
+}
+
+.comment-input-area .comment-emoji-btn:hover {
+    transform: scale(1.2);
+}
+
+/* Remover estilo de new-comment-form se a div comment-input-area for a principal */
+/* Se new-comment-form for o pai da comment-input-area, este bloco pode ser removido
+   ou adaptado para não sobrepor os estilos de comment-input-area */
+.new-comment-form {
+    display: flex; /* Manter se for um container para comment-input-area */
     align-items: center;
     gap: 10px;
 }
 
-.new-comment-form textarea {
+.new-comment-form textarea { /* Pode ser redundante se comment-input-area tiver o textarea */
     flex: 1;
     min-height: 40px;
     resize: vertical;
@@ -434,7 +569,7 @@ input:focus {
     border: 1px solid var(--cor-borda);
 }
 
-.new-comment-form button {
+.new-comment-form button { /* Pode ser redundante se comment-input-area tiver o botão */
     background-color: var(--cor-acento);
     color: white;
     padding: 10px 15px;
@@ -448,6 +583,7 @@ input:focus {
 .new-comment-form button:hover {
     background-color: var(--cor-acento-hover);
 }
+
 
 /* --- 8. ELEMENTOS DIVERSOS E ANIMAÇÕES --- */
 .emoji-button {
@@ -465,7 +601,7 @@ input:focus {
 }
 
 .coin-animation {
-    position: absolute;
+    position: fixed; /* Alterado de absolute para fixed para manter na tela */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -483,60 +619,75 @@ input:focus {
 }
 
 /* ====================================================== */
-/* === INÍCIO DAS SEÇÕES ADICIONADAS === */
+/* === SEÇÕES ADICIONADAS === */
 /* ====================================================== */
 
 /* --- 9. ESTILOS DA PÁGINA DE PERFIL --- */
-.perfil-header {
+.perfil-container {
     text-align: center;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 1px solid var(--cor-primaria);
 }
 
-.perfil-avatar-grande {
+.perfil-container > button { /* Botão "Ver Mural" e "Salvar Perfil" */
+    background: var(--cor-acento);
+    border: 1px solid var(--cor-acento);
+    color: white;
+    margin-bottom: 20px; /* Reduzida a margem para evitar muito espaço */
+    cursor: pointer;
+    padding: 12px 24px;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+    font-size: 16px;
+    border: none;
+}
+.perfil-container > button:hover {
+    background-color: var(--cor-acento-hover);
+}
+
+.perfil-imagem {
+    position: relative;
     width: 150px;
     height: 150px;
+    margin: 0 auto 20px auto; /* Mantida a margem */
+}
+
+.foto-perfil { /* Foto de perfil grande na página de perfil */
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    border: 4px solid var(--cor-acento);
     object-fit: cover;
-    margin: 0 auto 15px auto;
+    border: 4px solid var(--cor-acento);
+    cursor: pointer;
+    transition: filter 0.3s;
+}
+.foto-perfil:hover {
+    filter: brightness(0.7);
 }
 
-.perfil-username {
-    font-family: var(--fonte-pixel);
-    font-size: 28px;
-    color: var(--cor-texto-principal);
-    margin-bottom: 5px;
-}
-
-.perfil-bio {
-    font-size: 16px;
+.perfil-imagem label span {
+    display: block;
+    margin-top: 10px;
     color: var(--cor-texto-secundario);
-    max-width: 400px;
+    cursor: pointer;
+}
+
+.perfil-nome {
+    margin-bottom: 20px; /* Reduzida a margem */
+}
+.perfil-nome strong {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--cor-texto-secundario);
+}
+.perfil-nome input {
+    text-align: center;
+    max-width: 300px;
     margin: 0 auto;
 }
-
-.perfil-stats {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
+#mensagemStatus {
+    color: var(--cor-sucesso);
     margin-top: 20px;
-}
-
-.stat-item {
-    text-align: center;
-}
-
-.stat-item .stat-number {
-    font-size: 20px;
+    min-height: 22px;
     font-weight: bold;
-    color: var(--cor-texto-principal);
-}
-
-.stat-item .stat-label {
-    font-size: 14px;
-    color: var(--cor-texto-secundario);
 }
 
 /* --- 10. ESTILOS DA PÁGINA DE JOGOS (PGGAME) --- */
@@ -566,589 +717,12 @@ input:focus {
     box-shadow: 0 10px 20px rgba(138, 43, 226, 0.3);
 }
 
-.game-card i { /* Estilo para o ícone do jogo */
+.game-card i {
     font-size: 50px;
     color: var(--cor-acento);
     margin-bottom: 15px;
 }
 
-/* --- 1. CONFIGURAÇÕES GLOBAIS E VARIÁVEIS DE COR --- */
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-
-:root {
-    --cor-fundo-app: #0c0c0c;
-    --cor-primaria: #eca8e73f;
-    --cor-borda: #8A2BE2;
-    --cor-texto-principal: #e0e0e0;
-    --cor-texto-secundario: #a0a0a0;
-    --cor-acento: #c609f5db;
-    --cor-acento-hover: #9932CC;
-    --cor-sucesso: #4CAF50;
-    --cor-erro: #f44336;
-    --cor-moeda: #FFD700;
-    --fonte-pixel: 'Press Start 2P', cursive;
-    --fonte-padrao: 'Roboto', sans-serif;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: var(--fonte-padrao);
-    background-color: var(--cor-fundo-app);
-    background-image: url("https://images4.alphacoders.com/949/thumb-1920-949067.jpg");
-    background-size: cover;
-    background-attachment: fixed;
-    color: var(--cor-texto-principal);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    padding: 20px;
-}
-
-/* --- 2. LAYOUTS PRINCIPAIS (Containers) --- */
-.container, .login-container, .perfil-container {
-    width: 100%;
-    max-width: 800px;
-    background-color: rgba(12, 12, 12, 0.85);
-    border-radius: 10px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
-    border: 1px solid var(--cor-borda);
-    overflow: hidden;
-    padding: 30px;
-    backdrop-filter: blur(5px);
-}
-
-h2 {
-    font-family: var(--fonte-pixel);
-    color: var(--cor-acento);
-    margin-bottom: 30px;
-    font-size: 24px;
-    text-align: center;
-    text-shadow: 2px 2px 0px #f10909ee;
-}
-
-input[type="text"], input[type="password"], input[type="email"] {
-    width: 100%;
-    padding: 15px;
-    margin-bottom: 15px;
-    border: 1px solid var(--cor-borda);
-    border-radius: 8px;
-    background-color: var(--cor-primaria);
-    color: var(--cor-texto-principal);
-    font-size: 16px;
-}
-
-input::placeholder {
-    color: var(--cor-texto-secundario);
-}
-
-input:focus {
-    outline: none;
-    border-color: var(--cor-acento-hover);
-    box-shadow: 0 0 10px var(--cor-acento);
-}
-
-/* --- 3. PÁGINA DE LOGIN (index.html) --- */
-.login-container {
-    max-width: 400px;
-    text-align: center;
-}
-
-.login-container button {
-    width: 100%;
-    background-color: var(--cor-acento);
-    color: white;
-    padding: 15px;
-    border: none;
-    border-radius: 8px;
-    font-size: 18px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-.login-container button:hover {
-    background-color: var(--cor-acento-hover);
-}
-
-#mensagemErro {
-    color: var(--cor-erro);
-    margin-top: 15px;
-    min-height: 20px;
-    font-weight: bold;
-}
-
-/* --- 4. PÁGINA DO MURAL (mural.html) --- */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px;
-    background-color: rgba(0,0,0,0.2);
-    border-bottom: 1px solid var(--cor-borda);
-    flex-wrap: wrap;
-}
-.user-info-header p .fas {
-    /* Exemplo de estilo para o ícone */
-    color: var(--cor-moeda); /* Usa a cor de destaque do seu tema */
-    margin-right: 8px; /* Espaço entre o ícone e o texto */
-    font-size: 1.1em; /* Levemente maior que o texto, se desejar */
-    /* text-shadow: 0 0 5px var(--cor-acento); /* Um pequeno brilho, opcional */
-}
-.user-info-header {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 15px;
-}
-.foto-perfil-header {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid var(--cor-acento);
-}
-
-.main-content { padding: 0; }
-.new-post-section {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    padding: 20px;
-    border-bottom: 1px solid var(--cor-borda);
-}
-
-.new-post-section textarea { 
-    flex: 1;
-    min-height: 60px; 
-    resize: vertical; 
-    background-color: var(--cor-primaria); 
-    border-radius: 18px;
-    padding: 20px; 
-    color: var(--cor-texto-principal); 
-    font-size: 16px; 
-    border: 1px solid var(--cor-borda); 
-}
-.new-post-section button { 
-    width: auto; 
-    background-color: var(--cor-acento); 
-    color: white; 
-    padding: 10px 20px; 
-    border-radius: 8px; 
-    cursor: pointer; 
-    transition: background-color 0.3s; 
-    border: none; 
-    font-size: 16px;
-}
-.new-post-section button:hover { background-color: var(--cor-acento-hover); }
-
-.feed-posts { padding: 20px; }
-.tweet-post { 
-    border-bottom: 1px solid var(--cor-primaria); 
-    padding-bottom: 15px; 
-    margin-bottom: 15px; 
-}
-.post-header { 
-    display: flex; 
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 15px; 
-    margin-bottom: 15px; 
-}
-.post-header-info {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-.post-avatar { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
-.post-info { display: flex; flex-direction: column; }
-.post-author { font-size: 16px; font-weight: 700; }
-.post-date { font-size: 12px; color: var(--cor-texto-secundario); }
-.post-content p { line-height: 1.6; margin-bottom: 15px; white-space: pre-wrap; word-break: break-word; }
-
-.nav-buttons { display: flex; align-items: center; gap: 10px; }
-.nav-buttons button { background-color: transparent; color: var(--cor-texto-secundario); border: 1px solid var(--cor-borda); padding: 8px 16px; font-weight: normal; cursor: pointer; transition: background-color 0.3s, color 0.3s; border-radius: 8px; font-size: 14px; }
-.nav-buttons button:hover { background-color: var(--cor-borda); color: var(--cor-texto-principal); }
-
-.delete-button {
-    background: none;
-    border: none;
-    color: var(--cor-texto-secundario);
-    cursor: pointer;
-    font-size: 14px;
-    padding: 5px;
-    border-radius: 50%;
-    transition: color 0.3s, background-color 0.3s;
-}
-.delete-button:hover {
-    color: var(--cor-erro);
-    background-color: rgba(244, 67, 54, 0.1);
-}
-
-/* --- 5. PÁGINA DE PERFIL (perfil.html) --- */
-.perfil-container {
-    text-align: center;
-}
-.perfil-container > button {
-    background: var(--cor-acento);
-    border: 1px solid var(--cor-acento);
-    color: white;
-    margin-bottom: 30px;
-    cursor: pointer;
-    padding: 12px 24px;
-    border-radius: 8px;
-    transition: background-color 0.3s;
-    font-size: 16px;
-    border: none;
-}
-.perfil-container > button:hover {
-    background-color: var(--cor-acento-hover);
-}
-.perfil-imagem {
-    position: relative;
-    width: 150px;
-    height: 150px;
-    margin: 0 auto 20px auto;
-}
-.foto-perfil {
-    width: 100%; /* Ocupa 100% do container .perfil-imagem */
-    height: 100%;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 4px solid var(--cor-acento);
-    cursor: pointer;
-    transition: filter 0.3s;
-}
-.foto-perfil:hover {
-    filter: brightness(0.7);
-}
-.perfil-imagem label span {
-    display: block;
-    margin-top: 10px;
-    color: var(--cor-texto-secundario);
-    cursor: pointer;
-}
-.perfil-nome { margin-bottom: 30px; }
-.perfil-nome strong { display: block; margin-bottom: 10px; color: var(--cor-texto-secundario); }
-.perfil-nome input { text-align: center; max-width: 300px; margin: 0 auto; }
-#mensagemStatus { color: var(--cor-sucesso); margin-top: 20px; min-height: 22px; font-weight: bold; }
-
-
-/* --- 6. PÁGINAS DE JOGOS (pggame.html, jogo da velha.html) --- */
-.background-animation { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%); z-index: -2; }
-.floating-particles { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: -1; overflow: hidden; }
-.particle { position: absolute; bottom: -20px; background-color: rgba(224, 224, 224, 0.2); border-radius: 50%; animation: floatUp 15s linear infinite; }
-@keyframes floatUp {
-    from { transform: translateY(0) translateX(0); opacity: 0.7; }
-    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
-}
-.game-buttons-layout {
-    display: flex;
-    flex-direction: column; /* Coloca os itens um abaixo do outro */
-    gap: 10px;
-    margin-bottom: 30px;
-    align-items: stretch; /* Faz os botões ocuparem toda a largura do container */
-}
-.btn {
-    display: block;
-    font-family: var(--fonte-padrao);
-    text-decoration: none;
-    cursor: pointer;
-    border: 2px solid var(--cor-acento);
-    border-radius: 8px;
-    padding: 12px 24px;
-    font-size: 16px;
-    font-weight: 700;
-    transition: all 0.3s ease;
-    text-align: center;
-    background-color: var(--cor-acento);
-    color: white;
-    width: 100%;
-    max-width: 250px;
-    margin: 0 auto; /* Centraliza os botões se o container for maior */
-}
-.btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
-    background-color: var(--cor-acento-hover);
-}
-.btn.secondary {
-    background-color: transparent;
-    color: var(--cor-acento);
-}
-.btn.secondary:hover {
-    background-color: var(--cor-acento);
-    color: white;
-}
-#game-board {
-    display: grid;
-    grid-template-columns: repeat(3, 100px);
-    grid-template-rows: repeat(3, 100px);
-    gap: 8px;
-    margin: 30px auto;
-    justify-content: center;
-}
-.cell {
-    width: 100px;
-    height: 100px;
-    background-color: var(--cor-primaria);
-    border: 2px solid var(--cor-borda);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 4em;
-    font-family: var(--fonte-pixel);
-    cursor: pointer;
-    border-radius: 8px;
-    transition: background-color 0.2s;
-}
-/* --- 7. ESTILOS DA SEÇÃO DE COMENTÁRIOS --- */
-.post-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-top: 10px;
-    margin-top: 10px;
-    border-top: 1px solid var(--cor-primaria);
-}
-
-.action-button {
-    background: none;
-    border: 1px solid var(--cor-borda);
-    color: var(--cor-texto-secundario);
-    padding: 5px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 14px;
-}
-
-.action-button:hover {
-    background-color: var(--cor-borda);
-    color: var(--cor-texto-principal);
-}
-
-.comment-count {
-    background-color: var(--cor-borda);
-    color: white;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 10px;
-    margin-left: 8px;
-}
-
-.comments-section {
-    padding: 15px 0 0 0;
-    margin-top: 15px;
-    border-top: 1px solid rgba(138, 43, 226, 0.2);
-}
-
-.comments-list {
-    margin-bottom: 20px;
-    max-height: 300px;
-    overflow-y: auto;
-}
-
-.comment {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.comment-avatar {
-    width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-
-.comment-content {
-    background-color: rgba(0,0,0,0.15);
-    padding: 10px 15px;
-    border-radius: 8px;
-    width: 100%;
-}
-
-.comment-content strong {
-    font-size: 14px;
-    color: var(--cor-texto-principal);
-}
-
-.comment-content p {
-    font-size: 14px;
-    margin: 5px 0 0 0;
-    line-height: 1.5;
-    white-space: pre-wrap;
-    word-break: break-word;
-}
-
-.new-comment-form {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-}
-
-.new-comment-form textarea {
-    flex: 1;
-    min-height: 40px;
-    resize: vertical;
-    background-color: var(--cor-primaria);
-    border-radius: 20px;
-    padding: 10px 15px;
-    color: var(--cor-texto-principal);
-    font-size: 14px;
-    border: 1px solid var(--cor-borda);
-}
-
-.new-comment-form button {
-    background-color: var(--cor-acento);
-    color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    cursor: pointer;
-    border: none;
-    transition: background-color 0.3s;
-    font-size: 14px;
-}
-
-.new-comment-form button:hover {
-    background-color: var(--cor-acento-hover);
-}
-
-
-/* --- 8. DESIGN RESPONSIVO (Media Queries para Mobile) --- */
-@media (max-width: 768px) {
-    body {
-        padding: 10px; /* Reduz o padding do corpo para aproveitar melhor a tela */
-    }
-
-    .container, .login-container, .perfil-container {
-        padding: 15px; /* Diminui o padding interno dos containers */
-        border: none; /* Remove a borda para um visual mais limpo */
-    }
-
-    h2 {
-        font-size: 20px; /* Ajusta o tamanho da fonte dos títulos */
-    }
-
-    /* --- Cabeçalho e Navegação do Mural --- */
-    .header {
-        flex-direction: column; /* Empilha os elementos do cabeçalho */
-        gap: 20px;
-        padding: 15px;
-    }
-
-    .nav-buttons {
-        width: 100%;
-        justify-content: space-around; /* Distribui os botões de navegação */
-    }
-
-    /* --- Seção de Nova Postagem --- */
-    .new-post-section {
-        flex-direction: column; /* Empilha a área de texto e o botão */
-        gap: 10px;
-    }
-
-    .new-post-section button {
-        width: 100%; /* Faz o botão ocupar a largura total */
-    }
-    
-    /* --- Cabeçalho dos Posts --- */
-    .post-header {
-        flex-direction: column; /* Empilha as informações do post e o botão de excluir */
-        align-items: flex-start;
-        gap: 10px;
-    }
-
-    .delete-button {
-        align-self: flex-end; /* Move o botão de deletar para o canto direito */
-    }
-
-    /* --- Página de Perfil --- */
-    .perfil-imagem {
-        width: 120px;
-        height: 120px;
-    }
-
-    /* --- Páginas de Jogos --- */
-    #game-board {
-        /* Usa unidades de viewport (vw) para o grid se adaptar à largura da tela */
-        grid-template-columns: repeat(3, 25vw);
-        grid-template-rows: repeat(3, 25vw);
-        max-width: 320px; /* Limita o tamanho máximo em telas um pouco maiores */
-        gap: 5px;
-    }
-
-    .cell {
-        /* O tamanho da célula é herdado do grid, não precisa de width/height fixo */
-        font-size: 2.5em; /* Reduz o tamanho da fonte (X/O) para caber nas células menores */
-    }
-
-    /* --- Ações e Comentários dos Posts --- */
-    .post-actions {
-        flex-direction: column;
-        align-items: stretch; /* Faz os botões ocuparem a largura total */
-        gap: 10px;
-    }
-
-    .action-button {
-        justify-content: center; /* Centraliza o conteúdo dos botões de ação */
-    }
-
-    .new-comment-form {
-        flex-direction: column;
-        align-items: stretch; /* Empilha e estica os elementos do formulário */
-        gap: 10px;
-    }
-
-    .new-comment-form button {
-        width: 100%;
-    }
-}
-.new-post-section .emoji-btn,
-.new-comment-form .emoji-btn {
-    margin-right: 8px; /* Adiciona um espaço à direita do botão de emoji */
-    font-size: 1.2rem; /* Aumenta um pouco o emoji */
-    padding: 5px 10px;
-    border: none;
-    background-color: #f0f0f000;
-    cursor: pointer;
-    border-radius: 10px;
-}
-.new-post-section,
-.new-comment-form {
-    display: flex;
-    align-items: center; /* Alinha os itens verticalmente */
-    gap: 10px; /* Espaço entre os itens */
-}
-
-.new-post-section textarea,
-.new-comment-form textarea {
-    flex-grow: 1; /* Faz o textarea ocupar o espaço disponível */
-}
-
-.emoji-button {
-    background: none;
-    border: none;
-    font-size: 1.5rem; /* Tamanho do emoji */
-    cursor: pointer;
-    padding: 5px;
-    color: #333; 
-}
-
-.emoji-button:hover {
-    opacity: 0.8;
-}
 .game-card h3 {
     font-family: var(--fonte-pixel);
     font-size: 16px;
@@ -1167,7 +741,8 @@ input:focus {
     font-family: var(--fonte-pixel);
     font-size: 18px;
     color: var(--cor-acento);
-    height: 30px; 
+    height: 30px;
+    min-height: 30px; /* Garante que a altura seja mantida */
 }
 
 .board {
@@ -1212,15 +787,112 @@ input:focus {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s;
-    font-family: var(--fonte-pixel);
-    font-size: 14px;
+    font-family: var(--fonte-padrao);
 }
 
 #reset-button:hover {
-     background-color: var(--cor-acento-hover);
+    background-color: var(--cor-acento-hover);
 }
 
-/* --- 12. DESIGN RESPONSIVO --- */
+/* --- 12. ESTILOS DE BOTÕES GERAIS E LAYOUT DE JOGOS --- */
+.game-buttons-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 30px;
+    align-items: stretch; /* Garante que os botões estiquem para a largura do contêiner */
+}
+
+.btn {
+    display: block;
+    font-family: var(--fonte-padrao);
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid var(--cor-acento);
+    border-radius: 8px;
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    text-align: center;
+    background-color: var(--cor-acento);
+    color: white;
+    width: 100%;
+    max-width: 250px; /* Limita a largura máxima do botão */
+    margin: 0 auto; /* Centraliza o botão */
+}
+
+.btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+    background-color: var(--cor-acento-hover);
+}
+
+.btn.secondary {
+    background-color: transparent;
+    color: var(--cor-acento);
+}
+
+.btn.secondary:hover {
+    background-color: var(--cor-acento);
+    color: white;
+}
+
+/* --- 13. ESTILOS PARA SCROLLBAR --- */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--cor-borda);
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--cor-acento-hover);
+}
+
+/* --- 14. ANIMAÇÕES DE FUNDO --- */
+.background-animation {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 50% 50%, rgba(138, 43, 226, 0.08), transparent 70%);
+    z-index: -2;
+}
+
+.floating-particles {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.particle {
+    position: absolute;
+    bottom: -20px;
+    background-color: rgba(224, 224, 224, 0.2);
+    border-radius: 50%;
+    animation: floatUp 15s linear infinite;
+}
+
+@keyframes floatUp {
+    from { transform: translateY(0) translateX(0); opacity: 0.7; }
+    to { transform: translateY(-110vh) translateX(20px); opacity: 0; }
+}
+
+/* --- 15. RESPONSIVIDADE (Media Queries para Mobile) --- */
 @media (max-width: 768px) {
     body {
         padding: 10px;
@@ -1228,17 +900,17 @@ input:focus {
 
     .container, .login-container, .perfil-container, .pggame-container, .jogo-da-velha-container {
         padding: 15px;
-        border: none;
+        border: none; /* Remove a borda para economizar espaço em telas pequenas */
     }
 
     h2 {
         font-size: 20px;
     }
 
-    .header, .post-header {
+    .header {
         flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
+        gap: 20px;
+        padding: 15px;
     }
 
     .nav-buttons {
@@ -1246,42 +918,66 @@ input:focus {
         justify-content: space-around;
     }
 
-    .delete-button {
-        align-self: flex-end;
+    .new-post-section {
+        flex-direction: column;
+        gap: 10px;
     }
 
-    .post-actions, .new-comment-form {
+    .new-post-section .rubitar-btn { /* Ajuste para o botão de postar */
+        width: 100%;
+        margin-left: 0; /* Centraliza o botão */
+    }
+
+    .post-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .delete-button {
+        align-self: flex-end; /* Mantém o botão de exclusão à direita */
+    }
+
+    .perfil-imagem {
+        width: 120px;
+        height: 120px;
+    }
+
+    .board { /* Renomeei de #game-board para .board */
+        grid-template-columns: repeat(3, 25vw);
+        grid-template-rows: repeat(3, 25vw);
+        max-width: 320px;
+        gap: 5px;
+    }
+
+    .cell {
+        font-size: 2.5em;
+    }
+
+    .post-actions {
         flex-direction: column;
         align-items: stretch;
         gap: 10px;
     }
 
-    /* Ajustes para o Jogo da Velha em telas pequenas */
-    .board {
-        grid-template-columns: repeat(3, 80px);
-        grid-template-rows: repeat(3, 80px);
-        gap: 5px;
+    .action-button {
+        justify-content: center;
     }
 
-    .cell {
-        width: 80px;
-        height: 80px;
-        font-size: 38px;
+    .comment-input-area { /* Adaptação para mobile da nova área de comentários */
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        padding: 10px;
     }
-}
-.coin-animation {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 120px; /* Tamanho da moeda na animação */
-    height: auto;
-    opacity: 1;
-    transition: opacity 0.5s ease-in-out, transform 0.5s ease-out;
-    z-index: 1001; /* Garante que fique sobre outros elementos */
-}
 
-.coin-animation.fade-out {
-    opacity: 0;
-    transform: translate(-50%, calc(-50% - 50px));
+    .comment-input-area textarea {
+        margin-bottom: 0; /* Garante que a textarea não tenha margem inferior */
+    }
+
+    .comment-input-area .btn-post-comment,
+    .comment-input-area .comment-emoji-btn {
+        width: 100%;
+        text-align: center;
+    }
 }
