@@ -1,3 +1,5 @@
+// andar.js
+
 document.addEventListener('DOMContentLoaded', async () => {
     // --- Elementos do DOM ---
     const mainMenu = document.getElementById('main-menu');
@@ -14,9 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ground = document.getElementById('ground');
     const mobileControls = document.getElementById('mobile-controls');
 
-    // --- REMOVA ESTE BLOCO! AS CONFIGURAÇÕES DO SUPABASE DEVEM ESTAR EM 'utils.js' OU 'config.js'
+    // --- REMOVA ESTE BLOCO! AS CONFIGURAÇÕES DO SUPABASE DEVEM ESTAR EM 'supabaseClient.js'
     // const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-    // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtX-tL0';
+    // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
     // const { createClient } = supabase;
     // const _supabase = createClient(supabaseUrl, supabaseKey);
     // --- FIM DO BLOCO A SER REMOVIDO ---
@@ -48,15 +50,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         character.style.transform = `translateY(${characterY}px)`;
     };
 
-    // Verificação de sessão de usuário no início
-    // Garanta que window._supabase esteja definido em utils.js
-    const { data: { session } } = await window._supabase.auth.getSession(); 
-    if (!session) {
-        window.location.href = 'index.html';
+    // --- Verificação de sessão de usuário no início ---
+    // É crucial que window._supabase esteja definido por supabaseClient.js ANTES disso.
+    if (typeof window._supabase === 'undefined') {
+        console.error('Supabase client não inicializado. Não é possível verificar a sessão do usuário. Redirecionando...');
+        window.location.href = 'index.html'; // Redireciona se o Supabase não estiver pronto
         return;
     }
-    currentUser = session.user; 
-    window.currentUser = currentUser; // Torna o usuário atual globalmente acessível, se necessário
+
+    const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
+    if (sessionError || !session) {
+        console.error('Nenhuma sessão de usuário encontrada ou erro ao carregar sessão:', sessionError?.message);
+        window.location.href = 'index.html'; // Redireciona se não houver sessão ou erro
+        return;
+    }
+    currentUser = session.user;
+    // window.currentUser = currentUser; // Desnecessário, já que currentUser é uma variável global neste escopo.
 
     // --- LÓGICA DE CONTROLE DE TELAS ---
     function showMainMenu() {
@@ -65,13 +74,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainMenu.classList.remove('hidden');
         gameOverScreen.style.visibility = 'hidden';
         loadMenuRanking();
-        mobileControls.classList.add('hidden');
+        mobileControls.classList.add('hidden'); // Esconde controles móveis no menu
     }
 
     function showGame() {
         mainMenu.classList.add('hidden');
         gameContainer.classList.remove('hidden');
         startGame();
+        // Mostra controles móveis apenas em telas pequenas E quando o jogo está ativo
         if (window.innerWidth <= 768) {
             mobileControls.classList.remove('hidden');
         } else {
@@ -86,7 +96,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function loadMenuRanking() {
         rankingBoardMenu.innerHTML = '<p>Carregando ranking...</p>';
 
-        // Use window._supabase aqui também, ou apenas _supabase se você tiver feito const _supabase = window._supabase;
+        if (typeof window._supabase === 'undefined') {
+            console.error('Supabase client não inicializado ao carregar ranking.');
+            rankingBoardMenu.innerHTML = '<p>Não foi possível carregar o ranking (erro de Supabase).</p>';
+            return;
+        }
+
         const { data, error } = await window._supabase
             .from('runner_scores')
             .select('score, profiles(username)')
@@ -95,12 +110,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (error) {
             console.error("Erro ao carregar ranking:", error);
-            rankingBoardMenu.innerHTML = '<p>Não foi possível carregar.</p>';
+            rankingBoardMenu.innerHTML = '<p>Não foi possível carregar o ranking. Tente novamente.</p>';
             return;
         }
 
         if (data.length === 0) {
-            rankingBoardMenu.innerHTML = '<p>Seja o primeiro a jogar!</p>';
+            rankingBoardMenu.innerHTML = '<p>Seja o primeiro a deixar sua marca!</p>';
             return;
         }
 
@@ -117,9 +132,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function saveScore(finalScore) {
-        if (!currentUser) return;
+        if (!currentUser) {
+            console.warn('Tentativa de salvar pontuação sem usuário logado.');
+            return;
+        }
+        if (typeof window._supabase === 'undefined') {
+            console.error('Supabase client não inicializado ao salvar pontuação.');
+            return;
+        }
 
-        // Use window._supabase aqui também
         const { error } = await window._supabase
             .from('runner_scores')
             .insert([{ user_id: currentUser.id, score: finalScore }]);
@@ -127,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (error) {
             console.error("Erro ao salvar pontuação:", error);
         } else {
-            console.log("Pontuação salva!");
+            console.log("Pontuação salva com sucesso!");
         }
     }
 
@@ -141,19 +162,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         scoreDisplay.textContent = String(score).padStart(5, '0');
         gameOverScreen.style.visibility = 'hidden';
 
-        setGroundAndCharacterPosition();
-        character.src = 'boneco_parado.png';
-
-        ground.style.animationPlayState = 'running';
+        // Limpa obstáculos antigos (se houver)
         document.querySelectorAll('.obstacle').forEach(obs => obs.remove());
 
+        setGroundAndCharacterPosition();
+        character.src = 'boneco_parado.png'; // Garante a imagem inicial
+
+        // Redefine as animações para começar do zero
+        ground.style.animation = 'none';
+        void ground.offsetWidth; // Trigger reflow
+        ground.style.animation = `moveGround ${20 / gameSpeed}s linear infinite`; // Assume que você tem essa animação em CSS
+        ground.style.animationPlayState = 'running';
+
+
+        // Limpa timeouts/intervals anteriores para evitar múltiplos loops
         clearTimeout(obstacleTimeoutId);
         clearInterval(scoreInterval);
         clearInterval(gameLoopInterval);
 
-        scoreInterval = setInterval(updateScore, 100);
-        gameLoopInterval = setInterval(gameLoop, 20);
-        obstacleTimeoutId = setTimeout(spawnObstacle, 1500);
+        scoreInterval = setInterval(updateScore, 100); // Atualiza score a cada 100ms
+        gameLoopInterval = setInterval(gameLoop, 20); // Loop principal do jogo a cada 20ms (50 FPS)
+        obstacleTimeoutId = setTimeout(spawnObstacle, 1500); // Primeiro obstáculo após 1.5s
     }
 
     function gameLoop() {
@@ -168,35 +197,37 @@ document.addEventListener('DOMContentLoaded', async () => {
         velocityY += gravity;
         characterY += velocityY;
 
+        // Garante que o personagem não caia abaixo do chão
         if (characterY > 0) {
             characterY = 0;
             isJumping = false;
             velocityY = 0;
-            character.src = 'boneco_parado.png';
+            character.src = 'boneco_parado.png'; // Volta para imagem de parado
         }
         character.style.transform = `translateY(${characterY}px)`;
     }
 
     function jump() {
-        if (gameState !== 'playing') return;
+        if (gameState !== 'playing') return; // Só pula se o jogo estiver rodando
         if (!isJumping) {
             isJumping = true;
             velocityY = jumpPower;
-            character.src = 'boneco_pulando.png';
+            character.src = 'boneco_pulando.png'; // Muda para imagem de pulando
         }
     }
 
     function spawnObstacle() {
         if (gameState !== 'playing') return;
         const obstacle = document.createElement('img');
-        obstacle.src = 'capivara.png';
+        obstacle.src = 'capivara.png'; // Certifique-se que esta imagem existe
         obstacle.classList.add('obstacle');
-        obstacle.style.right = '-50px';
-        obstacle.style.bottom = `${groundHeight - 2}px`; 
+        obstacle.style.right = '-50px'; // Começa fora da tela à direita
+        obstacle.style.bottom = `${groundHeight - 2}px`; // Alinha com o chão
         gameContainer.appendChild(obstacle);
 
-        const baseInterval = 1800;
-        const randomVariation = 1200;
+        // Calcula o tempo do próximo obstáculo com base na velocidade do jogo
+        const baseInterval = 1800; // Tempo base em ms
+        const randomVariation = 1200; // Variação aleatória em ms
         const nextSpawnTime = (Math.random() * randomVariation + baseInterval) / (gameSpeed / 4);
         obstacleTimeoutId = setTimeout(spawnObstacle, nextSpawnTime);
     }
@@ -206,9 +237,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.querySelectorAll('.obstacle').forEach(obstacle => {
             let obsRight = parseFloat(obstacle.style.right);
-            obstacle.style.right = `${obsRight + gameSpeed}px`;
+            obstacle.style.right = `${obsRight + gameSpeed}px`; // Move o obstáculo para a esquerda
             if (obsRight > gameContainerWidth + obstacle.offsetWidth) {
-                obstacle.remove();
+                obstacle.remove(); // Remove o obstáculo quando ele sai da tela
             }
         });
     }
@@ -217,8 +248,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (gameState !== 'playing') return;
         score++;
         scoreDisplay.textContent = String(score).padStart(5, '0');
+        // Aumenta a velocidade do jogo a cada 100 pontos
         if (score > 0 && score % 100 === 0) {
             gameSpeed += 0.5;
+            // Atualiza a velocidade da animação do chão para corresponder à velocidade do jogo
+            ground.style.animationDuration = `${20 / gameSpeed}s`;
         }
     }
 
@@ -226,61 +260,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         const charRect = character.getBoundingClientRect();
         document.querySelectorAll('.obstacle').forEach(obstacle => {
             const obsRect = obstacle.getBoundingClientRect();
+            // Lógica de colisão: verifica se os retângulos de colisão se sobrepõem
             if (charRect.right > obsRect.left &&
                 charRect.left < obsRect.right &&
                 charRect.bottom > obsRect.top &&
                 charRect.top < obsRect.bottom) {
-                handleGameOver();
+                handleGameOver(); // Colisão detectada, Game Over!
             }
         });
     }
     
     async function handleGameOver() {
-        if (gameState === 'gameOver') return;
+        if (gameState === 'gameOver') return; // Evita múltiplas chamadas de Game Over
         gameState = 'gameOver';
 
+        // Limpa todos os intervalos e timeouts para parar o jogo
         clearTimeout(obstacleTimeoutId);
         clearInterval(scoreInterval);
         clearInterval(gameLoopInterval);
 
         gameOverScreen.style.visibility = 'visible';
-        ground.style.animationPlayState = 'paused';
+        ground.style.animationPlayState = 'paused'; // Para a animação do chão
 
-        mobileControls.classList.add('hidden');
+        mobileControls.classList.add('hidden'); // Esconde controles móveis no Game Over
 
+        // Salva a pontuação no Supabase
         await saveScore(score);
 
-        // Certifique-se de que 'adicionarRubixCoins' está definida em 'utils.js'
-        if (currentUser && typeof adicionarRubixCoins === 'function') {
-            const coinsEarned = 10; 
-            await adicionarRubixCoins(currentUser.id, coinsEarned);
+        // Adiciona RubixCoins ao usuário
+        // Certifique-se de que 'adicionarRubixCoins' está definida em 'utils.js' e acessível globalmente
+        if (currentUser && typeof window.adicionarRubixCoins === 'function') {
+            const coinsEarned = Math.floor(score / 50) + 1; // Exemplo: 1 moeda a cada 50 pontos + 1 moeda base
+            await window.adicionarRubixCoins(currentUser.id, coinsEarned);
             console.log(`Você ganhou ${coinsEarned} RubixCoins por jogar Corrida da Lisa!`);
+        } else {
+             console.error('Função adicionarRubixCoins não encontrada ou usuário não logado para dar moedas.');
         }
     }
 
     // --- Eventos de Input ---
     document.addEventListener('keydown', (e) => {
         if (e.code === 'Space' || e.code === 'ArrowUp') {
-            e.preventDefault();
+            e.preventDefault(); // Impede a rolagem da página ao pular
             if (gameState === 'playing') jump();
         }
     });
 
+    // Eventos para controle móvel
     jumpButton.addEventListener('click', jump);
     jumpButton.addEventListener('touchstart', (e) => {
-        e.preventDefault();
+        e.preventDefault(); // Impede o comportamento padrão de touch (como zoom)
         jump();
-    }, { passive: false });
+    }, { passive: false }); // { passive: false } para permitir preventDefault
 
     newGameButton.addEventListener('click', showGame);
     restartButton.addEventListener('click', showMainMenu);
     backToMuralButton.addEventListener('click', () => {
-        window.location.href = "mural.html";
+        window.location.href = "mural.html"; // Volta para a página do mural
     });
 
-    // --- Início do Script ---
-    window.addEventListener('resize', setGroundAndCharacterPosition);
-    setGroundAndCharacterPosition(); 
+    // --- Início do Script (Após o DOM ser completamente carregado) ---
+    window.addEventListener('resize', setGroundAndCharacterPosition); // Ajusta a posição ao redimensionar
+    setGroundAndCharacterPosition(); // Define a posição inicial do chão e personagem
 
-    showMainMenu();
+    showMainMenu(); // Mostra o menu principal ao iniciar a página
 });
