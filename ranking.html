@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking de RubixCoins</title>
+    <link rel="stylesheet" href="style.css"> <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        /* Estilos específicos para o ranking, adicione ao seu style.css ou aqui */
+        body {
+            background-color: #1a1a2e; /* Cor de fundo escura */
+            color: #e0e0e0; /* Cor do texto claro */
+            font-family: 'Press Start 2P', cursive;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #2a003a; /* Fundo mais escuro para o container */
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+            margin-top: 20px;
+        }
+
+        h1 {
+            color: #f306f7; /* Azul ciano para o título */
+            margin-bottom: 25px;
+            font-size: 1.8em;
+            text-shadow: 2px 2px 4px rgba(238, 8, 8, 0.7);
+        }
+
+        #rankingList {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        #rankingList li {
+            background-color: #3e005d; /* Cor de fundo para cada item do ranking */
+            margin-bottom: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.1em;
+            border: 1px solid #5a008a;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        #rankingList li:nth-child(1) {
+            background-color: #ffd700; /* Ouro para o 1º lugar */
+            color: #333;
+            font-weight: bold;
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        #rankingList li:nth-child(2) {
+            background-color: #c0c0c0; /* Prata para o 2º lugar */
+            color: #333;
+            font-weight: bold;
+        }
+        #rankingList li:nth-child(3) {
+            background-color: #cd7f32; /* Bronze para o 3º lugar */
+            color: #333;
+            font-weight: bold;
+        }
+
+        .rank-position {
+            font-size: 1.2em;
+            font-weight: bold;
+            width: 30px;
+            text-align: left;
+        }
+
+        .rank-username {
+            flex-grow: 1;
+            text-align: left;
+            margin-left: 15px;
+        }
+
+        .rank-coins {
+            font-weight: bold;
+            color: #aaffaa; /* Verde claro para as moedas */
+        }
+        #rankingList li:nth-child(1) .rank-coins,
+        #rankingList li:nth-child(2) .rank-coins,
+        #rankingList li:nth-child(3) .rank-coins {
+            color: #000; /* Preto para as moedas dos top 3 */
+        }
+
+        .back-button {
+            background-color: #df09ee;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Press Start 2P', cursive;
+            font-size: 0.9em;
+            margin-top: 20px;
+            transition: background-color 0.3s ease;
+        }
+
+        .back-button:hover {
+            background-color: #dd08e8;
+        }
+
+        #loadingMessage {
+            color: #d400bb;
+            margin-top: 20px;
+        }
+
+        #errorMessage {
+            color: #ff5722;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="utils.js"></script> <div class="container">
+        <h1>🏆 Ranking de RubixCoins 🏆</h1>
+        <p id="loadingMessage">Carregando ranking...</p>
+        <p id="errorMessage" style="display: none;"></p>
+        <ul id="rankingList">
+            </ul>
+        <button class="back-button" onclick="window.location.href='mural.html'">Voltar ao Mural</button>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const rankingList = document.getElementById('rankingList');
+            const loadingMessage = document.getElementById('loadingMessage');
+            const errorMessage = document.getElementById('errorMessage');
+
+            // Verifica se _supabase está disponível (do utils.js)
+            if (!window._supabase) {
+                errorMessage.textContent = 'Erro: Supabase não inicializado. Verifique utils.js';
+                errorMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+                return;
+            }
+
+            try {
+                // Busca os usuários da tabela 'profiles' ordenados por 'rubix_coins'
+                // Supondo que 'profiles' tem 'id', 'username' e 'rubix_coins'
+                const { data: profiles, error } = await window._supabase
+                    .from('profiles')
+                    .select('username, rubix_coins')
+                    .order('rubix_coins', { ascending: false }) // Do maior para o menor
+                    .limit(100); // Limite para, por exemplo, os 100 primeiros. Ajuste conforme necessário.
+
+                if (error) {
+                    console.error('Erro ao buscar ranking:', error.message);
+                    errorMessage.textContent = 'Erro ao carregar o ranking. Tente novamente mais tarde.';
+                    errorMessage.style.display = 'block';
+                    loadingMessage.style.display = 'none';
+                    return;
+                }
+
+                loadingMessage.style.display = 'none'; // Esconde a mensagem de carregamento
+
+                if (profiles.length === 0) {
+                    rankingList.innerHTML = '<li>Nenhum usuário no ranking ainda. Jogue para ganhar moedas!</li>';
+                } else {
+                    profiles.forEach((profile, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <span class="rank-position">${index + 1}º</span>
+                            <span class="rank-username">${profile.username || 'Usuário Anônimo'}</span>
+                            <span class="rank-coins">${profile.rubix_coins || 0} 💎</span>
+                        `;
+                        rankingList.appendChild(listItem);
+                    });
+                }
+
+            } catch (err) {
+                console.error('Erro inesperado:', err);
+                errorMessage.textContent = 'Ocorreu um erro inesperado ao carregar o ranking.';
+                errorMessage.style.display = 'block';
+                loadingMessage.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
