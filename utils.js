@@ -1,61 +1,75 @@
-// utils.js
+// --- 1. INICIALIZAÇÃO DO SUPABASE ---
+// Este bloco configura a conexão com seu banco de dados Supabase.
 
-// --- INICIALIZAÇÃO DO SUPABASE ---
-// Estes dados são sensíveis e em produção deveriam estar em um backend.
-// Para este projeto de faculdade, mantê-los aqui é comum.
-const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
+const SUPABASE_URL = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
 
-// A instância do Supabase deve ser globalmente acessível se utils.js for importado primeiro
 const { createClient } = supabase;
-window._supabase = createClient(supabaseUrl, supabaseKey); // Atribuir a window para globalizar
+
+// A instância do cliente Supabase é colocada no objeto 'window'.
+// Isso a torna uma variável "global", acessível em qualquer outro script,
+// como no seu 'mural.html', usando 'window._supabase'.
+window._supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+
+// --- 2. FUNÇÃO PARA GERENCIAR RUBIXCOINS ---
+// Esta é a função corrigida que agora retorna um valor em todos os cenários.
 
 /**
- * Adiciona uma quantidade específica de RubixCoins ao saldo de um usuário.
- * @param {string} userId - O ID do usuário no Supabase.
- * @param {number} amount - A quantidade de RubixCoins a ser adicionada.
+ * Adiciona ou remove RubixCoins de um usuário.
+ * @param {string} userId - O ID do usuário.
+ * @param {number} amount - A quantidade a ser adicionada (pode ser negativa para remover).
+ * @returns {Promise<{error: any}>} - Retorna um objeto com uma chave de erro. O erro será 'null' se tudo ocorrer bem.
  */
 async function adicionarRubixCoins(userId, amount) {
-    // Pega o saldo atual do usuário
-    const { data: profile, error: fetchError } = await window._supabase
-        .from('profiles')
-        .select('rubix_coins')
-        .eq('id', userId)
-        .single();
-
-    if (fetchError && fetchError.code !== 'PGRST116') { // PGRST116 indica "no rows found", o que é ok se for um novo perfil
-        console.error('Erro ao buscar saldo de RubixCoins:', fetchError);
-        return;
+    // Validação básica para garantir que os dados de entrada são válidos.
+    if (!userId || typeof amount !== 'number') {
+        const error = new Error("ID do usuário ou quantidade inválida.");
+        console.error(error.message);
+        return { error }; // Retorna um objeto com o erro
     }
 
-    const currentCoins = profile ? profile.rubix_coins : 0;
-    const newCoins = currentCoins + amount;
+    try {
+        // Passo 1: Pega o saldo atual do usuário direto do banco de dados para segurança.
+        const { data: profile, error: fetchError } = await window._supabase
+            .from('profiles')
+            .select('rubix_coins')
+            .eq('id', userId)
+            .single();
 
-    // Atualiza o saldo de RubixCoins no banco de dados
-    const { error: updateError } = await window._supabase
-        .from('profiles')
-        .update({ rubix_coins: newCoins })
-        .eq('id', userId);
+        if (fetchError) {
+            console.error("Erro ao buscar RubixCoins para o usuário:", userId, fetchError);
+            return { error: fetchError }; // Retorna o erro do Supabase
+        }
 
-    if (updateError) {
-        console.error(`Erro ao adicionar ${amount} RubixCoins para o usuário ${userId}:`, updateError);
-    } else {
-        console.log(`${amount} RubixCoins adicionadas para o usuário ${userId}. Novo saldo: ${newCoins}`);
-        // Opcional: Feedback visual aqui se estiver no contexto de uma página com exibição de saldo
-        // Por exemplo, uma pequena notificação "Você ganhou X RubixCoins!"
+        const currentCoins = profile.rubix_coins || 0;
+        const newBalance = currentCoins + amount;
+
+        // Passo 2: Atualiza o saldo do usuário no banco de dados.
+        const { error: updateError } = await window._supabase
+            .from('profiles')
+            .update({ rubix_coins: newBalance })
+            .eq('id', userId);
+
+        if (updateError) {
+            console.error("Erro ao atualizar RubixCoins para o usuário:", userId, updateError);
+            return { error: updateError }; // Retorna o erro do Supabase
+        }
+
+        // Log para depuração, informando que a operação foi bem-sucedida.
+        console.log(`${amount} RubixCoins adicionadas para o usuário ${userId}. Novo saldo: ${newBalance}`);
+        
+        // CORREÇÃO PRINCIPAL: Retorna um objeto indicando sucesso (erro é nulo).
+        // É por causa da falta desta linha que o erro acontecia.
+        return { error: null };
+
+    } catch (error) {
+        // Captura qualquer outro erro inesperado que possa acontecer.
+        console.error("Erro inesperado na função adicionarRubixCoins:", error);
+        return { error }; // Retorna o erro
     }
 }
 
-// Opcional: Você pode expor a função globalmente se for preciso ser acessada diretamente por outros scripts
+// A função de moedas também é colocada no objeto 'window' para se tornar global,
+// permitindo que seja chamada a partir de 'mural.html' usando 'window.adicionarRubixCoins'.
 window.adicionarRubixCoins = adicionarRubixCoins;
-
-// Exemplo de como carregar o usuário atual ao carregar utils.js, se for necessário em todas as páginas
-// let currentUser = null;
-// document.addEventListener('DOMContentLoaded', async () => {
-//     const { data: { session } } = await window._supabase.auth.getSession();
-//     if (session) {
-//         currentUser = session.user;
-//         // Você pode, por exemplo, armazenar currentUser na window também:
-//         // window.currentUser = currentUser;
-//     }
-// });
