@@ -160,12 +160,11 @@
 
         // --- DECLARAÇÃO DAS FUNÇÕES DA PÁGINA ---
 
-                async function carregarPerfilDoUsuario() {
+        async function carregarPerfilDoUsuario() {
             if (!currentUser) return;
             const { data: profile } = await window._supabase.from('profiles').select('username, avatar_url, rubix_coins').eq('id', currentUser.id).single();
             if (profile) {
                 document.getElementById("nomeUsuario").textContent = profile.username || 'Visitante';
-                // Linha Corrigida
                 document.getElementById("fotoPerfilHeader").src = profile.avatar_url || 'https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg?semt=ais_hybrid&w=740';
                 document.getElementById("saldoRubixCoins").textContent = profile.rubix_coins || 0;
             }
@@ -222,11 +221,27 @@
 
         async function postarMensagem() {
             const texto = document.getElementById("mensagem").value.trim();
-            if (texto === "" && !selectedFile) return alert("Escreva algo ou selecione uma imagem.");
+            if (texto === "" && !selectedFile) {
+                alert("Você precisa escrever algo ou selecionar uma imagem.");
+                return;
+            }
             if (!currentUser) return;
 
-            document.querySelector('.rubitar-btn').disabled = true;
-            document.querySelector('.rubitar-btn').textContent = 'Publicando...';
+            const rubitarBtn = document.querySelector('.rubitar-btn');
+            rubitarBtn.disabled = true;
+            rubitarBtn.textContent = 'Publicando...';
+
+            if (selectedFile) {
+                const custoImagem = 50;
+                const sucesso = await window.gastarRubixCoins(currentUser.id, custoImagem);
+
+                if (!sucesso) {
+                    alert(`Você não tem RubixCoins suficientes! Custa ${custoImagem} moedas para postar uma imagem.`);
+                    rubitarBtn.disabled = false;
+                    rubitarBtn.textContent = 'Rubitar';
+                    return; 
+                }
+            }
 
             let imageUrl = null;
 
@@ -234,13 +249,10 @@
                 const nomeArquivo = `${currentUser.id}-${Date.now()}`;
                 const { error: uploadError } = await window._supabase.storage.from('avatars').upload(nomeArquivo, selectedFile);
                 if (uploadError) {
-                    console.error('====== ERRO DETALHADO DO SUPABASE ======');
-                    console.error(uploadError); // Isso vai nos mostrar o objeto completo do erro
-                    alert('Falha ao enviar a imagem. Verifique o console (F12) para mais detalhes.');
-
-                    // Reativa o botão em caso de erro para poder tentar de novo
-                    document.querySelector('.rubitar-btn').disabled = false;
-                    document.querySelector('.rubitar-btn').textContent = 'Rubitar';
+                    console.error('Erro no upload:', uploadError);
+                    alert('Falha ao enviar a imagem.');
+                    rubitarBtn.disabled = false;
+                    rubitarBtn.textContent = 'Rubitar';
                     return;
                 }
                 const { data: { publicUrl } } = window._supabase.storage.from('avatars').getPublicUrl(nomeArquivo);
@@ -248,47 +260,59 @@
             }
 
             const { error: insertError } = await window._supabase.from('messages').insert({ content: texto, user_id: currentUser.id, image_url: imageUrl });
+
             if (insertError) {
                 console.error("Erro ao postar:", insertError);
             } else {
                 document.getElementById("mensagem").value = "";
                 document.getElementById('remove-image-btn').click();
-                await window.adicionarRubixCoins(currentUser.id, 10);
+                
+                if (!selectedFile) {
+                    await window.adicionarRubixCoins(currentUser.id, 10);
+                }
+                
                 await carregarMensagens();
-                await carregarPerfilDoUsuario();
+                await carregarPerfilDoUsuario(); 
             }
-            document.querySelector('.rubitar-btn').disabled = false;
-            document.querySelector('.rubitar-btn').textContent = 'Rubitar';
+
+            rubitarBtn.disabled = false;
+            rubitarBtn.textContent = 'Rubitar';
         }
 
         async function apagarMensagem(messageId) {
             if (!confirm("Tem certeza que deseja apagar este post?")) return;
-            // Adicionar lógica para apagar a imagem do Storage se houver
             const { error } = await window._supabase.from('messages').delete().match({ id: messageId });
-            if (error) console.error('Erro ao apagar:', error);
-            else {
+            if (error) {
+                console.error('Erro ao apagar:', error);
+            } else {
                 await carregarMensagens();
             }
         }
 
-        function toggleComentarios(messageId) {
+        async function toggleComentarios(messageId) {
             const commentsSection = document.getElementById(`comments-section-${messageId}`);
             if (commentsSection) {
-                commentsSection.style.display = commentsSection.style.display === 'block' ? 'none' : 'block';
-                // Aqui você pode adicionar a lógica para carregar os comentários do post
+                const isVisible = commentsSection.style.display === 'block';
+                commentsSection.style.display = isVisible ? 'none' : 'block';
             }
         }
 
         async function postarComentario(messageId) {
-            // Lógica para postar comentários
+            // Lógica para postar comentários (provavelmente usará 'await')
         }
 
         async function sair() {
             await window._supabase.auth.signOut();
             window.location.href = "index.html";
         }
-        function irParaPerfil() { window.location.href = "perfil.html"; }
-        function game() { window.location.href = "pggame.html"; }
+
+        function irParaPerfil() { 
+            window.location.href = "perfil.html"; 
+        }
+
+        function game() { 
+            window.location.href = "pggame.html"; 
+        }
     </script>
 </body>
 </html>

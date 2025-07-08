@@ -1,27 +1,343 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+﻿<!DOCTYPE html>
+<html xml:lang="en" lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Mural Rubix</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Mario game written in HTML.</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="cache-control" content="max-age=0" />
+    <meta http-equiv="cache-control" content="no-cache" />
+    <meta http-equiv="expires" content="0" />
+    <meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+    <meta http-equiv="pragma" content="no-cache" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <script type="application/javascript" src="jquery-3.5.1.min.js"></script>
+    <style type="text/css">
+        html, html > body {
+            margin: 0;
+            padding: 1em;
+            font-family:Arial;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #333;
+        }
+
+        *:not(a) {
+            -moz-user-select: -moz-none;
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        img {
+            pointer-events: none;
+        }
+
+        .mario_big, .mario_small {
+            position: absolute;
+            left: 25px;
+            top: 178px;
+            z-index: 1000;
+        }
+
+        .mario_warping {
+            z-index: unset;
+        }
+
+        .mario_big {
+            width: 25px;
+        }
+
+        #stage {
+            position: relative;
+            height: 300px;
+            width: 400px;
+            margin: 0;
+            background-color: #40bfff;
+            background-size: contain;
+            background-repeat: repeat-x;
+            overflow: hidden;
+            animation: bg_ani_1 20s infinite linear, bg_ani_2 2s infinite alternate;
+            border: 1px solid #000;
+            border-radius: 1em;
+            margin-left: 1em;
+            margin-top: 0.3em;
+            box-shadow: inset 0px -5px 14px 0px rgba(0, 0, 0, 0.55);
+            filter: saturate(0.6);
+        }
+        .tv {
+            display: none;
+        }
+        .scanlines {
+            display: none;
+        }
+        .info {
+            padding: 2em !IMPORTANT;
+            /* Por padrão, escondemos no mobile e mostramos no desktop */
+            display: none; 
+        }
+
+        #stats_pane {
+            position: absolute;
+            left: 1.5em;
+            top: 1em;
+            padding: 5px;
+            font-size: 16pt;
+            color: white;
+            font-weight: bold;
+            font-family: Arial;
+            background-color: transparent;
+            z-index: 200;
+            text-shadow: 1px 1px 1px #000;
+        }
+
+        #stats_pane img {
+            height: 0.7em;
+        }
+
+        .description {
+            font-family: Arial;
+            font-size: 9pt;
+        }
+
+        .points {
+            color: white;
+            font-size: 12pt;
+            font-weight: bold;
+            position: absolute;
+        }
+
+        .share {
+            display: none;
+        }
+
+        .sprite {
+            display: none;
+        }
+
+        .hide {
+            display: none;
+        }
+
+        @keyframes bg_ani_1 {
+            from {
+                background-position-x: 0;
+                background-position-y: 0;
+            }
+
+            to {
+                background-position-x: -400px;
+                background-position-y: 5px;
+            }
+        }
+
+        @keyframes bg_ani_2 {
+            from {
+                background-position-y: 0;
+            }
+
+            to {
+                background-position-y: 5px;
+            }
+        }
+        
+        /* --- ESTILOS PARA CONTROLES MOBILE --- */
+        #mobile-controls {
+            display: none; /* Escondido em telas grandes */
+            position: fixed;
+            bottom: 20px;
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+            box-sizing: border-box;
+            z-index: 99999;
+        }
+
+        .d-pad {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .action-button {
+            margin-right: 20px;
+        }
+
+        .control-btn {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-user-select: none; /* Safari */
+            user-select: none; /* Standard syntax */
+        }
+        
+        /* Media Query para telas grandes (desktops) */
+        @media (min-width: 769px) {
+            #stage {
+                /* Tamanho maior para desktop */
+                width: 800px; 
+                height: 600px;
+                max-width: 90%; /* Garante que não ultrapasse a largura da tela */
+            }
+            .info {
+                display: block; /* Mostra as instruções no desktop */
+            }
+            .tv, .scanlines {
+                display: block; /* Se você quiser mostrar a "TV" e as "linhas de scan" no desktop */
+            }
+        }
+
+        /* Media Query para telas pequenas (mobile) */
+        @media (max-width: 768px) {
+            #stage {
+                /* Tamanho menor para mobile */
+                width: 320px; 
+                height: 240px;
+                max-width: 95%; /* Garante que não ultrapasse a largura da tela */
+            }
+            #mobile-controls {
+                display: flex; /* Mostra os controles mobile */
+            }
+            .info {
+                display: none; /* Oculta as instruções de teclado no mobile */
+            }
+            .tv, .scanlines {
+                display: none; /* Esconde a "TV" e as "linhas de scan" no mobile */
+            }
+             html, html > body {
+                padding: 0.5em; /* Reduz o padding geral para mobile */
+            }
+        }
+        
+    </style>
+    <script type="text/javascript" src="gameengine.js"></script>
 </head>
 <body>
-    <div class="login-container">
-        <h2>Mural Rubix</h2>
-        <p>Acesse sua conta para continuar</p>
-        <input type="email" id="email" placeholder="E-mail" required>
-        <input type="password" id="password" placeholder="Senha" required>
-        
-        <button id="login-button">Entrar</button>
-        
-        <p id="mensagemErro" class="error-message"></p>
-    </div>
+<body>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <div> <button id="back-to-menu-button" class="btn secondary" onclick="location.reload()">Menu Principal</button> </div>
+    <div class="tv"></div>
+    <div id="stats_pane">
+        <img id="stats_pane_coin" />x<span id="coin_counter">0</span>
+    </div>
+    <div id="stage">
+        <img id="sprite" class="mario_small" />
+        <input type="hidden" id="clouds" class="sprite" value="clouds.gif" />
+        <input type="hidden" id="running_left" class="sprite" value="running_left.gif" />
+        <input type="hidden" id="running_right" class="sprite" value="running_right.gif" />
+        <input type="hidden" id="jumping_left" class="sprite" value="running_left.gif" />
+        <input type="hidden" id="jumping_right" class="sprite" value="running_right.gif" />
+        <input type="hidden" id="standing_left" class="sprite" value="standing_left.gif" />
+        <input type="hidden" id="standing_right" class="sprite" value="standing_right.gif" />
+        <input type="hidden" id="ground_brick" class="sprite" value="ground_brick.png" />
+        <input type="hidden" id="ground_pipe" class="sprite" value="ground_pipe.gif" />
+        <input type="hidden" id="question_block" class="sprite" value="question_block.gif" />
+        <input type="hidden" id="block_brick" class="sprite" value="block_brick.gif" />
+        <input type="hidden" id="moving_block" class="sprite" value="moving_block.png" />
+        <input type="hidden" id="mushroom_head" class="sprite" value="mushroom_head.gif" />
+        <input type="hidden" id="coin" class="sprite" value="coin.gif" />
+        <input type="hidden" id="small_brick" class="sprite" value="small_brick.png" />
+        <input type="hidden" id="bush" class="sprite" value="bush.png" />
+    </div>
+    <div class="info">
+        <div class="description">
+            <p>How to play:</p>
+            <ul>
+                <li>Arrow Keys to move</li>
+                <li>or WASD to move</li>
+                <li>or Space to jump</li>
+                <li>Go down last pipe to restart level</li>
+            </ul>
+        </div>
+        <textarea id="debug" rows="3" cols="50"></textarea>
+    </div>
+    <div class="share">
+    </div>
+    <audio id="audio_jump">
+        <source src="jump.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_mushroom">
+        <source src="mushroom.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_powerup">
+        <source src="powerup.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_bump">
+        <source src="bump.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_died">
+        <source src="died.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_coin">
+        <source src="coin.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_coin2">
+        <source src="coin.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_coin3">
+        <source src="coin.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_coin4">
+        <source src="coin.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_pipe">
+        <source src="pipe.wav" type="audio/wav">
+    </audio>
+    <audio id="audio_overworld">
+        <source src="overworld.mp3" type="audio/mp3">
+    </audio>
     
-    <script src="utils.js"></script>
+    <div id="mobile-controls">
+        <div class="d-pad">
+            <div id="btn-left" class="control-btn">◀</div>
+            <div id="btn-right" class="control-btn">▶</div>
+        </div>
+        <div class="action-button">
+            <div id="btn-jump" class="control-btn">▲</div>
+        </div>
+    </div>
     
-    <script src="login.js"></script>
+    <script>
+        // Espera o documento carregar completamente
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // 2. LÓGICA JAVASCRIPT PARA DETECTAR O TOQUE
+            const btnLeft = document.getElementById('btn-left');
+            const btnRight = document.getElementById('btn-right');
+            const btnJump = document.getElementById('btn-jump');
+
+            // Mapeia botões para as teclas do teclado
+            const controls = [
+                { button: btnLeft, key: 'ArrowLeft' },
+                { button: btnRight, key: 'ArrowRight' },
+                { button: btnJump, key: 'ArrowUp' } 
+            ];
+            
+            controls.forEach(control => {
+                // Evento para quando o dedo TOCA no botão
+                control.button.addEventListener('touchstart', (e) => {
+                    e.preventDefault(); // Impede comportamentos padrão do navegador (como zoom)
+                    // Simula o evento de "tecla pressionada"
+                    document.dispatchEvent(new KeyboardEvent('keydown', { 'key': control.key }));
+                });
+
+                // Evento para quando o dedo SAI do botão
+                control.button.addEventListener('touchend', (e) => {
+                    e.preventDefault();
+                    // Simula o evento de "tecla solta"
+                    document.dispatchEvent(new KeyboardEvent('keyup', { 'key': control.key }));
+                });
+            });
+        });
+    </script>
+    
 </body>
 </html>

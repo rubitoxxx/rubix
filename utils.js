@@ -1,5 +1,3 @@
-// utils.js
-
 // --- INICIALIZAÇÃO DO SUPABASE ---
 const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
@@ -92,17 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
      const coinAnimationContainer = document.getElementById('coin-animation-container');
 
      window.addEventListener('rubixcoin-gasta', () => {
-         const coinImage = document.createElement('img');
-         coinImage.src = 'coin.png'; // Certifique-se que 'coin.png' está no mesmo diretório (ou o caminho correto)
-         coinImage.classList.add('coin-animation');
-         coinAnimationContainer.appendChild(coinImage);
+        const coinImage = document.createElement('img');
+        coinImage.src = 'coin.png'; // Certifique-se que 'coin.png' está no mesmo diretório (ou o caminho correto)
+        coinImage.classList.add('coin-animation');
+        coinAnimationContainer.appendChild(coinImage);
 
-         // Remove a imagem após um tempo
-         setTimeout(() => {
-             coinImage.classList.add('fade-out');
-             setTimeout(() => {
-                 coinImage.remove();
-             }, 500); // Espera a transição de fade-out terminar
-         }, 1500); // Tempo que a moeda fica visível (1.5 segundos)
+        // Remove a imagem após um tempo
+        setTimeout(() => {
+            coinImage.classList.add('fade-out');
+            setTimeout(() => {
+                coinImage.remove();
+            }, 500); // Espera a transição de fade-out terminar
+        }, 1500); // Tempo que a moeda fica visível (1.5 segundos)
      });
  });
