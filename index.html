@@ -1,22 +1,26 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Mural Rubix</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Mural Rubix</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="login-container">
-    <h2>Mural Rubix</h2>
-    <input type="text" id="email" placeholder="Nome de usuário ou email">
-    <input type="password" id="password" placeholder="Senha">
-    <button onclick="login()" style="display: block; width: 100%; text-align: center;">Entrar</button>
-    <p id="mensagemErro"></p>
-  </div>
+  <div class="login-container">
+    <h2>Mural Rubix</h2>
+    <input type="text" id="email" placeholder="E-mail">
+    <input type="password" id="password" placeholder="Senha">
+    
+    <button id="login-button" class="btn">Entrar</button>
+    
+    <p id="mensagemErro"></p>
+  </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="script.js"></script>
+  <script src="utils.js"></script>
+  
+  <script src="script.js"></script>
 </body>
 </html>
