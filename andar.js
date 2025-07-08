@@ -16,12 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const ground = document.getElementById('ground');
     const mobileControls = document.getElementById('mobile-controls');
 
-    // --- REMOVA ESTE BLOCO! AS CONFIGURAÇÕES DO SUPABASE DEVEM ESTAR EM 'supabaseClient.js'
-    // const supabaseUrl = 'https://ldrcfomamlzpxoucpkmb.supabase.co';
-    // const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkcmNmb21hbWx6cHhvdWNwa21iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE4MjA4MjksImV4cCI6MjA2NzM5NjgyOX0.jsqMGgsa9qOMVQvX7bdS70lFvJ7f7TEpm3ggEtV-tL0';
-    // const { createClient } = supabase;
-    // const _supabase = createClient(supabaseUrl, supabaseKey);
-    // --- FIM DO BLOCO A SER REMOVIDO ---
+    // --- IMPORTANTE: REMOVIDO O BLOCO DE INICIALIZAÇÃO DO SUPABASE DAQUI! ---
+    // As configurações do Supabase e sua inicialização devem estar APENAS em 'supabaseClient.js'.
+    // O cliente Supabase deve ser acessado via 'window._supabase'.
 
     // --- Variáveis de Estado do Jogo ---
     let currentUser = null;
@@ -54,18 +51,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     // É crucial que window._supabase esteja definido por supabaseClient.js ANTES disso.
     if (typeof window._supabase === 'undefined') {
         console.error('Supabase client não inicializado. Não é possível verificar a sessão do usuário. Redirecionando...');
-        window.location.href = 'index.html'; // Redireciona se o Supabase não estiver pronto
-        return;
+        // O ideal é que isso não aconteça com a correção do HTML, mas é um bom fallback.
+        // window.location.href = 'index.html'; // Descomente se quiser forçar o redirecionamento
+        return; // Retorna para evitar erros caso Supabase não esteja pronto.
     }
 
-    const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
-    if (sessionError || !session) {
-        console.error('Nenhuma sessão de usuário encontrada ou erro ao carregar sessão:', sessionError?.message);
-        window.location.href = 'index.html'; // Redireciona se não houver sessão ou erro
+    // Tenta obter a sessão do usuário
+    try {
+        const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
+        if (sessionError || !session) {
+            console.error('Nenhuma sessão de usuário encontrada ou erro ao carregar sessão:', sessionError?.message);
+            window.location.href = 'index.html'; // Redireciona se não houver sessão ou erro
+            return;
+        }
+        currentUser = session.user;
+    } catch (e) {
+        console.error("Erro ao tentar obter sessão Supabase:", e);
+        window.location.href = 'index.html'; // Redireciona em caso de erro inesperado
         return;
     }
-    currentUser = session.user;
-    // window.currentUser = currentUser; // Desnecessário, já que currentUser é uma variável global neste escopo.
 
     // --- LÓGICA DE CONTROLE DE TELAS ---
     function showMainMenu() {
@@ -121,7 +125,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const rankingList = document.createElement('ol');
         data.forEach((entry, index) => {
-            const playerName = entry.profiles ? entry.profiles.username : 'Anônimo';
+            // Garante que 'profiles' e 'username' existam antes de acessar
+            const playerName = entry.profiles && entry.profiles.username ? entry.profiles.username : 'Anônimo';
             const listItem = document.createElement('li');
             listItem.innerHTML = `<span>#${index + 1} ${playerName}</span> <span>${String(entry.score).padStart(5, '0')}</span>`;
             rankingList.appendChild(listItem);
@@ -169,10 +174,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         character.src = 'boneco_parado.png'; // Garante a imagem inicial
 
         // Redefine as animações para começar do zero
-        ground.style.animation = 'none';
-        void ground.offsetWidth; // Trigger reflow
-        ground.style.animation = `moveGround ${20 / gameSpeed}s linear infinite`; // Assume que você tem essa animação em CSS
-        ground.style.animationPlayState = 'running';
+        // É importante que 'bgMove' esteja definido no seu CSS para #game-container
+        // e 'moveGround' no seu CSS para #ground (se aplicável, não vi 'moveGround' no CSS fornecido)
+        if (gameContainer) {
+            gameContainer.style.animation = 'none';
+            void gameContainer.offsetWidth; // Força um reflow
+            gameContainer.style.animation = `bgMove ${20 / gameSpeed}s linear infinite`; // Use bgMove ou a animação do chão
+        }
+        if (ground) { // Verifica se o elemento ground existe
+            ground.style.animation = 'none';
+            void ground.offsetWidth; // Força um reflow
+            // Se você tiver uma animação para o chão, adicione-a aqui
+            // Ex: ground.style.animation = `moveGround ${20 / gameSpeed}s linear infinite`;
+            ground.style.animationPlayState = 'running';
+        }
 
 
         // Limpa timeouts/intervals anteriores para evitar múltiplos loops
@@ -252,7 +267,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (score > 0 && score % 100 === 0) {
             gameSpeed += 0.5;
             // Atualiza a velocidade da animação do chão para corresponder à velocidade do jogo
-            ground.style.animationDuration = `${20 / gameSpeed}s`;
+            // A animação 'bgMove' no #game-container também deve ser ajustada para refletir a velocidade
+            if (gameContainer) {
+                 gameContainer.style.animationDuration = `${20 / gameSpeed}s`;
+            }
+            // Se houver uma animação específica para o 'ground', ajuste-a aqui também.
+            // Ex: ground.style.animationDuration = `${20 / gameSpeed}s`;
         }
     }
 
@@ -280,7 +300,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         clearInterval(gameLoopInterval);
 
         gameOverScreen.style.visibility = 'visible';
-        ground.style.animationPlayState = 'paused'; // Para a animação do chão
+        
+        if (gameContainer) {
+            gameContainer.style.animationPlayState = 'paused'; // Pausa a animação do fundo do jogo
+        }
+        if (ground) {
+            // Se houver uma animação no 'ground', pause-a também
+            // Ex: ground.style.animationPlayState = 'paused';
+        }
+
 
         mobileControls.classList.add('hidden'); // Esconde controles móveis no Game Over
 
@@ -294,7 +322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             await window.adicionarRubixCoins(currentUser.id, coinsEarned);
             console.log(`Você ganhou ${coinsEarned} RubixCoins por jogar Corrida da Lisa!`);
         } else {
-             console.error('Função adicionarRubixCoins não encontrada ou usuário não logado para dar moedas.');
+            console.error('Função adicionarRubixCoins não encontrada ou usuário não logado para dar moedas.');
         }
     }
 
