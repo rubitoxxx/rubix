@@ -4,18 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mural Rubix</title>
+    
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script src="utils.js"></script>
 </head>
 <body>
     <div class="container">
@@ -48,104 +41,15 @@
 
     <emoji-picker style="display: none; position: absolute; z-index: 1000;"></emoji-picker>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="utils.js"></script>
+    
     <script>
         let currentUser = null;
+        const CUSTO_EMOJI = 5;
 
-        // --- INÍCIO DO CÓDIGO PARA EMOJIS (COM CUSTO) ---
-
-        // Defina o custo para usar a função. Você pode alterar este valor.
-        const CUSTO_EMOJI = 5; 
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const emojiPicker = document.querySelector('emoji-picker');
-            let activeTextarea = null; 
-
-            // Lógica para abrir o seletor de emojis com custo
-            // Adicionamos 'async' para poder usar 'await' dentro da função
-            document.body.addEventListener('click', async (event) => {
-                if (event.target.matches('.emoji-button')) {
-                    event.stopPropagation(); // Impede que o clique se propague e feche o picker
-                    const button = event.target;
-
-                    try {
-                        // 1. Pega o perfil atualizado do usuário direto do banco de dados
-                        const { data: profile, error: profileError } = await window._supabase
-                            .from('profiles')
-                            .select('rubix_coins')
-                            .eq('id', currentUser.id)
-                            .single();
-
-                        if (profileError || !profile) {
-                            console.error('Erro ao verificar saldo:', profileError);
-                            alert('Não foi possível verificar seu saldo de RubixCoins.');
-                            return;
-                        }
-
-                        // 2. Verifica se o usuário tem moedas suficientes
-                        if (profile.rubix_coins < CUSTO_EMOJI) {
-                            alert(`Você não tem RubixCoins suficientes! Custo: ${CUSTO_EMOJI} moedas.`);
-                            return;
-                        }
-
-                        // 3. Pede confirmação ao usuário antes de gastar
-                        const confirmarGasto = confirm(`Usar a função de emoji custará ${CUSTO_EMOJI} RubixCoins. Deseja continuar?`);
-
-                        if (confirmarGasto) {
-                            // 4. Debita as moedas
-                            // Usamos a função global `adicionarRubixCoins` com um valor negativo
-                            const { error: deductError } = await window.adicionarRubixCoins(currentUser.id, -CUSTO_EMOJI);
-
-                            if (deductError) {
-                                alert('Ocorreu um erro ao debitar suas RubixCoins. Tente novamente.');
-                                return;
-                            }
-
-                            // Atualiza a exibição do saldo na tela imediatamente
-                            await carregarPerfilDoUsuario(); 
-
-                            // 5. Se tudo deu certo, abre o seletor de emojis
-                            if (button.id === 'emoji-btn-main') {
-                                activeTextarea = document.getElementById('mensagem');
-                            } else {
-                                const targetId = button.dataset.targetTextarea;
-                                activeTextarea = document.getElementById(targetId);
-                            }
-
-                            const rect = button.getBoundingClientRect();
-                            emojiPicker.style.top = `${window.scrollY + rect.bottom}px`;
-                            emojiPicker.style.left = `${window.scrollX + rect.left - 150}px`;
-                            emojiPicker.style.display = 'block';
-
-                        } else {
-                            // Se o usuário clicou em "Cancelar", não fazemos nada.
-                            return;
-                        }
-
-                    } catch (err) {
-                        console.error("Erro no processo de pagamento de emoji:", err);
-                        alert("Ocorreu um erro inesperado.");
-                    }
-                }
-            });
-            
-            // Lógica para inserir o emoji (permanece a mesma)
-            emojiPicker.addEventListener('emoji-click', event => {
-                if (activeTextarea) {
-                    activeTextarea.value += event.detail.unicode;
-                }
-                emojiPicker.style.display = 'none';
-            });
-
-            // Lógica para fechar o seletor ao clicar fora (permanece a mesma)
-            document.body.addEventListener('click', (event) => {
-                if (!emojiPicker.contains(event.target) && !event.target.matches('.emoji-button')) {
-                    emojiPicker.style.display = 'none';
-                }
-            });
-        });
-        // --- FIM DO CÓDIGO PARA EMOJIS ---
-
-        // --- LÓGICA PRINCIPAL DA PÁGINA ---
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await window._supabase.auth.getSession();
             if (!session) {
@@ -155,7 +59,82 @@
             currentUser = session.user;
             await carregarPerfilDoUsuario();
             await carregarMensagens();
+            configurarEventListeners();
         });
+
+        function configurarEventListeners() {
+            const emojiPicker = document.querySelector('emoji-picker');
+            let activeTextarea = null;
+
+            document.body.addEventListener('click', async (event) => {
+                if (event.target.matches('.emoji-button')) {
+                    event.stopPropagation();
+                    const button = event.target;
+
+                    try {
+                        const { data: profile, error: profileError } = await window._supabase.from('profiles').select('rubix_coins').eq('id', currentUser.id).single();
+
+                        if (profileError || !profile) {
+                            console.error('Erro ao verificar saldo:', profileError);
+                            Swal.fire({ icon: 'error', title: 'Ops!', text: 'Não foi possível verificar seu saldo de RubixCoins.' });
+                            return;
+                        }
+
+                        if (profile.rubix_coins < CUSTO_EMOJI) {
+                            Swal.fire({ icon: 'warning', title: 'Saldo Insuficiente', text: `Você precisa de ${CUSTO_EMOJI} RubixCoins para usar emojis.` });
+                            return;
+                        }
+
+                        Swal.fire({
+                            title: 'Confirmar Ação',
+                            text: `Usar a função de emoji custará ${CUSTO_EMOJI} RubixCoins. Deseja continuar?`,
+                            icon: 'question',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Sim, gastar!',
+                            cancelButtonText: 'Cancelar'
+                        }).then(async (result) => {
+                            if (result.isConfirmed) {
+                                const { error: deductError } = await window.adicionarRubixCoins(currentUser.id, -CUSTO_EMOJI);
+
+                                if (deductError) {
+                                    Swal.fire({ icon: 'error', title: 'Erro na Transação', text: 'Não foi possível debitar suas RubixCoins.' });
+                                    return;
+                                }
+
+                                Swal.fire({ toast: true, position: 'top-end', icon: 'success', title: `-${CUSTO_EMOJI} RubixCoins!`, showConfirmButton: false, timer: 2000 });
+                                await carregarPerfilDoUsuario();
+
+                                activeTextarea = (button.id === 'emoji-btn-main') ? document.getElementById('mensagem') : document.getElementById(button.dataset.targetTextarea);
+                                
+                                const rect = button.getBoundingClientRect();
+                                emojiPicker.style.top = `${window.scrollY + rect.bottom}px`;
+                                emojiPicker.style.left = `${window.scrollX + rect.left - 150}px`;
+                                emojiPicker.style.display = 'block';
+                            }
+                        });
+
+                    } catch (err) {
+                        console.error("Erro no processo de pagamento de emoji:", err);
+                        Swal.fire({ icon: 'error', title: 'Erro Inesperado', text: 'Algo deu muito errado.' });
+                    }
+                }
+            });
+
+            emojiPicker.addEventListener('emoji-click', event => {
+                if (activeTextarea) {
+                    activeTextarea.value += event.detail.unicode;
+                }
+                emojiPicker.style.display = 'none';
+            });
+
+            document.body.addEventListener('click', (event) => {
+                if (!emojiPicker.contains(event.target) && !event.target.matches('.emoji-button')) {
+                    emojiPicker.style.display = 'none';
+                }
+            });
+        }
 
         async function carregarPerfilDoUsuario() {
             if (!currentUser) return;
@@ -171,14 +150,7 @@
             const mural = document.getElementById("mural");
             mural.innerHTML = "<p>Carregando mural...</p>";
             
-            const { data: messages, error } = await window._supabase
-                .from('messages')
-                .select(`
-                    *,
-                    profiles (username, avatar_url),
-                    comments ( *, profiles (username, avatar_url) )
-                `)
-                .order('created_at', { ascending: false });
+            const { data: messages, error } = await window._supabase.from('messages').select(`*, profiles (username, avatar_url), comments ( *, profiles (username, avatar_url) )`).order('created_at', { ascending: false });
 
             if (error) {
                 console.error("Erro ao carregar mensagens:", error);
@@ -200,15 +172,7 @@
                     msg.comments.forEach(comment => {
                         const commenterName = comment.profiles ? comment.profiles.username : 'Anônimo';
                         const commenterAvatar = comment.profiles?.avatar_url || "https://img.freepik.com/vetores-premium/icone-de-perfil-de-avatar-padrao-imagem-de-usuario-de-midia-social-icone-de-avatar-cinza-silhueta-de-perfil-em-branco-ilustracao-vetorial_561158-3383.jpg";
-                        commentsHTML += `
-                            <div class="comment">
-                                <img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}">
-                                <div class="comment-content">
-                                    <strong>${commenterName}</strong>
-                                    <p>${comment.content}</p>
-                                </div>
-                            </div>
-                        `;
+                        commentsHTML += `<div class="comment"><img src="${commenterAvatar}" class="comment-avatar" alt="Foto de ${commenterName}"><div class="comment-content"><strong>${commenterName}</strong><p>${comment.content}</p></div></div>`;
                     });
                 }
 
@@ -224,10 +188,7 @@
                     </div>
                     <div class="post-content"><p>${msg.content}</p></div>
                     <div class="post-actions">
-                        <button class="action-button" onclick="toggleComentarios('${msg.id}')">
-                            <i class="fas fa-comment"></i> Comentar 
-                            <span class="comment-count">${commentCount}</span>
-                        </button>
+                        <button class="action-button" onclick="toggleComentarios('${msg.id}')"><i class="fas fa-comment"></i> Comentar <span class="comment-count">${commentCount}</span></button>
                         ${msg.user_id === currentUser?.id ? `<button class="delete-button" onclick="apagarMensagem('${msg.id}')"><i class="fas fa-trash"></i></button>` : ''}
                     </div>
                     <div class="comments-section" id="comments-section-${msg.id}" style="display:none;">
@@ -237,8 +198,7 @@
                             <button class="emoji-button" data-target-textarea="comment-input-${msg.id}">😀</button>
                             <button onclick="postarComentario('${msg.id}')">Publicar</button>
                         </div>
-                    </div>
-                `;
+                    </div>`;
                 mural.appendChild(postElement);
             });
         }
@@ -249,6 +209,7 @@
             const { error } = await window._supabase.from('messages').insert({ content: texto, user_id: currentUser.id });
             if (error) {
                 console.error("Erro ao postar mensagem:", error);
+                Swal.fire({ icon: 'error', title: 'Erro', text: 'Não foi possível postar sua mensagem.'});
             } else {
                 document.getElementById("mensagem").value = "";
                 await window.adicionarRubixCoins(currentUser.id, 10);
@@ -258,14 +219,28 @@
         }
 
         async function apagarMensagem(messageId) {
-            if (!confirm("Tem certeza que deseja apagar este post?")) return;
-            const { error } = await window._supabase.from('messages').delete().match({ id: messageId });
-            if (error) {
-                console.error('Erro ao apagar a mensagem:', error);
-            } else {
-                await carregarMensagens();
-                await carregarPerfilDoUsuario();
-            }
+            Swal.fire({
+                title: 'Tem certeza?',
+                text: "Você não poderá reverter esta ação!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Sim, apagar!',
+                cancelButtonText: 'Cancelar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    const { error } = await window._supabase.from('messages').delete().match({ id: messageId });
+                    if (error) {
+                        console.error('Erro ao apagar a mensagem:', error);
+                        Swal.fire('Erro!', 'Não foi possível apagar o post.', 'error');
+                    } else {
+                        Swal.fire('Apagado!', 'Seu post foi removido.', 'success');
+                        await carregarMensagens();
+                        await carregarPerfilDoUsuario();
+                    }
+                }
+            });
         }
         
         function toggleComentarios(messageId) {
@@ -281,15 +256,11 @@
             const content = input.value.trim();
             if (content === "" || !currentUser) return;
 
-            const { error } = await window._supabase.from('comments').insert({
-                content: content,
-                user_id: currentUser.id,
-                message_id: messageId
-            });
+            const { error } = await window._supabase.from('comments').insert({ content: content, user_id: currentUser.id, message_id: messageId });
 
             if (error) {
                 console.error('Erro ao postar comentário:', error);
-                alert('Não foi possível enviar seu comentário.');
+                Swal.fire({ icon: 'error', title: 'Erro', text: 'Não foi possível enviar seu comentário.' });
             } else {
                 input.value = '';
                 await window.adicionarRubixCoins(currentUser.id, 5);
