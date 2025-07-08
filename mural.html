@@ -8,9 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1/index.js"></script>
-    
     <script src="utils.js"></script>
 </head>
 <body>
@@ -45,57 +43,12 @@
     <emoji-picker style="display: none; position: absolute; z-index: 1000;"></emoji-picker>
 
     <script>
-        // Não é mais necessário inicializar o Supabase aqui, utils.js já faz isso.
-        
-        let currentUser = null; // Mantenha esta declaração aqui
-
-        // --- INÍCIO DO NOVO CÓDIGO PARA EMOJIS ---
-        document.addEventListener('DOMContentLoaded', () => {
-            const emojiPicker = document.querySelector('emoji-picker');
-            let activeTextarea = null; // Variável para guardar o textarea ativo
-
-            // 1. Lógica para abrir o seletor de emojis
-            document.body.addEventListener('click', (event) => {
-                // Verifica se o clique foi em um botão de emoji
-                if (event.target.matches('.emoji-button')) {
-                    const button = event.target;
-                    // Define qual textarea receberá o emoji
-                    if (button.id === 'emoji-btn-main') {
-                        activeTextarea = document.getElementById('mensagem');
-                    } else {
-                        const targetId = button.dataset.targetTextarea;
-                        activeTextarea = document.getElementById(targetId);
-                    }
-
-                    // Posiciona o seletor perto do botão e o exibe
-                    const rect = button.getBoundingClientRect();
-                    emojiPicker.style.top = `${window.scrollY + rect.bottom}px`;
-                    emojiPicker.style.left = `${window.scrollX + rect.left - 150}px`; // Ajuste o valor (-150) se necessário
-                    emojiPicker.style.display = 'block';
-                    event.stopPropagation(); // Impede que o clique feche o seletor imediatamente
-                }
-            });
-            
-            // 2. Lógica para inserir o emoji no textarea
-            emojiPicker.addEventListener('emoji-click', event => {
-                if (activeTextarea) {
-                    // Adiciona o emoji ao texto existente no textarea
-                    activeTextarea.value += event.detail.unicode;
-                }
-                emojiPicker.style.display = 'none'; // Esconde o seletor após a seleção
-            });
-
-            // 3. Lógica para fechar o seletor ao clicar fora dele
-            document.body.addEventListener('click', (event) => {
-                if (!emojiPicker.contains(event.target) && !event.target.matches('.emoji-button')) {
-                    emojiPicker.style.display = 'none';
-                }
-            });
-        });
-        // --- FIM DO NOVO CÓDIGO PARA EMOJIS ---
+        let currentUser = null;
+        let activeTextarea = null; // Variável global para o textarea
 
         // --- LÓGICA PRINCIPAL DA PÁGINA ---
         document.addEventListener('DOMContentLoaded', async () => {
+            // 1. VERIFICA AUTENTICAÇÃO E CARREGA DADOS
             const { data: { session } } = await window._supabase.auth.getSession();
             if (!session) {
                 window.location.href = "index.html";
@@ -104,7 +57,57 @@
             currentUser = session.user;
             await carregarPerfilDoUsuario();
             await carregarMensagens();
+
+            // 2. CONFIGURA A LÓGICA DOS EMOJIS (TUDO EM UM LUGAR SÓ)
+            const emojiPicker = document.querySelector('emoji-picker');
+
+            // Listener para ABRIR o seletor (com custo) e FECHAR (clicando fora)
+            document.body.addEventListener('click', async (event) => {
+                // Se o clique foi em um botão de emoji
+                if (event.target.matches('.emoji-button')) {
+                    event.stopPropagation(); // Impede que o clique feche o picker imediatamente
+
+                    if (!currentUser) {
+                        alert("Você precisa estar logado para usar emojis.");
+                        return;
+                    }
+
+                    const custoEmoji = 5;
+                    const sucesso = await window.gastarRubixCoins(currentUser.id, custoEmoji);
+
+                    if (sucesso) {
+                        await carregarPerfilDoUsuario(); // Atualiza o saldo na tela
+                        
+                        const button = event.target;
+                        activeTextarea = (button.id === 'emoji-btn-main')
+                            ? document.getElementById('mensagem')
+                            : document.getElementById(button.dataset.targetTextarea);
+
+                        const rect = button.getBoundingClientRect();
+                        emojiPicker.style.top = `${window.scrollY + rect.bottom}px`;
+                        emojiPicker.style.left = `${window.scrollX + rect.left - 150}px`;
+                        emojiPicker.style.display = 'block';
+                    } else {
+                        alert(`Você não tem RubixCoins suficientes! Custa ${custoEmoji} moedas para usar um emoji.`);
+                        emojiPicker.style.display = 'none';
+                    }
+                } 
+                // Se o clique foi fora do seletor (e ele está visível)
+                else if (emojiPicker.style.display === 'block' && !emojiPicker.contains(event.target)) {
+                    emojiPicker.style.display = 'none';
+                }
+            });
+
+            // Listener para INSERIR o emoji no textarea
+            emojiPicker.addEventListener('emoji-click', event => {
+                if (activeTextarea) {
+                    activeTextarea.value += event.detail.unicode;
+                }
+                emojiPicker.style.display = 'none';
+            });
         });
+
+        // --- FUNÇÕES DA PÁGINA ---
 
         async function carregarPerfilDoUsuario() {
             if (!currentUser) return;
@@ -122,11 +125,7 @@
             
             const { data: messages, error } = await window._supabase
                 .from('messages')
-                .select(`
-                    *,
-                    profiles (username, avatar_url),
-                    comments ( *, profiles (username, avatar_url) )
-                `)
+                .select(`*, profiles (username, avatar_url), comments ( *, profiles (username, avatar_url) )`)
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -163,7 +162,6 @@
 
                 const commentCount = msg.comments ? msg.comments.length : 0;
 
-                // POSTAGEM E SEÇÃO DE COMENTÁRIOS ATUALIZADA
                 postElement.innerHTML = `
                     <div class="post-header">
                         <img src="${autorAvatar}" class="post-avatar" alt="Foto de ${autorNome}">
