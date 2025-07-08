@@ -311,7 +311,7 @@ input:focus {
     display: block;          /* Necessário para aplicar margens automáticas */
     max-width: 100%;         /* Garante que a imagem nunca ultrapasse o card */
     width: auto;             /* A largura será automática até o limite de altura */
-    max-height: 450px;       /* Limita a altura máxima para a imagem não ficar gigante */
+    max-height: 200px;       /* Limita a altura máxima para a imagem não ficar gigante */
     margin-top: 15px;        
     margin-left: auto;       /* Centraliza a imagem na horizontal */
     margin-right: auto;      /* Centraliza a imagem na horizontal */
