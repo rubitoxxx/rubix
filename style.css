@@ -541,3 +541,37 @@ input:focus {
         width: 100%;
     }
 }
+.new-post-section .emoji-btn,
+.new-comment-form .emoji-btn {
+    margin-right: 8px; /* Adiciona um espaço à direita do botão de emoji */
+    font-size: 1.2rem; /* Aumenta um pouco o emoji */
+    padding: 5px 10px;
+    border: none;
+    background-color: #f0f0f000;
+    cursor: pointer;
+    border-radius: 10px;
+}
+.new-post-section,
+.new-comment-form {
+    display: flex;
+    align-items: center; /* Alinha os itens verticalmente */
+    gap: 10px; /* Espaço entre os itens */
+}
+
+.new-post-section textarea,
+.new-comment-form textarea {
+    flex-grow: 1; /* Faz o textarea ocupar o espaço disponível */
+}
+
+.emoji-button {
+    background: none;
+    border: none;
+    font-size: 1.5rem; /* Tamanho do emoji */
+    cursor: pointer;
+    padding: 5px;
+    color: #333; 
+}
+
+.emoji-button:hover {
+    opacity: 0.8;
+}
