@@ -1269,3 +1269,20 @@ input:focus {
         font-size: 38px;
     }
 }
+}
+.coin-animation {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120px; /* Tamanho da moeda na animação */
+    height: auto;
+    opacity: 1;
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-out;
+    z-index: 1001; /* Garante que fique sobre outros elementos */
+}
+
+.coin-animation.fade-out {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 50px));
+}
