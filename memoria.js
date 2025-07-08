@@ -28,13 +28,13 @@ let gameMode = null; // 'computer' ou 'online'
 // --- Variáveis para Jogo da Memória ---
 const imagePaths = [
     'https://i.pinimg.com/736x/52/64/b0/5264b06cb12da2ab22134399699e462d.jpg',
-    'https://i.pinimg.com/73x/41/80/a6/4180a6b284fdefecaa1e54d6850020b8.jpg',
-    'https://i.pinimg.com/73x/46/7b/1b/467b1bae91d79ac51edeb7d8af5336a0.jpg',
-    'https://i.pinimg.com/73x/29/3d/38/293d38e5012912c311c365c29124b696.jpg',
-    'https://i.pinimg.com/73x/a2/5e/83/a25e83405b3d5613b2eef67c5c3e4bc8.jpg',
-    'https://i.pinimg.com/73x/f8/22/54/f822548760b95016414d7f42c93c8555.jpg',
-    'https://i.pinimg.com/73x/af/19/1e/af191e86d445a2c19319763dee7b2db0.jpg',
-    'https://i.pinimg.com/73x/a9/96/86/a996860ec5c13cc689f01430c5d345a6.jpg',
+    'https://i.pinimg.com/736x/a4/5c/06/a45c06ea180c9ef4c45e67a8a3f9875e.jpg',
+    'https://i.pinimg.com/736x/1a/95/0c/1a950cfaffe952580d51b84f6e6f012a.jpg',
+    'https://i.pinimg.com/736x/1c/c4/be/1cc4be2f1090773519b5e4c37a782671.jpg',
+    'https://i.pinimg.com/736x/e7/5c/f2/e75cf2698b2ca28b09a2a152573b9433.jpg',
+    'https://i.pinimg.com/736x/d9/29/10/d92910845fd3227bd751803dc2b352d5.jpg',
+    'https://i.pinimg.com/736x/fd/fb/82/fdfb82455430348145535ec779093a0a.jpg',
+    'https://i.pinimg.com/736x/53/70/c7/5370c72e72201bc17a91719d01e80484.jpg'
 ];
 
 // --- Variáveis de Estado de Jogo ---
