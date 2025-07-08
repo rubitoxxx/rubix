@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jogo da Velha - Rubix</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="style.css"> <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script type="module" src="supabaseClient.js"></script> 
+    
     <script src="utils.js"></script> 
     
     <style>
+        /* Seus estilos do jogo da velha podem ficar aqui ou em style.css */
         /* Estilos do ranking e lobby online (mantidos do seu código original) */
         #ranking-section { margin-bottom: 30px; text-align: center; }
         #ranking-board ol { list-style: none; padding: 0; }
@@ -100,12 +103,7 @@
     </div>
 
     <script>
-        // --- REMOVIDA: INICIALIZAÇÃO E VARIÁVEIS GLOBAIS DO SUPABASE. ELAS DEVEM ESTAR EM 'utils.js' ---
-        // const supabaseUrl = '...';
-        // const supabaseKey = '...';
-        // const { createClient } = supabase;
-        // const _supabase = createClient(supabaseUrl, supabaseKey);
-
+        // --- Elementos do DOM ---
         const mainMenu = document.getElementById('main-menu-view');
         const onlineLobby = document.getElementById('online-lobby-view');
         const gameView = document.getElementById('game-view');
@@ -115,27 +113,45 @@
         const rankingBoard = document.getElementById('ranking-board');
         const gameCodeDisplay = document.getElementById('game-code-display');
         
+        // --- Variáveis de Estado ---
         let currentUser = null;
         let gameMode = null;
-        const winningConditions = [ [0, 1, 2], [3, 4, 5], [6, 7, 8], [0, 3, 6], [1, 4, 7], [2, 5, 8], [0, 4, 8], [2, 4, 6] ];
+        const winningConditions = [ 
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Linhas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Colunas
+            [0, 4, 8], [2, 4, 6]             // Diagonais
+        ];
 
         // Variáveis para jogo online
-        let currentGame = null;
-        let gameSubscription = null;
+        let currentGame = null; // Armazena o estado do jogo do Supabase
+        let gameSubscription = null; // Armazena a inscrição em tempo real do Supabase
 
-        // Variáveis para jogo vs. Máquina
+        // Variáveis para jogo vs. Máquina (modo local)
         let localGameActive = true;
         let localCurrentPlayer = 'X'; // Sempre começa com o jogador humano
         let localGameState = ['', '', '', '', '', '', '', '', ''];
         
+        // --- Inicialização ao carregar o DOM ---
         document.addEventListener('DOMContentLoaded', async () => {
-            // Use window._supabase para acessar a instância Supabase de utils.js
-            const { data: { session } } = await window._supabase.auth.getSession();
-            if (!session) { window.location.href = 'index.html'; return; }
+            // Verifica se o Supabase client foi inicializado por supabaseClient.js
+            if (typeof window._supabase === 'undefined') {
+                console.error("ERRO: Supabase client não está disponível. Verifique 'supabaseClient.js'.");
+                alert("Erro ao carregar o jogo. Por favor, tente novamente mais tarde.");
+                window.location.href = 'index.html'; // Redireciona para o login se Supabase não estiver pronto
+                return;
+            }
+
+            const { data: { session }, error: sessionError } = await window._supabase.auth.getSession();
+            if (sessionError || !session) {
+                console.warn('Sessão não encontrada ou erro ao carregar sessão. Redirecionando para login.');
+                window.location.href = 'index.html'; // Redireciona se não houver sessão
+                return;
+            }
             currentUser = session.user;
             await carregarRanking();
         });
 
+        // --- Funções de Controle de UI ---
         function selecionarModo(mode) {
             gameMode = mode;
             mainMenu.style.display = 'none';
@@ -148,14 +164,41 @@
         
         function voltarParaMenuPrincipal() {
             onlineLobby.style.display = 'none';
+            gameView.style.display = 'none'; // Esconde a view do jogo também
             mainMenu.style.display = 'block';
+            if (gameSubscription) {
+                gameSubscription.unsubscribe(); // Desinscreve de jogos online ao voltar para o menu
+                gameSubscription = null;
+            }
+            // Limpa o estado do jogo local ao voltar para o menu
+            localGameActive = true;
+            localCurrentPlayer = 'X';
+            localGameState = ['', '', '', '', '', '', '', '', ''];
+            gameBoard.innerHTML = ''; // Limpa o tabuleiro
+            statusDisplay.textContent = ''; // Limpa o status
+            resetButton.style.display = 'none'; // Esconde botão de reset
+            gameCodeDisplay.innerHTML = ''; // Limpa código do jogo
+            carregarRanking(); // Recarrega o ranking ao voltar
         }
 
+        // --- Funções de Ranking ---
         async function carregarRanking() {
-            // Use window._supabase aqui também
-            const { data, error } = await window._supabase.from('game_scores').select(`wins, profiles(username)`).order('wins', { ascending: false }).limit(5);
-            if (error || !data) { rankingBoard.innerHTML = '<p>Não foi possível carregar o ranking.</p>'; return; }
-            if (data.length === 0) { rankingBoard.innerHTML = '<p>Ninguém venceu ainda. Seja o primeiro!</p>'; return; }
+            if (typeof window._supabase === 'undefined') return; // Segurança
+
+            const { data, error } = await window._supabase.from('game_scores')
+                .select(`wins, profiles(username)`) // Assume que 'profiles' tem 'username'
+                .order('wins', { ascending: false })
+                .limit(5);
+
+            if (error || !data) { 
+                console.error("Erro ao carregar ranking:", error);
+                rankingBoard.innerHTML = '<p>Não foi possível carregar o ranking.</p>'; 
+                return; 
+            }
+            if (data.length === 0) { 
+                rankingBoard.innerHTML = '<p>Ninguém venceu ainda. Seja o primeiro!</p>'; 
+                return; 
+            }
             const rankingList = document.createElement('ol');
             data.forEach((score, index) => {
                 const playerUsername = score.profiles ? score.profiles.username : 'Anônimo';
@@ -168,18 +211,35 @@
         }
 
         async function registrarVitoria() {
-            if (!currentUser) return;
-            // Use window._supabase aqui também
+            if (!currentUser || typeof window._supabase === 'undefined') return; // Segurança
+
+            // Assume que você tem uma função RPC 'increment_wins' no Supabase
+            // ou uma lógica para atualizar 'game_scores' diretamente.
+            // Aqui usamos RPC como no seu exemplo anterior.
             const { error } = await window._supabase.rpc('increment_wins', { user_id_to_update: currentUser.id });
             if (error) console.error('Erro ao registrar vitória:', error);
-            else await carregarRanking();
+            else {
+                console.log('Vitória registrada!');
+                await carregarRanking(); // Recarrega o ranking após a vitória
+            }
         }
 
         // --- LÓGICA DO JOGO ONLINE ---
         async function criarNovoJogo() {
-            // Use window._supabase aqui também
-            const { data, error } = await window._supabase.from('games').insert({ player1_id: currentUser.id }).select().single();
-            if (error) { console.error("Erro ao criar jogo:", error); return; }
+            if (typeof window._supabase === 'undefined' || !currentUser) return; // Segurança
+
+            const { data, error } = await window._supabase.from('games').insert({ 
+                player1_id: currentUser.id,
+                board_state: ['', '', '', '', '', '', '', '', ''], // Estado inicial do tabuleiro
+                current_turn: 'X', // Player1 sempre começa com X
+                status: 'waiting' // Estado inicial
+            }).select().single();
+
+            if (error) { 
+                console.error("Erro ao criar jogo:", error); 
+                alert("Não foi possível criar o jogo. Tente novamente.");
+                return; 
+            }
             currentGame = data;
             iniciarVisualizacaoDeJogo();
             escutarMudancasNoJogo(currentGame.id);
@@ -191,13 +251,14 @@
                 alert("Por favor, insira um código de jogo.");
                 return;
             }
+            if (typeof window._supabase === 'undefined' || !currentUser) return; // Segurança
 
-            // Use window._supabase aqui também
+            // Tenta atualizar o jogo para adicionar o player2 e mudar o status para in_progress
             const { data, error } = await window._supabase.from('games')
                 .update({ player2_id: currentUser.id, status: 'in_progress' })
                 .eq('id', gameId)
-                .eq('status', 'waiting')
-                .is('player2_id', null)
+                .eq('status', 'waiting') // Garante que o jogo ainda está aguardando
+                .is('player2_id', null) // Garante que não há player2 já
                 .select()
                 .single();
 
@@ -227,16 +288,25 @@
             atualizarStatusOnline();
         }
 
-        function copiarCodigo() { navigator.clipboard.writeText(currentGame.id).then(() => alert("Código copiado!")); }
+        function copiarCodigo() { 
+            navigator.clipboard.writeText(currentGame.id)
+                .then(() => alert("Código copiado!"))
+                .catch(err => console.error('Erro ao copiar:', err));
+        }
 
         function escutarMudancasNoJogo(gameId) {
-            if (gameSubscription) { gameSubscription.unsubscribe(); }
-            // Use window._supabase aqui também
-            gameSubscription = window._supabase.channel(`game-${gameId}`).on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` }, payload => {
-                currentGame = payload.new;
-                desenharTabuleiroOnline();
-                atualizarStatusOnline();
-            }).subscribe();
+            if (gameSubscription) { 
+                gameSubscription.unsubscribe(); 
+            }
+            if (typeof window._supabase === 'undefined') return; // Segurança
+
+            gameSubscription = window._supabase.channel(`game-${gameId}`)
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'games', filter: `id=eq.${gameId}` }, payload => {
+                    currentGame = payload.new;
+                    desenharTabuleiroOnline();
+                    atualizarStatusOnline();
+                })
+                .subscribe();
         }
 
         function desenharTabuleiroOnline() {
@@ -247,72 +317,117 @@
                 if (cellValue) cell.classList.add(cellValue.toLowerCase());
                 cell.dataset.cellIndex = index;
                 cell.textContent = cellValue;
-                cell.addEventListener('click', () => fazerJogadaOnline(index));
+                // Adiciona o event listener apenas se o jogo estiver em andamento e for a vez do jogador
+                const mySymbol = currentUser.id === currentGame.player1_id ? 'X' : 'O';
+                if (currentGame.status === 'in_progress' && mySymbol === currentGame.current_turn && cellValue === '') {
+                    cell.addEventListener('click', () => fazerJogadaOnline(index));
+                } else {
+                    cell.style.cursor = 'default'; // Não clicável
+                }
                 gameBoard.appendChild(cell);
             });
         }
 
         async function fazerJogadaOnline(index) {
+            if (!currentGame) return; // Garante que um jogo está ativo
+
             const mySymbol = currentUser.id === currentGame.player1_id ? 'X' : 'O';
-            if (currentGame.status !== 'in_progress' || mySymbol !== currentGame.current_turn || currentGame.board_state[index] !== '') return;
+            // Verifica se é a vez do jogador e se a célula está vazia
+            if (currentGame.status !== 'in_progress' || mySymbol !== currentGame.current_turn || currentGame.board_state[index] !== '') {
+                return;
+            }
             
             const newBoardState = [...currentGame.board_state];
             newBoardState[index] = mySymbol;
             
             const [isFinished, winnerSymbol] = verificarVencedor(newBoardState);
             let newStatus = 'in_progress', newWinnerId = null;
+            let coinsEarned = 0; // Para as RubixCoins
 
             if (isFinished) {
                 newStatus = 'finished';
-                if (winnerSymbol) newWinnerId = winnerSymbol === 'X' ? currentGame.player1_id : currentGame.player2_id;
+                if (winnerSymbol) {
+                    newWinnerId = winnerSymbol === 'X' ? currentGame.player1_id : currentGame.player2_id;
+                    if (newWinnerId === currentUser.id) { // Se este jogador venceu
+                        coinsEarned = 20; // Recompensa por vitória online
+                    }
+                } else { // Empate
+                    coinsEarned = 5; // Recompensa por empate online
+                }
             }
             
             const nextTurn = mySymbol === 'X' ? 'O' : 'X';
-            // Use window._supabase aqui também
-            const { error } = await window._supabase.from('games').update({ board_state: newBoardState, current_turn: nextTurn, status: newStatus, winner_id: newWinnerId }).eq('id', currentGame.id);
-            if (error) console.error("Erro ao fazer jogada:", error);
+            
+            if (typeof window._supabase === 'undefined') {
+                console.error('Supabase client não disponível para fazer jogada.');
+                return;
+            }
+
+            const { error } = await window._supabase.from('games').update({ 
+                board_state: newBoardState, 
+                current_turn: nextTurn, 
+                status: newStatus, 
+                winner_id: newWinnerId 
+            }).eq('id', currentGame.id);
+
+            if (error) {
+                console.error("Erro ao fazer jogada:", error);
+            } else {
+                // Se o jogo terminou e este jogador venceu/empatou, adicione as moedas.
+                if (newStatus === 'finished' && coinsEarned > 0 && typeof window.adicionarRubixCoins === 'function') {
+                    await window.adicionarRubixCoins(currentUser.id, coinsEarned);
+                    console.log(`Você ganhou ${coinsEarned} RubixCoins!`);
+                }
+            }
         }
 
         async function atualizarStatusOnline() {
+            if (!currentGame) return;
+
             if (currentGame.status === 'finished') {
                 resetButton.style.display = 'block';
-                resetButton.textContent = 'Jogar Novamente';
+                resetButton.textContent = 'Novo Jogo Online';
                 resetButton.onclick = () => location.reload(); // Recarrega para iniciar novo jogo ou voltar ao menu
                 
                 if (currentGame.winner_id) {
                     const venci = currentUser.id === currentGame.winner_id;
-                    statusDisplay.textContent = venci ? 'Você venceu!' : 'Você perdeu!';
+                    const winnerName = currentGame.winner_id === currentGame.player1_id ? 
+                                       (currentGame.player1_id === currentUser.id ? 'Você' : 'Oponente (X)') : 
+                                       (currentGame.player2_id === currentUser.id ? 'Você' : 'Oponente (O)');
+                    
+                    statusDisplay.textContent = venci ? 'Você venceu!' : `${winnerName} venceu!`;
                     if (venci) {
-                        await registrarVitoria();
-                        // Opcional: Adicionar rubixcoins para vitória online
-                        // if (typeof adicionarRubixCoins === 'function') {
-                        //     const coinsEarned = 20; // Exemplo
-                        //     await adicionarRubixCoins(currentUser.id, coinsEarned);
-                        //     console.log(`Você ganhou ${coinsEarned} RubixCoins por vencer!`);
-                        // }
+                        await registrarVitoria(); // Registra vitória no ranking
                     }
                 } else { 
                     statusDisplay.textContent = 'O jogo empatou!'; 
                 }
             } else if (currentGame.status === 'in_progress') {
-                const isMyTurn = (currentGame.current_turn === 'X' && currentUser.id === currentGame.player1_id) || (currentGame.current_turn === 'O' && currentUser.id === currentGame.player2_id);
-                statusDisplay.textContent = isMyTurn ? 'É a sua vez!' : 'Aguardando jogada do oponente...';
-            } else { 
-                statusDisplay.textContent = 'Aguardando oponente...'; 
+                const isMyTurn = (currentGame.current_turn === 'X' && currentUser.id === currentGame.player1_id) || 
+                                 (currentGame.current_turn === 'O' && currentUser.id === currentGame.player2_id);
+                statusDisplay.textContent = isMyTurn ? `É a sua vez (${currentGame.current_turn})!` : `Aguardando jogada do oponente (${currentGame.current_turn})...`;
+            } else if (currentGame.status === 'waiting') {
+                statusDisplay.textContent = 'Aguardando oponente... Compartilhe o código!';
             }
         }
 
         // --- LÓGICA DO JOGO VS MÁQUINA (COM MINIMAX) ---
         function iniciarJogoLocal() {
-            gameView.style.display = 'block';
+            mainMenu.style.display = 'none'; // Esconde o menu principal
+            gameView.style.display = 'block'; // Mostra a view do jogo
+            onlineLobby.style.display = 'none'; // Garante que o lobby online está escondido
+
             resetButton.style.display = 'block';
             resetButton.textContent = 'Reiniciar Jogo';
-            resetButton.onclick = iniciarJogoLocal; 
+            resetButton.onclick = iniciarJogoLocal; // Reinicia o jogo local
+            
+            gameCodeDisplay.innerHTML = ''; // Limpa o display do código do jogo
+
             localGameActive = true;
             localCurrentPlayer = 'X'; 
             localGameState = ['', '', '', '', '', '', '', '', ''];
             statusDisplay.innerHTML = `Sua vez (X)`;
-            gameBoard.innerHTML = '';
+            gameBoard.innerHTML = ''; // Limpa o tabuleiro anterior
             for (let i = 0; i < 9; i++) {
                 const cell = document.createElement('div');
                 cell.classList.add('cell');
@@ -327,7 +442,7 @@
             const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
 
             if (localGameState[clickedCellIndex] !== '' || !localGameActive || localCurrentPlayer !== 'X') {
-                return;
+                return; // Ignora cliques inválidos
             }
 
             localGameState[clickedCellIndex] = 'X';
@@ -340,13 +455,13 @@
                 localGameActive = false;
                 if (winnerSymbol === 'X') {
                     statusDisplay.innerHTML = `Você venceu!`;
-                    registrarVitoria();
-                    // Opcional: Adicionar rubixcoins para vitória contra a máquina
-                    // if (typeof adicionarRubixCoins === 'function') {
-                    //     const coinsEarned = 5; // Exemplo
-                    //     await adicionarRubixCoins(currentUser.id, coinsEarned);
-                    //     console.log(`Você ganhou ${coinsEarned} RubixCoins por vencer a máquina!`);
-                    // }
+                    registrarVitoria(); // Registra vitória no ranking
+                    // Adicionar rubixcoins para vitória contra a máquina
+                    if (currentUser && typeof window.adicionarRubixCoins === 'function') {
+                        const coinsEarned = 5; 
+                        window.adicionarRubixCoins(currentUser.id, coinsEarned);
+                        console.log(`Você ganhou ${coinsEarned} RubixCoins por vencer a máquina!`);
+                    }
                 } else {
                     statusDisplay.innerHTML = `O jogo empatou!`;
                 }
@@ -355,6 +470,7 @@
 
             localCurrentPlayer = 'O'; 
             statusDisplay.innerHTML = `Vez da máquina (O)`;
+            // Pequeno atraso para a jogada da máquina parecer mais natural
             setTimeout(makeComputerMove, 700); 
         }
 
@@ -362,30 +478,31 @@
         function minimax(board, depth, isMaximizingPlayer) {
             const [isFinished, winnerSymbol] = verificarVencedor(board);
 
+            // Retorna pontuação base se o jogo terminou
             if (isFinished) {
-                if (winnerSymbol === 'O') return 100 - depth; 
-                if (winnerSymbol === 'X') return -100 + depth; 
-                return 0; 
+                if (winnerSymbol === 'O') return 100 - depth; // Máquina vence (O)
+                if (winnerSymbol === 'X') return -100 + depth; // Jogador vence (X)
+                return 0; // Empate
             }
 
-            if (isMaximizingPlayer) { 
+            if (isMaximizingPlayer) { // Vez da Máquina (O) - busca maximizar
                 let bestScore = -Infinity;
                 for (let i = 0; i < board.length; i++) {
                     if (board[i] === '') {
                         board[i] = 'O'; 
-                        let score = minimax(board, depth + 1, false); 
-                        board[i] = ''; 
+                        let score = minimax(board, depth + 1, false); // Chamada recursiva para a vez do Jogador
+                        board[i] = ''; // Desfaz a jogada
                         bestScore = Math.max(bestScore, score);
                     }
                 }
                 return bestScore;
-            } else { 
+            } else { // Vez do Jogador (X) - busca minimizar
                 let bestScore = Infinity;
                 for (let i = 0; i < board.length; i++) {
                     if (board[i] === '') {
                         board[i] = 'X'; 
-                        let score = minimax(board, depth + 1, true); 
-                        board[i] = ''; 
+                        let score = minimax(board, depth + 1, true); // Chamada recursiva para a vez da Máquina
+                        board[i] = ''; // Desfaz a jogada
                         bestScore = Math.min(bestScore, score);
                     }
                 }
@@ -400,11 +517,12 @@
             let bestScore = -Infinity;
             let bestMove = -1;
 
+            // Percorre todas as células disponíveis para encontrar a melhor jogada
             for (let i = 0; i < localGameState.length; i++) {
                 if (localGameState[i] === '') {
-                    localGameState[i] = 'O'; 
-                    let score = minimax(localGameState, 0, false); 
-                    localGameState[i] = ''; 
+                    localGameState[i] = 'O'; // Simula a jogada da máquina
+                    let score = minimax(localGameState, 0, false); // Calcula a pontuação para essa jogada
+                    localGameState[i] = ''; // Desfaz a simulação
 
                     if (score > bestScore) {
                         bestScore = score;
@@ -413,6 +531,7 @@
                 }
             }
             
+            // Aplica a melhor jogada no tabuleiro real
             const cellElement = document.querySelector(`.cell[data-cell-index='${bestMove}']`);
             localGameState[bestMove] = 'O';
             cellElement.innerHTML = 'O';
@@ -433,13 +552,19 @@
             }
         }
 
+        // --- Função Comum de Verificação de Vencedor ---
         function verificarVencedor(board) {
             for (const condition of winningConditions) {
                 const [a, b, c] = condition;
-                if (board[a] && board[a] === board[b] && board[a] === board[c]) return [true, board[a]];
+                if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+                    return [true, board[a]]; // Retorna [true, símbolo do vencedor]
+                }
             }
-            if (!board.includes('')) return [true, null]; 
-            return [false, null]; 
+            // Verifica se houve empate (todas as células preenchidas e ninguém venceu)
+            if (!board.includes('')) {
+                return [true, null]; // Retorna [true, null] para empate
+            }
+            return [false, null]; // O jogo continua
         }
     </script>
 </body>
