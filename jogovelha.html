@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
+        /* Estilos do ranking e lobby online (mantidos do seu código original) */
         #ranking-section { margin-bottom: 30px; text-align: center; }
         #ranking-board ol { list-style: none; padding: 0; }
         #ranking-board li { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid var(--cor-primaria); font-size: 1.1em; text-align: left; }
@@ -16,6 +17,45 @@
         #game-code-display span { background: #333; padding: 5px 10px; border-radius: 5px; cursor: pointer; }
         #online-lobby-view input { padding: 10px; font-size: 1em; margin-right: 10px; }
         #reset-button, #back-to-menu-button { margin-top: 20px; }
+
+        /* Adicione ou ajuste estilos para o tabuleiro se necessário, garantindo boa visualização */
+        #game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 5px;
+            width: 315px; /* 3*100px + 2*5px */
+            margin: 20px auto;
+            background-color: #222;
+            border-radius: 8px;
+            padding: 5px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background-color: var(--cor-secundaria);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3em;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        .cell:hover {
+            background-color: #444;
+        }
+
+        .x {
+            color: #ff6b6b; /* Cor para o jogador X */
+        }
+
+        .o {
+            color: #6bff6b; /* Cor para a máquina O */
+        }
     </style>
 </head>
 <body>
@@ -82,7 +122,7 @@
 
         // Variáveis para jogo vs. Máquina
         let localGameActive = true;
-        let localCurrentPlayer = 'X';
+        let localCurrentPlayer = 'X'; // Sempre começa com o jogador humano
         let localGameState = ['', '', '', '', '', '', '', '', ''];
         
         document.addEventListener('DOMContentLoaded', async () => {
@@ -124,7 +164,7 @@
 
         async function registrarVitoria() {
             if (!currentUser) return;
-            statusDisplay.innerHTML = `Você venceu! Pontos registrados!`;
+            // A mensagem de vitória é tratada na validação do jogo, aqui apenas registramos o ponto.
             const { error } = await _supabase.rpc('increment_wins', { user_id_to_update: currentUser.id });
             if (error) console.error('Erro ao registrar vitória:', error);
             else await carregarRanking();
@@ -140,42 +180,42 @@
         }
 
        async function entrarEmJogo() {
-    const gameId = document.getElementById('game-code-input').value.trim();
-    if (!gameId) {
-        alert("Por favor, insira um código de jogo.");
-        return;
-    }
+            const gameId = document.getElementById('game-code-input').value.trim();
+            if (!gameId) {
+                alert("Por favor, insira um código de jogo.");
+                return;
+            }
 
-    const { data, error } = await _supabase.from('games')
-        .update({ player2_id: currentUser.id, status: 'in_progress' })
-        .eq('id', gameId)
-        .eq('status', 'waiting')
-        .is('player2_id', null)
-        .select()
-        .single();
+            const { data, error } = await _supabase.from('games')
+                .update({ player2_id: currentUser.id, status: 'in_progress' })
+                .eq('id', gameId)
+                .eq('status', 'waiting')
+                .is('player2_id', null)
+                .select()
+                .single();
 
-    if (error || !data) {
-        console.error("Erro ao tentar entrar no jogo:", error); // Adicione este log para depuração
-        if (error && error.message.includes('duplicate key value')) {
-            alert("Este jogo já tem dois jogadores ou o código está incorreto.");
-        } else if (error && error.code === 'PGRST116') { // Código para "Row not found"
-            alert("Código de jogo inválido ou o jogo não está mais disponível para entrada.");
-        } else {
-            alert("Não foi possível entrar no jogo. Verifique o código ou tente novamente.");
+            if (error || !data) {
+                console.error("Erro ao tentar entrar no jogo:", error);
+                if (error && error.message.includes('duplicate key value')) {
+                    alert("Este jogo já tem dois jogadores ou o código está incorreto.");
+                } else if (error && error.code === 'PGRST116') { // Código para "Row not found"
+                    alert("Código de jogo inválido ou o jogo não está mais disponível para entrada.");
+                } else {
+                    alert("Não foi possível entrar no jogo. Verifique o código ou tente novamente.");
+                }
+                return;
+            }
+
+            currentGame = data;
+            iniciarVisualizacaoDeJogo();
+            escutarMudancasNoJogo(currentGame.id);
         }
-        return;
-    }
-
-    currentGame = data;
-    iniciarVisualizacaoDeJogo();
-    escutarMudancasNoJogo(currentGame.id);
-}
 
         function iniciarVisualizacaoDeJogo() {
             onlineLobby.style.display = 'none';
             gameView.style.display = 'block';
             gameCodeDisplay.innerHTML = `Código do Jogo: <span onclick="copiarCodigo()">${currentGame.id}</span> (clique para copiar)`;
-            resetButton.style.display = 'none';
+            resetButton.style.display = 'none'; // No jogo online, o reset é via recarregamento para novo jogo
             desenharTabuleiroOnline();
             atualizarStatusOnline();
         }
@@ -207,14 +247,18 @@
         async function fazerJogadaOnline(index) {
             const mySymbol = currentUser.id === currentGame.player1_id ? 'X' : 'O';
             if (currentGame.status !== 'in_progress' || mySymbol !== currentGame.current_turn || currentGame.board_state[index] !== '') return;
+            
             const newBoardState = [...currentGame.board_state];
             newBoardState[index] = mySymbol;
+            
             const [isFinished, winnerSymbol] = verificarVencedor(newBoardState);
             let newStatus = 'in_progress', newWinnerId = null;
+
             if (isFinished) {
                 newStatus = 'finished';
                 if (winnerSymbol) newWinnerId = winnerSymbol === 'X' ? currentGame.player1_id : currentGame.player2_id;
             }
+            
             const nextTurn = mySymbol === 'X' ? 'O' : 'X';
             const { error } = await _supabase.from('games').update({ board_state: newBoardState, current_turn: nextTurn, status: newStatus, winner_id: newWinnerId }).eq('id', currentGame.id);
             if (error) console.error("Erro ao fazer jogada:", error);
@@ -224,26 +268,31 @@
             if (currentGame.status === 'finished') {
                 resetButton.style.display = 'block';
                 resetButton.textContent = 'Jogar Novamente';
-                resetButton.onclick = () => location.reload();
+                resetButton.onclick = () => location.reload(); // Recarrega para iniciar novo jogo ou voltar ao menu
+                
                 if (currentGame.winner_id) {
                     const venci = currentUser.id === currentGame.winner_id;
                     statusDisplay.textContent = venci ? 'Você venceu!' : 'Você perdeu!';
                     if (venci) await registrarVitoria();
-                } else { statusDisplay.textContent = 'O jogo empatou!'; }
+                } else { 
+                    statusDisplay.textContent = 'O jogo empatou!'; 
+                }
             } else if (currentGame.status === 'in_progress') {
                 const isMyTurn = (currentGame.current_turn === 'X' && currentUser.id === currentGame.player1_id) || (currentGame.current_turn === 'O' && currentUser.id === currentGame.player2_id);
                 statusDisplay.textContent = isMyTurn ? 'É a sua vez!' : 'Aguardando jogada do oponente...';
-            } else { statusDisplay.textContent = 'Aguardando oponente...'; }
+            } else { 
+                statusDisplay.textContent = 'Aguardando oponente...'; 
+            }
         }
 
-        // --- LÓGICA DO JOGO VS MÁQUINA ---
+        // --- LÓGICA DO JOGO VS MÁQUINA (COM MINIMAX) ---
         function iniciarJogoLocal() {
             gameView.style.display = 'block';
             resetButton.style.display = 'block';
             resetButton.textContent = 'Reiniciar Jogo';
-            resetButton.onclick = iniciarJogoLocal;
+            resetButton.onclick = iniciarJogoLocal; // Reinicia o jogo local
             localGameActive = true;
-            localCurrentPlayer = 'X';
+            localCurrentPlayer = 'X'; // O jogador humano é sempre 'X'
             localGameState = ['', '', '', '', '', '', '', '', ''];
             statusDisplay.innerHTML = `Sua vez (X)`;
             gameBoard.innerHTML = '';
@@ -259,68 +308,126 @@
         function handleCellClickLocal(event) {
             const clickedCell = event.target;
             const clickedCellIndex = parseInt(clickedCell.getAttribute('data-cell-index'));
-            if (localGameState[clickedCellIndex] !== '' || !localGameActive || localCurrentPlayer !== 'X') return;
-            handleCellPlayedLocal(clickedCell, clickedCellIndex);
-            if (localGameActive) setTimeout(makeComputerMove, 500);
-        }
 
-        function handleCellPlayedLocal(cell, index) {
-            localGameState[index] = localCurrentPlayer;
-            cell.innerHTML = localCurrentPlayer;
-            cell.classList.add(localCurrentPlayer.toLowerCase());
-            validarResultadoLocal();
-        }
+            // Só permite jogada se for a vez do jogador e a célula estiver vazia
+            if (localGameState[clickedCellIndex] !== '' || !localGameActive || localCurrentPlayer !== 'X') {
+                return;
+            }
 
-        async function validarResultadoLocal() {
-            let roundWon = false;
-            for (const condition of winningConditions) {
-                if (localGameState[condition[0]] && localGameState[condition[0]] === localGameState[condition[1]] && localGameState[condition[1]] === localGameState[condition[2]]) {
-                    roundWon = true; break;
+            // Realiza a jogada do jogador
+            localGameState[clickedCellIndex] = 'X';
+            clickedCell.innerHTML = 'X';
+            clickedCell.classList.add('x');
+
+            // Verifica o resultado após a jogada do jogador
+            const [isFinished, winnerSymbol] = verificarVencedor(localGameState);
+
+            if (isFinished) {
+                localGameActive = false;
+                if (winnerSymbol === 'X') {
+                    statusDisplay.innerHTML = `Você venceu!`;
+                    registrarVitoria();
+                } else {
+                    statusDisplay.innerHTML = `O jogo empatou!`;
                 }
-            }
-            if (roundWon) {
-                localGameActive = false;
-                if (localCurrentPlayer === 'X') await registrarVitoria();
-                else statusDisplay.innerHTML = `A máquina venceu!`;
                 return;
             }
-            if (!localGameState.includes('')) {
-                statusDisplay.innerHTML = `O jogo empatou!`;
-                localGameActive = false;
-                return;
-            }
-            trocarJogadorLocal();
-        }
 
-        function trocarJogadorLocal() {
-            localCurrentPlayer = 'O'; // Apenas a máquina joga como 'O'
+            // Se o jogo não terminou, é a vez da máquina
+            localCurrentPlayer = 'O'; // Define o jogador atual para a máquina
             statusDisplay.innerHTML = `Vez da máquina (O)`;
+            setTimeout(makeComputerMove, 700); // Dá um pequeno delay para a jogada da máquina
         }
 
+        // Algoritmo Minimax para a IA
+        function minimax(board, depth, isMaximizingPlayer) {
+            const [isFinished, winnerSymbol] = verificarVencedor(board);
+
+            // Casos base (condições de término)
+            if (isFinished) {
+                if (winnerSymbol === 'O') return 100 - depth; // IA (O) vence: pontuação alta, penaliza jogadas mais longas
+                if (winnerSymbol === 'X') return -100 + depth; // Jogador (X) vence: pontuação baixa, recompensa vitória mais rápida do jogador (pior para IA)
+                return 0; // Empate
+            }
+
+            if (isMaximizingPlayer) { // Vez da IA ('O') - Quer maximizar a pontuação
+                let bestScore = -Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'O'; // Tenta a jogada da IA
+                        let score = minimax(board, depth + 1, false); // Chama para o próximo turno (jogador, minimizando)
+                        board[i] = ''; // Desfaz a jogada (backtracking)
+                        bestScore = Math.max(bestScore, score);
+                    }
+                }
+                return bestScore;
+            } else { // Vez do Jogador ('X') - Quer minimizar a pontuação da IA (ou seja, maximizar a própria)
+                let bestScore = Infinity;
+                for (let i = 0; i < board.length; i++) {
+                    if (board[i] === '') {
+                        board[i] = 'X'; // Tenta a jogada do jogador
+                        let score = minimax(board, depth + 1, true); // Chama para o próximo turno (IA, maximizando)
+                        board[i] = ''; // Desfaz a jogada
+                        bestScore = Math.min(bestScore, score);
+                    }
+                }
+                return bestScore;
+            }
+        }
+
+        // Função para a jogada da máquina usando Minimax
         function makeComputerMove() {
             if (!localGameActive) return;
-            const emptyCells = localGameState.map((val, idx) => val === '' ? idx : null).filter(val => val !== null);
-            const randomIndex = Math.floor(Math.random() * emptyCells.length);
-            const move = emptyCells[randomIndex];
-            const cellElement = document.querySelector(`.cell[data-cell-index='${move}']`);
-            localGameState[move] = 'O';
+
+            let bestScore = -Infinity;
+            let bestMove = -1;
+
+            // Percorre todas as células vazias para encontrar a melhor jogada
+            for (let i = 0; i < localGameState.length; i++) {
+                if (localGameState[i] === '') {
+                    localGameState[i] = 'O'; // Tenta a jogada da máquina
+                    // Chama o minimax assumindo que o próximo turno é do jogador (isMaximizingPlayer = false)
+                    let score = minimax(localGameState, 0, false); 
+                    localGameState[i] = ''; // Desfaz a jogada (importante para não alterar o estado real do tabuleiro para as próximas simulações)
+
+                    if (score > bestScore) {
+                        bestScore = score;
+                        bestMove = i;
+                    }
+                }
+            }
+            
+            // Realiza a melhor jogada encontrada
+            const cellElement = document.querySelector(`.cell[data-cell-index='${bestMove}']`);
+            localGameState[bestMove] = 'O';
             cellElement.innerHTML = 'O';
             cellElement.classList.add('o');
-            validarResultadoLocal();
-            if (localGameActive) {
+
+            // Verifica o resultado após a jogada da máquina
+            const [isFinished, winnerSymbol] = verificarVencedor(localGameState);
+
+            if (isFinished) {
+                localGameActive = false;
+                if (winnerSymbol === 'O') {
+                    statusDisplay.innerHTML = `A máquina venceu!`;
+                } else {
+                    statusDisplay.innerHTML = `O jogo empatou!`;
+                }
+            } else {
+                // Se o jogo não terminou, troca para a vez do jogador
                 localCurrentPlayer = 'X';
                 statusDisplay.innerHTML = `Sua vez (X)`;
             }
         }
 
-        // Função compartilhada de verificação de vitória
+        // Função compartilhada de verificação de vitória (mantida do seu código original)
         function verificarVencedor(board) {
             for (const condition of winningConditions) {
                 const [a, b, c] = condition;
                 if (board[a] && board[a] === board[b] && board[a] === board[c]) return [true, board[a]];
             }
-            if (!board.includes('')) return [true, null];
-            return [false, null];
+            if (!board.includes('')) return [true, null]; // Empate
+            return [false, null]; // Jogo continua
         }
     </script>
 </body>
