@@ -433,7 +433,7 @@ function resetGame() {
 
     // Limpar imagens e status (opcional, pois a seleção sobrescreverá)
     playerImageElement.src = "";
-    enemyImageElement.src = "";
+    enemyImageElement.src = "https://media1.tenor.com/m/qF-2UrMmvXkAAAAC/pikachu-pokemon.gif";
     playerStatusElement.textContent = "";
     enemyStatusElement.textContent = "";
     
