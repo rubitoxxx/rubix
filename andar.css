@@ -1,103 +1,352 @@
-body {
+/* --- TEMA 'BLACKPINK' ADAPTADO PARA O JOGO 'CORRIDA DA LISA' --- */
+
+* {
     margin: 0;
-    overflow: hidden; /* Esconde as barras de rolagem */
-    background-color: #14abe7; /* Cor do céu */
+    padding: 0;
+    box-sizing: border-box;
 }
+
+body {
+    font-family: 'Noto Sans', sans-serif;
+    background-image: url(https://static.dw.com/image/65370607_605.jpg);
+    background-size: 100% 100%;
+    animation: gradientShift 8s ease infinite;
+    color: white;
+    overflow: hidden; /* Previne scroll indesejado */
+    min-height: 100vh;
+    display: flex; /* Para centralizar o conteúdo na tela */
+    justify-content: center;
+    align-items: center;
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Efeito de partículas/brilho */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image:
+        radial-gradient(2px 2px at 20px 30px, #fff, transparent),
+        radial-gradient(2px 2px at 40px 70px, #ff1493, transparent),
+        radial-gradient(1px 1px at 90px 40px, #fff, transparent),
+        radial-gradient(1px 1px at 130px 80px, #ff69b4, transparent),
+        radial-gradient(2px 2px at 160px 30px, #fff, transparent);
+    background-repeat: repeat;
+    background-size: 200px 100px;
+    animation: sparkle 5s linear infinite;
+    pointer-events: none;
+    z-index: 1;
+}
+
+@keyframes sparkle {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-200px); }
+}
+
+
+/* --- SEÇÃO DO MENU PRINCIPAL --- */
+
+#main-menu {
+    position: relative;
+    z-index: 10;
+    padding: 2rem;
+    min-height: 100vh; /* Mantém a altura total para o menu */
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+#main-menu h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 4rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, #ff1493, #ffffff, #ff69b4);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: textShimmer 3s ease-in-out infinite;
+    text-shadow: 0 0 30px rgba(255, 20, 147, 0.5);
+    margin-bottom: 2rem;
+    letter-spacing: 3px;
+}
+
+@keyframes textShimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+#menu-ranking {
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff1493;
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.3), inset 0 0 20px rgba(255, 105, 180, 0.1);
+    width: 90%;
+    max-width: 400px;
+}
+
+#menu-ranking h2 {
+    font-family: 'Orbitron', monospace;
+    color: #ff69b4;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    text-shadow: 0 0 10px rgba(255, 105, 180, 0.8);
+}
+
+#ranking-board-menu {
+    color: #ffffff;
+    font-weight: 600;
+    text-align: left;
+}
+#ranking-board-menu ol { list-style: none; padding: 0; }
+#ranking-board-menu li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255, 105, 180, 0.3); }
+#ranking-board-menu li:last-child { border-bottom: none; }
+
+
+.menu-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Estilo geral para botões */
+button {
+    font-family: 'Orbitron', monospace;
+    font-weight: 700;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 25px;
+    background: linear-gradient(45deg, #ff1493, #ff69b4);
+    color: white;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 20, 147, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+}
+
+button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+button:hover::before {
+    left: 100%;
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 20, 147, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+
+/* --- SEÇÃO DO JOGO EM SI --- */
 
 #game-container {
+    background-image: url(chao.jpeg);
+    /* Altere de cover para repeat-x e defina um tamanho adequado */
+    background-repeat: repeat-x; /* Garante que a imagem se repita horizontalmente */
+    background-size: auto 100%; /* Ajusta a altura da imagem para 100% do contêiner e repete automaticamente na largura */
+    background-position: 0 0;
     position: relative;
-    width: 100vw; /* Largura total da tela */
-    height: 100vh; /* Altura total da tela */
-    background-color: #a0d8a0; /* Cor de fundo para a floresta, se não tiver imagem */
+    z-index: 10;
+    /* --- AJUSTES PARA DIMINUIR A TELA DO JOGO --- */
+    width: 800px; /* Largura fixa desejada para a tela do jogo */
+    height: 450px; /* Altura fixa desejada para a tela do jogo */
+    max-width: 95vw; /* Garante que não ultrapasse 95% da largura da viewport em telas pequenas */
+    max-height: 95vh; /* Garante que não ultrapasse 95% da altura da viewport em telas pequenas */
+    border: 5px solid #ff1493; /* Borda para demarcar a área do jogo */
+    border-radius: 20px; /* Cantos arredondados */
+    box-shadow: 0 0 30px rgba(255, 20, 147, 0.7); /* Sombra para destacar */
+    background-color: rgba(0, 0, 0, 0.7); /* Fundo semi-transparente para o jogo */
+    overflow: hidden; /* Garante que elementos de jogo não saiam da caixa */
+    animation: bgMove 3s linear infinite;
 }
 
-#forest-background {
+@keyframes bgMove {
+    0% { background-position: 0 0; }
+    /* Ajuste o valor para a largura da sua imagem chao.jpg ou um múltiplo dela */
+    /* Por exemplo, se sua imagem tem 800px de largura e é um padrão: */
+    100% { background-position: -800px 0; } /* Ou -400px 0 se a imagem for 400px de largura e se repita bem */
+}
+
+
+#score {
     position: absolute;
-    width: 500%; /* Duas vezes a largura da tela para permitir rolagem */
-    height: 200%;
-    background-image: url('chao.png'); /* Imagem do chão que vai se mover */
-    background-repeat: repeat-x; /* Repete a imagem horizontalmente */
-    background-position: 0% 100%; /* Começa no canto inferior esquerdo */
-    bottom: 0; /* Alinha na parte inferior */
+    top: 20px;
+    right: 20px;
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 0.5rem 1rem;
+    border-radius: 15px;
+    border: 2px solid #ff1493;
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+    z-index: 20;
+}
+
+#ground {
+    position: absolute;
+    bottom: 0;
     left: 0;
-    transition: left 0.1s linear; /* Animação suave para o movimento */
+    width: 100%; /* Ocupa 100% da largura do #game-container */
+    height: 80px; /* Altura fixa do chão */
+    background: linear-gradient(to top, #000000, rgba(0, 0, 0, 0));
+    border-top: 3px solid #ff1493;
+    box-shadow: 0 -5px 15px rgba(255, 20, 147, 0.3);
+    z-index: 5;
 }
 
 #character {
     position: absolute;
-    bottom: 10%; /* Posição do boneco em relação à base */
-    left: 50%; /* Centraliza horizontalmente */
-    transform: translateX(-50%); /* Ajuste para centralizar perfeitamente */
-    width: 100px; /* Ajuste o tamanho do seu boneco */
-    height: 150px; /* Ajuste o tamanho do seu boneco */
-    object-fit: contain; /* Garante que a imagem se ajuste */
-    transition: transform 0.1s linear; /* Para virar o boneco */
-    z-index: 10; /* Garante que o boneco fique acima do fundo */
+    bottom: calc(80px - 2px); /* Altura do chão - borda para ficar em cima */
+    left: 50px; /* Posição inicial relativa ao #game-container */
+    width: 60px; /* Largura da imagem do seu personagem */
+    height: auto;
+    z-index: 10;
 }
 
-/* Estilo do Botão de Voltar ao Mural */
-#voltar-mural {
+.obstacle {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    bottom: calc(80px - 2px); /* Altura do chão - borda para ficar em cima */
+    width: 50px; /* Largura da imagem do seu obstáculo */
+    height: auto;
+    z-index: 10;
+}
+
+/* --- TELA DE GAME OVER --- */
+
+#game-over-screen {
+    position: absolute; /* Agora é absoluto em relação ao #game-container */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
     z-index: 100;
-
-    padding: 12px 25px;
-    background-color: #da1107;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-decoration: none;
-    display: inline-block;
+    visibility: hidden; /* Controlado pelo JS */
 }
 
-#voltar-mural:hover {
-    background-color: #ff332a;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+#game-over-screen h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    color: #ff1493;
+    text-shadow: 0 0 20px rgba(255, 20, 147, 0.8);
+    margin-bottom: 2rem;
+    animation: pulse 2s infinite;
 }
 
-/* ESTILOS PARA OS NOVOS BOTÕES DE CONTROLE MOBILE */
+@keyframes pulse {
+    0%, 100% { transform: scale(1); text-shadow: 0 0 20px rgba(255, 20, 147, 0.8); }
+    50% { transform: scale(1.05); text-shadow: 0 0 30px rgba(255, 20, 147, 1); }
+}
+
+/* --- CONTROLES MOBILE --- */
+
 #mobile-controls {
-    position: absolute;
-    bottom: 20px; /* Posiciona os controles na parte inferior da tela */
-    left: 50%;
-    transform: translateX(-50%); /* Centraliza os controles horizontalmente */
-    display: flex; /* Para alinhar os botões lado a lado */
-    gap: 20px; /* Espaço entre os botões */
-    z-index: 99; /* Garante que fiquem acima do fundo, mas abaixo do botão de mural */
+    position: absolute; /* Agora é absoluto em relação ao #game-container */
+    bottom: 1rem; /* Ajustado para dentro do container */
+    right: 1rem; /* Ajustado para dentro do container */
+    z-index: 50;
+    display: none;
 }
 
-#mobile-controls button {
-    width: 80px; /* Tamanho dos botões */
-    height: 80px;
-    border-radius: 50%; /* Botões circulares */
-    background-color: rgba(0, 0, 0, 0.6); /* Fundo semi-transparente */
-    color: white;
-    font-size: 2.5em; /* Tamanho do ícone da seta */
-    border: 2px solid rgba(255, 255, 255, 0.8); /* Borda branca */
-    cursor: pointer;
+#jump-button {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    font-size: 2rem;
+    background: linear-gradient(45deg, #ff1493, #ff69b4);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 20px rgba(255, 20, 147, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.3);
     display: flex;
     justify-content: center;
     align-items: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    user-select: none; /* Previne a seleção de texto ao tocar */
-    -webkit-tap-highlight-color: transparent; /* Remove o destaque de toque padrão */
 }
 
-#mobile-controls button:active {
-    background-color: rgba(0, 0, 0, 0.8); /* Mudar cor ao tocar/clicar */
-    transform: scale(0.95); /* Pequeno efeito de clique */
+/* --- CLASSE UTILITÁRIA --- */
+
+.hidden {
+    display: none !important;
 }
 
-/* Mídia Query para esconder os controles mobile em telas maiores (desktops) */
-@media (min-width: 768px) {
+/* --- DESIGN RESPONSIVO --- */
+
+/* Para tablets e telas menores que 768px */
+@media (max-width: 768px) {
+    #main-menu h1 { font-size: 2.5rem; }
+    #menu-ranking { padding: 1rem; }
+    button { padding: 0.8rem 1.5rem; font-size: 1rem; }
+    #score { font-size: 1.5rem; top: 10px; right: 10px;}
+    #game-over-screen h1 { font-size: 2rem; }
+
+    /* Força o game-container a ser 100% da largura em telas menores para maximizar o espaço */
+    #game-container {
+        width: 100vw;
+        height: 100vh;
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
+        border: none;
+        box-shadow: none;
+        background-color: transparent;
+    }
+    
+    /* Mostra os controles mobile em telas menores */
     #mobile-controls {
-        display: none; /* Esconde os botões de toque em telas maiores */
+        display: block;
+        bottom: 2rem; /* Retorna ao posicionamento original para mobile */
+        right: 2rem;
+    }
+}
+
+/* Para celulares e telas menores que 480px */
+@media (max-width: 480px) {
+    #main-menu h1 { font-size: 2rem; }
+    .menu-buttons { flex-direction: column; align-items: center; }
+    button { width: 200px; }
+    
+    /* Reduz o tamanho do botão de pulo em telas muito pequenas */
+    #jump-button {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+        bottom: 1.5rem;
+        right: 1.5rem;
     }
 }
