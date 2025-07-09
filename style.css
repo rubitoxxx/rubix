@@ -271,7 +271,55 @@ textarea:focus { /* Focus para textarea também */
 .rubitar-btn:disabled {
     background-color: var(--cor-texto-secundario);
     cursor: not-allowed;
-    opacity: 0.7; /* Adiciona uma pequena opacidade para indicar desativado */
+    opacity: 0.7;
+}
+/*container da listatop3*/ 
+.ranking-sidebar {
+    background-color: #29003a11; 
+    margin-top: 30px;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 10px 10px 10px rgba(240, 216, 3, 0);
+    text-align: center;
+    margin-top: 0;
+}
+/*box dos nomes */
+#rankingListTop3 li {
+    background-color: #3e005d00;
+    margin-top: 10px;
+    margin-bottom: -20px;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    font-size: 1.1em;
+    color: var(--cor-texto-principal);
+    border: 1px solid #5a008a36;
+    box-shadow: 0 2px 5px rgba(234, 223, 4, 0);
+}
+
+#rankingListTop3 li .rank-position {
+    font-weight: bold;
+    color: var(--cor-acento);
+    
+    margin-right: 20px;
+}
+
+/* nome de usuário */
+#rankingListTop3 li .rank-username {
+    margin-left: 0px; 
+    margin-right: 20px; 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* numero de moedas */
+#rankingListTop3 li .rank-coins {
+    font-weight: bold;
+    color: var(--cor-moeda);
+    margin-left: 10px;
 }
 
 /* --- 6. FEED DE POSTS (MURAL) --- */
@@ -980,4 +1028,63 @@ textarea:focus { /* Focus para textarea também */
         width: 100%;
         text-align: center;
     }
+    /* --- 16. ESTILOS DE RANKING --- */
+
+
+/* lista de ranking da paginha ranking.html */
+#rankingList {
+    background-color: #3e005d; /* Cor de fundo para cada item do ranking */
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+    color: var(--cor-texto-principal); /* Garante que o texto dentro do li seja legível */
+    border: 1px solid #5a008a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#rankingList li {
+    background-color: #3e005d; /* Cor de fundo para cada item do ranking */
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 1.1em;
+    color: var(--cor-texto-principal); /* Garante que o texto dentro do li seja legível */
+    border: 1px solid #5a008a;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+#rankingList li:last-child {
+    margin-bottom: 0; /* Remove a margem do último item para evitar espaço extra */
+}
+
+#rankingList li .rank-position {
+    font-weight: bold;
+    color: var(--cor-acento); /* Exemplo: destaque para a posição */
+    margin-right: 10px;
+}
+
+#rankingList li .player-name {
+    /* text-align: center; <--- Isso não é mais necessário aqui se você usar margin auto */
+    flex-grow: 1; /* Permite que o nome do jogador ocupe o máximo de espaço */
+    margin-left: auto; /* Empurra o elemento para o centro após a posição */
+    margin-right: auto; /* Empurra o elemento para o centro antes da pontuação */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#rankingList li .player-score {
+    text-align: center;
+    font-weight: bold;
+    color: var(--cor-moeda); /* Destaque para a pontuação */
+    margin-left: 10px;
+}
+
 }
