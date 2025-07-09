@@ -23,7 +23,7 @@
                         mesmo trocando a foto de perfil</h3>
                     <h6>Bem-vindo ao nosso projeto de rede social! Começou para a faculdade, mas com a ajuda de vocês,<br>
                         meus amigos, estamos construindo um espaço do nosso jeito. Quem sabe um dia ele se torne algo maior.</h6>
-                    <a href="ranking.html" class="btn">🏆 Ver Ranking</a>
+                    <a href="ranking.html" class="btn">🏆 Ver Ranking Completo</a>
                     <nav class="nav-buttons">
                         <div>
                             <button onclick="irParaPerfil()">Ver Perfil</button>
@@ -32,21 +32,22 @@
                         </div>
                     </nav>
                 </div>
-                </nav>
             </div>
         </header>
-
-        <main class="main-content">
-            <div class="new-post-section">
-                <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
-                <div class="post-input-area">
-                    <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
-                    
-                    <div id="image-preview-container" style="display: none; margin-top: 10px; position: relative;">
-                        <img id="image-preview" src="#" alt="Preview da imagem" style="max-width: 100%; border-radius: 8px;">
-                        <button id="remove-image-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); border: none; color: white; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center;">X</button>
+        <div class="content-wrapper">
+            <main class="main-content">
+                <div class="new-post-section">
+                    <img id="fotoPerfilHeader" class="foto-perfil-header" src="" alt="Foto de Perfil">
+                    <div class="post-input-area">
+                        <textarea id="mensagem" placeholder="O que está acontecendo?"></textarea>
+                        
+                        <div id="image-preview-container" style="display: none; margin-top: 10px; position: relative;">
+                            <img id="image-preview" src="#" alt="Preview da imagem" style="max-width: 100%; border-radius: 8px;">
+                            <button id="remove-image-btn" style="position: absolute; top: 5px; right: 5px; background: rgba(0,0,0,0.7); border: none; color: white; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; display: flex; align-items: center; justify-content: center;">X</button>
+                        </div>
                     </div>
-
+                    <div>
+                    </div>
                     <div class="post-actions-toolbar">
                         <input type="file" id="file-upload" accept="image/*" style="display: none;">
                         <label for="file-upload" class="action-button-icon" title="Adicionar imagem">
@@ -55,13 +56,19 @@
                         <button id="emoji-btn-main" class="emoji-button" title="Adicionar emoji">😀</button>
                         <button onclick="postarMensagem()" class="rubitar-btn">Rubitar</button>
                     </div>
-                </div>
-            </div>
-            
-            <div id="mural" class="feed-posts"></div>
-        </main>
+                    </div>
+                    <aside class="ranking-sidebar">
+                <div class="top-ranking-section">
+                    <h3>👑 Top 3 do Ranking 👑</h3>
+                    <ul id="rankingListTop3">
+                        </ul>
+                    <p id="errorMessageRanking" style="display: none;"></p>
+            </aside>
+                </div> 
+                <div id="mural" class="feed-posts"></div>
+            </main>
+        </div> 
     </div>
-
     <div id="coin-animation-container"></div>
     <emoji-picker style="display: none; position: absolute; z-index: 1000;"></emoji-picker>
 
@@ -387,6 +394,56 @@
         function game() {    
             window.location.href = "pggame.html";    
         }
+        async function carregarTop3Ranking() {
+            const rankingList = document.getElementById('rankingListTop3'); // ID diferente para não confundir com o ranking completo
+            const errorMessage = document.getElementById('errorMessageRanking'); // ID diferente
+
+            if (!window._supabase) {
+                errorMessage.textContent = 'Erro: Supabase não inicializado para o ranking. Verifique supabaseClient.js ou utils.js';
+                errorMessage.style.display = 'block';
+                return;
+            }
+
+            try {
+                const { data: profiles, error } = await window._supabase
+                    .from('profiles')
+                    .select('username, rubix_coins')
+                    .order('rubix_coins', { ascending: false })
+                    .limit(3); // Limita aos 3 primeiros!
+
+                if (error) {
+                    console.error('Erro ao buscar top 3 ranking:', error.message);
+                    errorMessage.textContent = 'Erro ao carregar o top 3 do ranking. Tente novamente mais tarde.';
+                    errorMessage.style.display = 'block';
+                    return;
+                }
+
+                if (profiles.length === 0) {
+                    rankingList.innerHTML = '<li>Nenhum usuário no top 3 ainda.</li>';
+                } else {
+                    rankingList.innerHTML = ''; // Limpa antes de adicionar
+                    profiles.forEach((profile, index) => {
+                        const listItem = document.createElement('li');
+                        listItem.innerHTML = `
+                            <span class="rank-position">${index + 1}º</span>
+                            <span class="rank-username">${profile.username || 'Usuário Anônimo'}</span>
+                            <span class="rank-coins">${profile.rubix_coins || 0} 🪙</span>
+                        `;
+                        rankingList.appendChild(listItem);
+                    });
+                }
+
+            } catch (err) {
+                console.error('Erro inesperado ao carregar top 3 ranking:', err);
+                errorMessage.textContent = 'Ocorreu um erro inesperado ao carregar o top 3 do ranking.';
+                errorMessage.style.display = 'block';
+            }
+        }
+        // Carrega o top 3 do ranking ao iniciar a página
+        document.addEventListener('DOMContentLoaded', () => {
+            carregarTop3Ranking();
+        }); 
+
 
         // --- Lógica Principal da Página (Tudo acontece depois que o HTML carrega) ---
         document.addEventListener('DOMContentLoaded', async () => {
