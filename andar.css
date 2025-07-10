@@ -276,28 +276,6 @@ button:active {
     50% { transform: scale(1.05); text-shadow: 0 0 30px rgba(255, 20, 147, 1); }
 }
 
-/* --- CONTROLES MOBILE --- */
-
-#mobile-controls {
-    position: absolute; /* Agora é absoluto em relação ao #game-container */
-    bottom: 1rem; /* Ajustado para dentro do container */
-    right: 1rem; /* Ajustado para dentro do container */
-    z-index: 50;
-    display: none;
-}
-
-#jump-button {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    font-size: 2rem;
-    background: linear-gradient(45deg, #ff1493, #ff69b4);
-    border: 3px solid rgba(255, 255, 255, 0.5);
-    box-shadow: 0 0 20px rgba(255, 20, 147, 0.6), inset 0 2px 0 rgba(255, 255, 255, 0.3);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
 
 /* --- CLASSE UTILITÁRIA --- */
 
@@ -326,13 +304,6 @@ button:active {
         box-shadow: none;
         background-color: transparent;
     }
-    
-    /* Mostra os controles mobile em telas menores */
-    #mobile-controls {
-        display: block;
-        bottom: 2rem; /* Retorna ao posicionamento original para mobile */
-        right: 2rem;
-    }
 }
 
 /* Para celulares e telas menores que 480px */
@@ -341,12 +312,4 @@ button:active {
     .menu-buttons { flex-direction: column; align-items: center; }
     button { width: 200px; }
     
-    /* Reduz o tamanho do botão de pulo em telas muito pequenas */
-    #jump-button {
-        width: 60px;
-        height: 60px;
-        font-size: 1.8rem;
-        bottom: 1.5rem;
-        right: 1.5rem;
-    }
 }
