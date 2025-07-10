@@ -109,16 +109,20 @@ button:hover {
     fill: none;
 }
 
+/* --- ESTA PARTE É A CHAVE --- */
+/* O JavaScript agora trabalha COM estas regras, em vez de contra elas. */
+
 .homem-parte {
     stroke: #ff6b6b;
     stroke-width: 4;
     fill: none;
-    opacity: 0;
-    transition: opacity 0.5s ease;
+    opacity: 0; /* Começa invisível... */
+    transition: opacity 0.5s ease; /* ...e aparece suavemente. */
 }
 
+/* Quando o JavaScript adiciona a classe '.show', esta regra é ativada. */
 .homem-parte.show {
-    opacity: 1;
+    opacity: 1; /* A parte do boneco se torna visível. */
 }
 
 #palavra-container {
@@ -177,8 +181,10 @@ button:hover {
     opacity: 0.5;
 }
 
-.tecla:disabled {
+/* Renomeei de :disabled para .usada para corresponder ao JS e evitar confusão */
+.tecla.usada {
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 #mensagem {
@@ -228,6 +234,8 @@ button:hover {
     }
     
     #teclado {
-        grid-template-columns: repeat(6, 1fr);
+        /* Ajuste sugerido para teclados menores */
+        grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+        gap: 0.4rem;
     }
 }
