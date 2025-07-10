@@ -40,13 +40,7 @@
                     <line x1="60" y1="20" x2="60" y2="230" />
                     <line x1="20" y1="230" x2="100" y2="230" />
 
-                    <circle cx="140" cy="70" r="20" class="homem-parte" />
-                    <line x1="140" y1="90" x2="140" y2="150" class="homem-parte" />
-                    <line x1="140" y1="120" x2="110" y2="100" class="homem-parte" />
-                    <line x1="140" y1="120" x2="170" y2="100" class="homem-parte" />
-                    <line x1="140" y1="150" x2="110" y2="180" class="homem-parte" />
-                    <line x1="140" y1="150" x2="170" y2="180" class="homem-parte" />
-                </svg>
+                    <circle cx="140" cy="70" r="20" class="homem-parte" /> <line x1="140" y1="90" x2="140" y2="150" class="homem-parte" /> <line x1="140" y1="120" x2="110" y2="100" class="homem-parte" /> <line x1="140" y1="120" x2="170" y2="100" class="homem-parte" /> <line x1="140" y1="150" x2="110" y2="180" class="homem-parte" /> <line x1="140" y1="150" x2="170" y2="180" class="homem-parte" /> </svg>
             </div>
             <div id="palavra-container"></div>
             <div id="teclado"></div>
@@ -72,6 +66,19 @@
         let letrasCorretas = [];
         let letrasErradas = [];
         let score = 0;
+        let palavras = [
+            "bruna marquezine", "neymar jr.", "anitta", "tata werneck", "giovanna ewbank", 
+            "caio castro", "juliana paes", "marina ruy barbosa", "ludmilla", "thais fersoza",
+            "paolla oliveira", "rodrigo santoro", "juliana alves", "isis valverde", "camila queiroz", 
+            "lucas lucco", "gusttavo lima", "ivete sangalo", "mirella santos", "mateus solano", 
+            "luciano huck", "xuxa meneghel", "larissa manoela", "kefera buchmann", "tati zaqui", 
+            "pabllo vittar", "nanda costa", "fabio assuncao", "deborah secco", "marcos mion", 
+            "paloma bernardi", "daniela albuquerque", "mario frias", "jose loreto", "renata dominguez", 
+            "caua reymond", "gloria pires", "luana piovani", "felipe titolo", "leo picon", 
+            "luiz lins", "nathalia dill", "ricardo pereira", "tatiane lobo", "andressa suita", 
+            "roberta rodrigues", "simone mendes", "simaria", "rafa kalimann", "biel", 
+            "jade picon", "sabrina sato", "fatima bernardes", "felipe neto", "gabriela pugliesi"
+        ];
 
         function iniciarJogo() {
             telaInicio.classList.add('hidden');
@@ -80,27 +87,16 @@
         }
 
         function prepararNovoJogo() {
-            palavraSelecionada = [
-    "bruna marquezine", "neymar jr.", "anitta", "tata werneck", "giovanna ewbank", 
-    "caio castro", "juliana paes", "marina ruy barbosa", "ludmilla", "thais fersoza",
-    "paolla oliveira", "rodrigo santoro", "juliana alves", "isis valverde", "camila queiroz", 
-    "lucas lucco", "gusttavo lima", "ivete sangalo", "mirella santos", "mateus solano", 
-    "luciano huck", "xuxa meneghel", "larissa manoela", "kefera buchmann", "tati zaqui", 
-    "pabllo vittar", "nanda costa", "fabio assuncao", "deborah secco", "marcos mion", 
-    "paloma bernardi", "daniela albuquerque", "mario frias", "jose loreto", "renata dominguez", 
-    "caua reymond", "gloria pires", "luana piovani", "felipe titolo", "leo picon", 
-    "luiz lins", "nathalia dill", "ricardo pereira", "tatiane lobo", "andressa suita", 
-    "roberta rodrigues", "simone mendes", "simaria", "rafa kalimann", "biel", 
-    "jade picon", "sabrina sato", "fatima bernardes", "felipe neto", "gabriela pugliesi"
-]
-
-                palavraSelecionada = palavraSelecionada[Math.floor(Math.random() * palavraSelecionada.length)];
+            palavraSelecionada = palavras[Math.floor(Math.random() * palavras.length)];
             letrasCorretas = [];
             letrasErradas = [];
             score = 0;
             mensagemEl.innerText = '';
             botaoReiniciar.style.display = 'none';
-            homemPartes.forEach(parte => parte.style.display = 'none');
+
+            // CORREÇÃO: Esconde o boneco removendo a classe .show
+            homemPartes.forEach(parte => parte.classList.remove('show'));
+            
             mostrarPalavra();
             criarTeclado();
         }
@@ -109,7 +105,7 @@
             palavraContainer.innerHTML = ` 
                 ${palavraSelecionada
                     .split('') 
-                    .map(letra => `<span class="letra">${letrasCorretas.includes(letra) || letra === ' ' ? letra : '_'}</span>`)
+                    .map(letra => `<span class="letra">${letrasCorretas.includes(letra) || letra === ' ' || letra === '.' ? letra : '_'}</span>`)
                     .join('')}
             `;
             const palavraInterna = palavraContainer.innerText.replace(/\n/g, '');
@@ -119,10 +115,16 @@
             }
         }
 
+        // FUNÇÃO CORRIGIDA
         function atualizarErradas() {
+            // Mostra as partes do boneco adicionando a classe .show
             homemPartes.forEach((parte, index) => {
-                parte.style.display = index < letrasErradas.length ? 'block' : 'none';
+                if (index < letrasErradas.length) {
+                    parte.classList.add('show');
+                }
             });
+
+            // Verifica a condição de derrota
             if (letrasErradas.length === homemPartes.length) {
                 mensagemEl.innerText = `Você perdeu! 😕 A palavra era: ${palavraSelecionada}`;
                 finalizarJogo();
@@ -143,28 +145,43 @@
 
         function selecionarLetra(letra, tecla) {
             if (tecla.classList.contains('usada')) return;
+            
             tecla.classList.add('usada');
+
             if (palavraSelecionada.includes(letra)) {
                 letrasCorretas.push(letra);
+                tecla.classList.add('correta'); // Feedback visual de acerto
             } else {
                 letrasErradas.push(letra);
+                tecla.classList.add('errada'); // Feedback visual de erro
+                // A função atualizarErradas cuidará de desenhar o boneco
             }
+            
             mostrarPalavra();
             atualizarErradas();
         }
 
         function finalizarJogo() {
             const teclas = document.querySelectorAll('.tecla');
-            teclas.forEach(tecla => tecla.classList.add('usada'));
+            teclas.forEach(tecla => {
+                if(!tecla.classList.contains('usada')) {
+                    tecla.classList.add('usada');
+                }
+            });
             botaoReiniciar.style.display = 'block';
 
             const nomeJogador = 'Jogador1'; 
-            const pontuacao = letrasCorretas.length * 10; 
+            const pontuacao = letrasCorretas.length * 10 - letrasErradas.length * 5; 
             const userId = 'user123'; 
-            salvarPontuacaoForca(userId, nomeJogador, pontuacao);
+            // salvarPontuacaoForca(userId, nomeJogador, pontuacao); // Descomente se quiser salvar
         }
 
         async function salvarPontuacaoForca(userId, nomeJogador, pontuacao) {
+            // Verifique se a variável _supabase está disponível
+            if (!window._supabase) {
+                console.error("Supabase client não encontrado. Verifique a importação.");
+                return;
+            }
             try {
                 const { error } = await window._supabase
                     .from('"forca_scores"') 
@@ -181,6 +198,16 @@
         }
 
         async function carregarRankingForca() {
+            // Verifique se a variável _supabase está disponível
+            if (!window._supabase) {
+                console.error("Supabase client não encontrado. Verifique a importação.");
+                const rankingBoardMenu = document.getElementById('ranking-board-menu');
+                if (rankingBoardMenu) {
+                    rankingBoardMenu.innerHTML = '<p>Erro de conexão com o placar.</p>';
+                }
+                return;
+            }
+            
             const rankingBoardMenu = document.getElementById('ranking-board-menu');
             if (!rankingBoardMenu) return;
 
@@ -220,10 +247,13 @@
         });
 
         btnTelaInicial.addEventListener("click", function () {
-            window.location.href = "forca.html";  
+            // Recarrega a página atual para voltar ao início do jogo da forca
+            window.location.reload();
         });
 
-        carregarRankingForca();
+        // Carrega o ranking quando a página é aberta
+        document.addEventListener('DOMContentLoaded', carregarRankingForca);
+
     </script>
 
 </body>
