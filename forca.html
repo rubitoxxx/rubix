@@ -170,32 +170,47 @@
             });
             botaoReiniciar.style.display = 'block';
 
-            const nomeJogador = 'Jogador1'; 
             const pontuacao = letrasCorretas.length * 10 - letrasErradas.length * 5; 
-            const userId = 'user123'; 
-            // salvarPontuacaoForca(userId, nomeJogador, pontuacao); // Descomente se quiser salvar
+            const userId = 'user123'; // Este ID precisa ser um UUID válido ou você terá um erro
+            const nomeJogador = 'Jogador1'; // Substitua pelo nome do jogador real
+            
         }
 
         async function salvarPontuacaoForca(userId, nomeJogador, pontuacao) {
-            // Verifique se a variável _supabase está disponível
-            if (!window._supabase) {
-                console.error("Supabase client não encontrado. Verifique a importação.");
-                return;
-            }
-            try {
-                const { error } = await window._supabase
-                    .from('"forca_scores"') 
-                    .upsert([{ id: userId, nome: nomeJogador, pontuacao }], { onConflict: ['id'] });
+    if (!window._supabase) {
+        console.error("Supabase client não encontrado.");
+        return;
+    }
 
-                if (error) {
-                    console.error('Erro ao salvar pontuação:', error);
-                    return;
-                }
-                console.log('Pontuação salva com sucesso!');
-            } catch (error) {
-                console.error('Erro inesperado ao salvar pontuação:', error);
-            }
+    // Objeto de dados que corresponde EXATAMENTE à sua tabela
+    const dadosParaSalvar = {
+        // 'id' pode ser omitido se for gerado automaticamente pelo Supabase
+        user_id: userId, // Supondo que você queira usar o userId aqui
+        score: pontuacao,
+        tries: letrasErradas.length, // Salvando o número de tentativas erradas
+        word: palavraSelecionada // Salvando a palavra do jogo
+    };
+
+    try {
+        // Usaremos 'insert' em vez de 'upsert' por ser mais simples aqui
+        const { error } = await window._supabase
+            .from('forca_scores') // Removido as aspas duplas desnecessárias
+            .insert([dadosParaSalvar]);
+
+        if (error) {
+            console.error('Erro ao salvar pontuação:', error);
+            // Um erro comum aqui é violar a chave 'user_id' se ela não for única
+            // ou se o 'id' que você está tentando inserir já existir.
+            return;
         }
+
+        console.log('Pontuação salva com sucesso!', dadosParaSalvar);
+        // Recarregar o ranking para mostrar a nova pontuação
+        carregarRankingForca(); 
+    } catch (error) {
+        console.error('Erro inesperado ao salvar pontuação:', error);
+    }
+}
 
         async function carregarRankingForca() {
             // Verifique se a variável _supabase está disponível
@@ -209,36 +224,38 @@
             }
             
             const rankingBoardMenu = document.getElementById('ranking-board-menu');
-            if (!rankingBoardMenu) return;
+    if (!rankingBoardMenu) return;
 
-            const { data, error } = await window._supabase
-                .from('"forca_scores"')  
-                .select('nome, pontuacao')  
-                .order('pontuacao', { ascending: false })  
-                .limit(5);  
+    // Pedindo as colunas corretas: 'user_id' e 'score'
+    const { data, error } = await window._supabase
+        .from('forca_scores')
+        .select('user_id, score') // MUDANÇA AQUI
+        .order('score', { ascending: false }) // MUDANÇA AQUI
+        .limit(5);
 
-            if (error) {
-                console.error('Erro ao carregar o ranking:', error);
-                rankingBoardMenu.innerHTML = '<p>Não foi possível carregar o ranking. Tente novamente.</p>';
-                return;
-            }
+    if (error) {
+        console.error('Erro ao carregar o ranking:', error);
+        rankingBoardMenu.innerHTML = '<p>Não foi possível carregar o ranking. Tente novamente.</p>';
+        return;
+    }
 
-            if (data.length === 0) {
-                rankingBoardMenu.innerHTML = '<p>Seja o primeiro a deixar sua marca!</p>';
-                return;
-            }
+    if (data.length === 0) {
+        rankingBoardMenu.innerHTML = '<p>Seja o primeiro a deixar sua marca!</p>';
+        return;
+    }
 
-            const rankingList = document.createElement('ol');
-            data.forEach((entry, index) => {
-                const playerName = entry.nome || 'Anônimo';
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `<span>#${index + 1} ${playerName}</span> <span>${entry.pontuacao} pts</span>`;
-                rankingList.appendChild(listItem);
-            });
+    const rankingList = document.createElement('ol');
+    data.forEach((entry, index) => {
+        // Usando as colunas que realmente existem: entry.user_id e entry.score
+        const playerName = entry.user_id || 'Anônimo'; // Exibindo o ID do usuário
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `<span>#${index + 1} ${playerName}</span> <span>${entry.score} pts</span>`; // MUDANÇA AQUI
+        rankingList.appendChild(listItem);
+    });
 
-            rankingBoardMenu.innerHTML = '';
-            rankingBoardMenu.appendChild(rankingList);
-        }
+    rankingBoardMenu.innerHTML = '';
+    rankingBoardMenu.appendChild(rankingList);
+}
 
         botaoIniciar.addEventListener('click', iniciarJogo);
         botaoReiniciar.addEventListener('click', prepararNovoJogo);
