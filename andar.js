@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const jumpButton = document.getElementById('jump-button');
     const ground = document.getElementById('ground');
     const mobileControls = document.getElementById('mobile-controls');
+    gameContainer.addEventListener('touchstart', jump);
 
     // --- IMPORTANTE: REMOVIDO O BLOCO DE INICIALIZAÇÃO DO SUPABASE DAQUI! ---
     // As configurações do Supabase e sua inicialização devem estar APENAS em 'supabaseClient.js'.
