@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jogo da Forca</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="supabaseClient.js"></script>
+    <script type="module" src="utils.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;600&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="forca.css">
+</head>
+<body>
+
+    <div id="tela-inicio">
+        <h1>Bem-vindo ao Jogo da Forca!</h1>
+        <button id="botao-iniciar">Começar Jogo</button>
+        <button id="btnVoltarMural">Voltar para o Mural</button>
+
+        <div id="menu-ranking">
+            <h2>🏆 Top 5 🏆</h2>
+            <div id="ranking-board-menu">
+                <p>Carregando ranking...</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="jogo-principal" class="hidden">
+        <h1>Jogo da Forca</h1>
+        <div class="jogo-container">
+            <div class="forca-container">
+                <svg height="250" width="200" class="forca">
+                    <line x1="60" y1="20" x2="140" y2="20" />
+                    <line x1="140" y1="20" x2="140" y2="50" />
+                    <line x1="60" y1="20" x2="60" y2="230" />
+                    <line x1="20" y1="230" x2="100" y2="230" />
+
+                    <circle cx="140" cy="70" r="20" class="homem-parte" />
+                    <line x1="140" y1="90" x2="140" y2="150" class="homem-parte" />
+                    <line x1="140" y1="120" x2="110" y2="100" class="homem-parte" />
+                    <line x1="140" y1="120" x2="170" y2="100" class="homem-parte" />
+                    <line x1="140" y1="150" x2="110" y2="180" class="homem-parte" />
+                    <line x1="140" y1="150" x2="170" y2="180" class="homem-parte" />
+                </svg>
+            </div>
+            <div id="palavra-container"></div>
+            <div id="teclado"></div>
+            <div id="mensagem"></div>
+            <button id="btnTelaInicial">Tela Inicial</button>
+            <button id="botao-reiniciar">Jogar Novamente</button>
+        </div>
+    </div>
+
+    <script>
+        const telaInicio = document.getElementById('tela-inicio');
+        const jogoPrincipal = document.getElementById('jogo-principal');
+        const botaoIniciar = document.getElementById('botao-iniciar');
+        const palavraContainer = document.getElementById('palavra-container');
+        const tecladoContainer = document.getElementById('teclado');
+        const mensagemEl = document.getElementById('mensagem');
+        const botaoReiniciar = document.getElementById('botao-reiniciar');
+        const homemPartes = document.querySelectorAll('.homem-parte');
+        const btnVoltarMural = document.getElementById("btnVoltarMural");
+        const btnTelaInicial = document.getElementById("btnTelaInicial");
+
+        let palavraSelecionada = '';
+        let letrasCorretas = [];
+        let letrasErradas = [];
+        let score = 0;
+
+        function iniciarJogo() {
+            telaInicio.classList.add('hidden');
+            jogoPrincipal.classList.remove('hidden');
+            prepararNovoJogo();
+        }
+
+        function prepararNovoJogo() {
+            palavraSelecionada = ["zeca baleiro", "caetano veloso", "gilberto gil", "chico buarque", "djavan"][Math.floor(Math.random() * 5)];
+            letrasCorretas = [];
+            letrasErradas = [];
+            score = 0;
+            mensagemEl.innerText = '';
+            botaoReiniciar.style.display = 'none';
+            homemPartes.forEach(parte => parte.style.display = 'none');
+            mostrarPalavra();
+            criarTeclado();
+        }
+
+        function mostrarPalavra() {
+            palavraContainer.innerHTML = ` 
+                ${palavraSelecionada
+                    .split('') 
+                    .map(letra => `<span class="letra">${letrasCorretas.includes(letra) || letra === ' ' ? letra : '_'}</span>`)
+                    .join('')}
+            `;
+            const palavraInterna = palavraContainer.innerText.replace(/\n/g, '');
+            if (palavraInterna === palavraSelecionada) {
+                mensagemEl.innerText = 'Parabéns! Você venceu! 😃';
+                finalizarJogo();
+            }
+        }
+
+        function atualizarErradas() {
+            homemPartes.forEach((parte, index) => {
+                parte.style.display = index < letrasErradas.length ? 'block' : 'none';
+            });
+            if (letrasErradas.length === homemPartes.length) {
+                mensagemEl.innerText = `Você perdeu! 😕 A palavra era: ${palavraSelecionada}`;
+                finalizarJogo();
+            }
+        }
+
+        function criarTeclado() {
+            const letras = 'abcdefghijklmnopqrstuvwxyz';
+            tecladoContainer.innerHTML = '';
+            for (let letra of letras) {
+                const tecla = document.createElement('div');
+                tecla.classList.add('tecla');
+                tecla.innerText = letra;
+                tecla.addEventListener('click', () => selecionarLetra(letra, tecla));
+                tecladoContainer.appendChild(tecla);
+            }
+        }
+
+        function selecionarLetra(letra, tecla) {
+            if (tecla.classList.contains('usada')) return;
+            tecla.classList.add('usada');
+            if (palavraSelecionada.includes(letra)) {
+                letrasCorretas.push(letra);
+            } else {
+                letrasErradas.push(letra);
+            }
+            mostrarPalavra();
+            atualizarErradas();
+        }
+
+        function finalizarJogo() {
+            const teclas = document.querySelectorAll('.tecla');
+            teclas.forEach(tecla => tecla.classList.add('usada'));
+            botaoReiniciar.style.display = 'block';
+
+            const nomeJogador = 'Jogador1'; 
+            const pontuacao = letrasCorretas.length * 10; 
+            const userId = 'user123'; 
+            salvarPontuacaoForca(userId, nomeJogador, pontuacao);
+        }
+
+        async function salvarPontuacaoForca(userId, nomeJogador, pontuacao) {
+            try {
+                const { error } = await window._supabase
+                    .from('"forca_scores"') 
+                    .upsert([{ id: userId, nome: nomeJogador, pontuacao }], { onConflict: ['id'] });
+
+                if (error) {
+                    console.error('Erro ao salvar pontuação:', error);
+                    return;
+                }
+                console.log('Pontuação salva com sucesso!');
+            } catch (error) {
+                console.error('Erro inesperado ao salvar pontuação:', error);
+            }
+        }
+
+        async function carregarRankingForca() {
+            const rankingBoardMenu = document.getElementById('ranking-board-menu');
+            if (!rankingBoardMenu) return;
+
+            const { data, error } = await window._supabase
+                .from('"forca_scores"')  
+                .select('nome, pontuacao')  
+                .order('pontuacao', { ascending: false })  
+                .limit(5);  
+
+            if (error) {
+                console.error('Erro ao carregar o ranking:', error);
+                rankingBoardMenu.innerHTML = '<p>Não foi possível carregar o ranking. Tente novamente.</p>';
+                return;
+            }
+
+            if (data.length === 0) {
+                rankingBoardMenu.innerHTML = '<p>Seja o primeiro a deixar sua marca!</p>';
+                return;
+            }
+
+            const rankingList = document.createElement('ol');
+            data.forEach((entry, index) => {
+                const playerName = entry.nome || 'Anônimo';
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<span>#${index + 1} ${playerName}</span> <span>${entry.pontuacao} pts</span>`;
+                rankingList.appendChild(listItem);
+            });
+
+            rankingBoardMenu.innerHTML = '';
+            rankingBoardMenu.appendChild(rankingList);
+        }
+
+        botaoIniciar.addEventListener('click', iniciarJogo);
+        botaoReiniciar.addEventListener('click', prepararNovoJogo);
+        btnVoltarMural.addEventListener("click", function () {
+            window.location.href = "mural.html";  
+        });
+
+        btnTelaInicial.addEventListener("click", function () {
+            window.location.href = "forca.html";  
+        });
+
+        carregarRankingForca();
+    </script>
+
+</body>
+</html>

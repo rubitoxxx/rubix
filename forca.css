@@ -1,0 +1,233 @@
+body {
+    font-family: 'Noto Sans', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#tela-inicio {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 500px;
+    width: 90%;
+}
+
+#tela-inicio h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    color: #fff;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+button {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+}
+
+#menu-ranking {
+    margin-top: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 15px;
+}
+
+#menu-ranking h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+#ranking-board-menu {
+    text-align: left;
+}
+
+.ranking-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+#jogo-principal {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    max-width: 800px;
+    width: 90%;
+}
+
+#jogo-principal h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    color: #fff;
+}
+
+.jogo-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+}
+
+.forca-container {
+    display: flex;
+    justify-content: center;
+}
+
+.forca {
+    stroke: white;
+    stroke-width: 4;
+    fill: none;
+}
+
+.homem-parte {
+    stroke: #ff6b6b;
+    stroke-width: 4;
+    fill: none;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.homem-parte.show {
+    opacity: 1;
+}
+
+#palavra-container {
+    font-family: 'Orbitron', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 2rem 0;
+    letter-spacing: 0.5rem;
+    grid-column: 1 / -1;
+}
+
+.letra {
+    display: inline-block;
+    width: 3rem;
+    height: 3rem;
+    line-height: 3rem;
+    margin: 0 0.25rem;
+    border-bottom: 3px solid white;
+    text-transform: uppercase;
+}
+
+#teclado {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
+    gap: 0.5rem;
+    margin: 2rem 0;
+    grid-column: 1 / -1;
+}
+
+.tecla {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    padding: 1rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+}
+
+.tecla:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.05);
+}
+
+.tecla.correta {
+    background: #27ae60;
+    border-color: #27ae60;
+}
+
+.tecla.errada {
+    background: #e74c3c;
+    border-color: #e74c3c;
+    opacity: 0.5;
+}
+
+.tecla:disabled {
+    cursor: not-allowed;
+}
+
+#mensagem {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2rem 0;
+    min-height: 2rem;
+    grid-column: 1 / -1;
+}
+
+.vitoria {
+    color: #2ecc71;
+    animation: pulse 1s infinite;
+}
+
+.derrota {
+    color: #e74c3c;
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+@media (max-width: 768px) {
+    .jogo-container {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    #tela-inicio h1 {
+        font-size: 2rem;
+    }
+    
+    .letra {
+        width: 2rem;
+        height: 2rem;
+        line-height: 2rem;
+        font-size: 1.5rem;
+    }
+    
+    #teclado {
+        grid-template-columns: repeat(6, 1fr);
+    }
+}
