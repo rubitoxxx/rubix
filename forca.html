@@ -108,8 +108,14 @@
                     .map(letra => `<span class="letra">${letrasCorretas.includes(letra) || letra === ' ' || letra === '.' ? letra : '_'}</span>`)
                     .join('')}
             `;
-            const palavraInterna = palavraContainer.innerText.replace(/\n/g, '');
-            if (palavraInterna === palavraSelecionada) {
+
+            // NOVA VERIFICAÇÃO DE VITÓRIA - A FORMA CORRETA
+            // Verifica se toda letra da palavra selecionada está inclusa nas letras corretas (ou é espaço/ponto)
+            const vitoria = palavraSelecionada.split('').every(letra => 
+                letrasCorretas.includes(letra) || letra === ' ' || letra === '.'
+            );
+
+            if (vitoria) {
                 mensagemEl.innerText = 'Parabéns! Você venceu! 😃';
                 finalizarJogo();
             }
